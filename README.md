@@ -45,6 +45,20 @@ yarn add @metal-box/fetch
 
 ---
 
+## Getting Started
+
+The `f` object is the main entry point for `metal-fetch`. It provides access to the `builder` for creating individual requests and the `router` for defining a full API client.
+
+```typescript
+import { f } from '@metal-box/fetch'
+
+// Use the builder for single, reusable endpoints
+const builder = f.builder()
+
+// Use the router to define your entire API surface
+const api = f.router(...)
+```
+
 ## Quick Start
 
 Here's a quick look at defining and using an API endpoint to fetch a user by their ID.
@@ -155,26 +169,43 @@ await createProduct.query({
 // await getProducts.query({ body: { name: 'Laptop' } });
 ```
 
-#### Response Validation
+### Lazy Response Parsing
 
-Similarly, use `.def_response()` to parse and validate the data you receive. When combined with `.def_json()`, you get a `json()` helper function to safely parse the body.
+`metal-fetch` gives you full control over the raw `Response` object. The `.def_response()` handler receives helpers like `response` and `json`, but parsing is **lazy**. The `json()` function is a helper that must be awaited, giving you a chance to inspect headers or status codes _before_ attempting to read the response body. This prevents your application from crashing on unexpected API responses, such as when a server returns an HTML error page instead of JSON.
 
 ```typescript
-const ProductResponse = z.object({ id: z.string() /* ... */ })
-
 const getProduct = apiClient
     .def_method('GET')
     .def_url(`${BASE_URL}/products/$id`)
     .def_response(async ({ response, json }) => {
         // You can inspect the raw response first
         if (!response.ok) {
+            // Handle a server error, maybe by throwing a custom error
             throw new Error(`Request failed with status ${response.status}`)
         }
-        // Then parse the body
-        return ProductResponse.parse(await json())
+
+        // Or check headers before parsing
+        if (
+            response.headers.get('Content-Type')?.includes('application/json')
+        ) {
+            // Then safely parse the body
+            return ProductResponse.parse(await json())
+        }
+
+        throw new Error('Expected JSON response from server.')
     })
     .build()
 ```
+
+### Intelligent Body Handling
+
+`metal-fetch` automatically handles serialization and sets the correct `Content-Type` header for you.
+
+- If you provide an object to `body`, it will be stringified with `JSON.stringify` and the `Content-Type` will be set to `application/json`.
+- If you provide an instance of `FormData`, it will be sent as `multipart/form-data`.
+- If you provide an instance of `URLSearchParams`, it will be sent as `application/x-www-form-urlencoded`.
+
+This simplifies requests and reduces boilerplate, as you don't need to manage headers manually.
 
 ### Path and Search Parameters
 
@@ -294,20 +325,31 @@ This creates a single source of truth for your API's contract, providing autocom
 
 ### Middleware
 
-Middleware allows you to implement cross-cutting concerns. It follows the standard `(request, next) => Promise<Response>` pattern.
+Middleware allows you to implement cross-cutting concerns like logging, authentication, or caching. It follows the standard `(request, next) => Promise<Response>` pattern, where `next` is a function that proceeds to the next middleware in the chain or executes the final fetch call.
+
+Middleware is executed in the order it's defined. You can add middleware to a base client or a specific endpoint.
 
 ```typescript
+// A logging middleware
+const loggerMiddleware: f.MiddlewareFunction = async (request, next) => {
+    console.log(`[Request] ${request.method} ${request.url}`)
+    const response = await next(request)
+    console.log(`[Response] Status: ${response.status}`)
+    return response
+}
+
 // An authentication middleware that adds a bearer token
 const authMiddleware: f.MiddlewareFunction = async (request, next) => {
     const token = localStorage.getItem('auth_token')
     if (token) {
         request.headers.set('Authorization', `Bearer ${token}`)
     }
-    // Continue to the next middleware or the actual fetch call
     return next(request)
 }
 
-const secureApiClient = apiClient.def_middleware(authMiddleware)
+const secureApiClient = apiClient
+    .def_middleware(loggerMiddleware)
+    .def_middleware(authMiddleware)
 
 // All endpoints created from `secureApiClient` will now have the auth header
 const getMyProfile = secureApiClient
