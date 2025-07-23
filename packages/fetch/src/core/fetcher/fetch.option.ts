@@ -5,6 +5,20 @@ import type {
     FetchUrl,
 } from './core.type'
 
+export interface FetchCommonConfiguration {
+    baseUrl: string
+    cache?: FetchOption['cache']
+    mode?: FetchOption['mode']
+    credentials?: FetchOption['credentials']
+    redirect?: FetchOption['redirect']
+    referrer?: FetchOption['referrer']
+    referrerPolicy?: FetchOption['referrerPolicy']
+    integrity?: FetchOption['integrity']
+    keepalive?: FetchOption['keepalive']
+    window?: FetchOption['window']
+    priority?: FetchOption['priority']
+}
+
 export class FetchOptionStore {
     public get options(): FetchOption {
         return {
