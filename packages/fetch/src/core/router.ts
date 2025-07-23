@@ -5,6 +5,7 @@ import {
     type FetchBuilderShape,
 } from './fetcher/builder'
 import type { FetchMethod, Param } from './fetcher/core.type'
+import type { FetchCommonConfiguration } from './fetcher/fetch.option'
 
 type Structure<T> =
     | {
@@ -17,26 +18,27 @@ type BuilderStructure = Structure<FetchBuilderShape>
 type UnitStructure = Structure<FetchUnitShape>
 
 class Router<
-    const RouterBaseUrl extends string,
     const RouterBuilderStructure extends BuilderStructure,
+    const CommonConfig extends FetchCommonConfiguration,
 > {
     public constructor(
-        routerBaseUrl: RouterBaseUrl,
-        routerStructure: RouterBuilderStructure
+        routerStructure: RouterBuilderStructure,
+        commonConfig: CommonConfig
     ) {
         this._buildedRouterStructure = this.buildRouterStructure(
             routerStructure,
-            routerBaseUrl
+            commonConfig,
+            commonConfig.baseUrl
         )
     }
 
     private _buildedRouterStructure: BuildRouterUrlFromStructure<
         RouterBuilderStructure,
-        RouterBaseUrl
+        CommonConfig['baseUrl']
     >
     public get routerStructure(): BuildRouterUrlFromStructure<
         RouterBuilderStructure,
-        RouterBaseUrl
+        CommonConfig['baseUrl']
     > {
         return this._buildedRouterStructure
     }
@@ -73,6 +75,7 @@ class Router<
 
     private buildRouterStructure<T extends Record<string, unknown>>(
         structure: BuilderStructure,
+        commonConfig: FetchCommonConfiguration,
         baseUrl: string = ''
     ): T {
         const result = {} as Record<string, unknown>
@@ -91,11 +94,47 @@ class Router<
                 const newBuilder = value
                     .def_url(Router.getUrlPath(baseUrl))
                     .def_method(key)
-                // 2. Build
+
+                // 2. Set common config
+                if (commonConfig.cache) {
+                    newBuilder.def_default_cache(commonConfig.cache)
+                }
+                if (commonConfig.credentials) {
+                    newBuilder.def_default_credentials(commonConfig.credentials)
+                }
+                if (commonConfig.integrity) {
+                    newBuilder.def_default_integrity(commonConfig.integrity)
+                }
+                if (commonConfig.keepalive) {
+                    newBuilder.def_default_keepalive(commonConfig.keepalive)
+                }
+                if (commonConfig.mode) {
+                    newBuilder.def_default_mode(commonConfig.mode)
+                }
+                if (commonConfig.priority) {
+                    newBuilder.def_default_priority(commonConfig.priority)
+                }
+                if (commonConfig.redirect) {
+                    newBuilder.def_default_redirect(commonConfig.redirect)
+                }
+                if (commonConfig.referrer) {
+                    newBuilder.def_default_referrer(commonConfig.referrer)
+                }
+                if (commonConfig.referrerPolicy) {
+                    newBuilder.def_default_referrer_policy(
+                        commonConfig.referrerPolicy
+                    )
+                }
+                if (commonConfig.window) {
+                    newBuilder.def_default_window(commonConfig.window)
+                }
+
+                // 3. Build
                 result[key] = newBuilder.build()
             } else if (Router.isRecord(value)) {
                 result[key] = this.buildRouterStructure(
                     value,
+                    commonConfig,
                     Router.getUrlPath(baseUrl, key as string)
                 )
             } else {
@@ -109,91 +148,32 @@ class Router<
     }
 }
 
-//TODO: Add transformer for router
-/**
- * @example
- * ```ts
- *
- * const ex =
- * {
- *      api: {
- *           "auth-login": {
- *              GET: f.unit()
- *           }
- *      }
- * }
- *
- * const transformed =
- * {
- *      api: {
- *          auth: { // auth-login -> auth, we need to change that for convenience!
- *            GET: f.unit()
- *      }
- * }
- * ```
-    routerTransformer?: <
-        TransformedRouterStructure extends RouterBuilderStructure,
-    >(
-        base: RouterBuilderStructure
-    ) => TransformedRouterStructure
- */
-
-/**
- * @description Define RESTful API structure with `router`
- * @param baseUrl Represents the base_url of the api
- * @param router RESTful API structure
- * @example
- * ```md
- * 1. BASE_URL : 'https://api/v1/example.com'
- *
- * 2. REST_API_STRUCTURE
- *  › auth     : 'BASE_URL/auth'
- *  › login    : 'BASE_URL/auth/login'
- *  › books    : 'BASE_URL/books'
- *  › book     : 'BASE_URL/books/:id'
- *
- * 3. DEFINE_ROUTER
- * ```
- *
- * ```ts
- * import * as f from "@metal-box/fetch"
- *
- * export const api = f.router(BASE_URL, {
- *      auth: {
- *          login: {
- *              GET: f.builder()
- *          },
- *      },
- *      books: {
- *          GET: f.builder()
- *          POST: f.builder()
- *          // Dynamic path parameter via $ symbol
- *          $id: {
- *              GET: f.builder()
- *              PUT: f.builder()
- *              DELETE: f.builder()
- *          },
- *     },
- * })
- * ```
- *
- * ```md
- *
- * 4. GET_ROUTER_CONFIG
- * ```
- * ```ts
- * export type Api = f.GetRouterConfig<typeof api>
- *
- * ```
- */
-export const router = <
+export function router<
     const RouterBaseUrl extends string,
     const RouterBuilderStructure extends BuilderStructure,
 >(
     baseUrl: RouterBaseUrl,
     router: RouterBuilderStructure
-): BuildRouterUrlFromStructure<RouterBuilderStructure, RouterBaseUrl> => {
-    const baseRouter = new Router(baseUrl, router).routerStructure
+): BuildRouterUrlFromStructure<RouterBuilderStructure, RouterBaseUrl>
+export function router<
+    const CommonConfig extends FetchCommonConfiguration,
+    const RouterBuilderStructure extends BuilderStructure,
+>(
+    config: CommonConfig,
+    router: RouterBuilderStructure
+): BuildRouterUrlFromStructure<RouterBuilderStructure, CommonConfig['baseUrl']>
+export function router<
+    const ConfigOrBaseUrl extends string | FetchCommonConfiguration,
+    const RouterBuilderStructure extends BuilderStructure,
+>(configOrBaseUrl: ConfigOrBaseUrl, routerStructure: RouterBuilderStructure) {
+    if (typeof configOrBaseUrl === 'string') {
+        const baseRouter = new Router(routerStructure, {
+            baseUrl: configOrBaseUrl,
+        }).routerStructure
+        return baseRouter
+    }
+    const baseRouter = new Router(routerStructure, configOrBaseUrl)
+        .routerStructure
     return baseRouter
 }
 
