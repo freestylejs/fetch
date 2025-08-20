@@ -1,0 +1,560 @@
+{
+    "openapi": "3.1.1",
+    "info": {
+        "title": "E-Commerce Platform API",
+        "version": "2.0.0",
+        "description": "A comprehensive API for managing products, users, orders, and more on an advanced e-commerce platform. This specification showcases a wide range of OpenAPI 3.1 features, including polymorphism, webhooks, callbacks, and advanced security models.",
+        "termsOfService": "https://api.example-commerce.com/terms",
+        "contact": {
+            "name": "API Support Team",
+            "url": "https://support.example-commerce.com",
+            "email": "api-support@example-commerce.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "identifier": "Apache-2.0"
+        },
+        "x-version-lifecycle": "beta"
+    },
+    "jsonSchemaDialect": "https://spec.openapis.org/oas/3.1/dialect/base",
+    "externalDocs": {
+        "description": "Find more in-depth tutorials and guides here.",
+        "url": "https://docs.example-commerce.com"
+    },
+    "servers": [
+        {
+            "url": "https://{environment}.example-commerce.com/api/v2",
+            "description": "Main API server",
+            "variables": {
+                "environment": {
+                    "default": "api",
+                    "enum": ["api", "staging-api"],
+                    "description": "`api` for production, `staging-api` for testing."
+                }
+            }
+        }
+    ],
+    "tags": [
+        {
+            "name": "Users",
+            "description": "Operations related to user accounts and profiles."
+        },
+        {
+            "name": "Products",
+            "description": "Manage the product catalog, inventory, and reviews."
+        },
+        {
+            "name": "Orders",
+            "description": "Endpoints for creating and managing customer orders."
+        },
+        {
+            "name": "Webhooks",
+            "description": "Manage webhook subscriptions for real-time event notifications."
+        }
+    ],
+    "security": [
+        {
+            "oauth2_user": ["read:profile", "read:orders"]
+        }
+    ],
+    "paths": {
+        "/products": {
+            "summary": "Product Collection",
+            "description": "Endpoint for searching and creating products.",
+            "get": {
+                "tags": ["Products"],
+                "operationId": "searchProducts",
+                "summary": "Search and filter products",
+                "parameters": [
+                    {
+                        "name": "searchQuery",
+                        "in": "query",
+                        "description": "Text search across product name and description.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "tags",
+                        "in": "query",
+                        "description": "Filter by product tags.",
+                        "style": "pipeDelimited",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A paginated list of products.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedProductResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    }
+                }
+            },
+            "post": {
+                "tags": ["Products"],
+                "operationId": "createProduct",
+                "summary": "Add a new product with an image",
+                "security": [
+                    {
+                        "oauth2_user": ["write:products"],
+                        "apiKey_internal": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "productData": {
+                                        "$ref": "#/components/schemas/ProductInput"
+                                    },
+                                    "productImage": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "description": "The primary product image file."
+                                    }
+                                }
+                            },
+                            "encoding": {
+                                "productData": {
+                                    "contentType": "application/json"
+                                },
+                                "productImage": {
+                                    "contentType": "image/png, image/jpeg, image/gif",
+                                    "headers": {
+                                        "X-File-Metadata": {
+                                            "description": "Custom metadata about the file.",
+                                            "schema": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Product created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Product"
+                                }
+                            }
+                        },
+                        "links": {
+                            "getProductById": {
+                                "operationId": "getProductById",
+                                "parameters": {
+                                    "productId": "$response.body#/id"
+                                },
+                                "description": "A link to the newly created product."
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/products/{productId}": {
+            "parameters": [
+                {
+                    "name": "productId",
+                    "in": "path",
+                    "required": true,
+                    "description": "The unique identifier of the product.",
+                    "schema": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            ],
+            "get": {
+                "tags": ["Products"],
+                "operationId": "getProductById",
+                "summary": "Get a single product by its ID",
+                "responses": {
+                    "200": {
+                        "description": "The requested product.",
+                        "headers": {
+                            "ETag": {
+                                "$ref": "#/components/headers/ETag"
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Product"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    }
+                }
+            }
+        },
+        "/orders/{orderId}/process": {
+            "post": {
+                "tags": ["Orders"],
+                "operationId": "processOrder",
+                "summary": "Process an order asynchronously",
+                "description": "Begins processing an order. A callback URL is invoked upon completion.",
+                "parameters": [
+                    {
+                        "name": "orderId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "$ref": "#/components/requestBodies/OrderProcessingRequest"
+                },
+                "callbacks": {
+                    "onOrderProcessed": {
+                        "{$request.body#/notificationUrl}": {
+                            "post": {
+                                "requestBody": {
+                                    "required": true,
+                                    "description": "Callback payload sent when order processing is complete.",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {
+                                                "$ref": "#/components/schemas/CallbackPayload"
+                                            }
+                                        }
+                                    }
+                                },
+                                "responses": {
+                                    "202": {
+                                        "description": "Your server has successfully acknowledged the callback."
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Order processing has been initiated."
+                    }
+                }
+            }
+        }
+    },
+    "webhooks": {
+        "inventoryUpdate": {
+            "summary": "Inventory Level Update",
+            "post": {
+                "operationId": "inventoryUpdateWebhook",
+                "requestBody": {
+                    "description": "Notification sent when a product's inventory level changes.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/InventoryUpdatePayload"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The event has been successfully received."
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "User": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "username": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9_-]{3,16}$"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "profile": {
+                        "type": "object",
+                        "properties": {
+                            "fullName": {
+                                "type": "string"
+                            },
+                            "joinDate": {
+                                "type": "string",
+                                "format": "date-time",
+                                "readOnly": true
+                            }
+                        }
+                    },
+                    "legacyId": {
+                        "type": "integer",
+                        "deprecated": true
+                    }
+                },
+                "required": ["id", "username", "email"]
+            },
+            "ProductInput": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Quantum Fusion Laptop"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "number",
+                        "format": "double",
+                        "minimum": 0
+                    }
+                },
+                "required": ["name", "price"]
+            },
+            "Product": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ProductInput"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string",
+                                "format": "uuid",
+                                "readOnly": true
+                            },
+                            "imageUrl": {
+                                "type": "string",
+                                "format": "uri",
+                                "readOnly": true
+                            },
+                            "stock": {
+                                "type": "integer",
+                                "writeOnly": true
+                            }
+                        }
+                    }
+                ]
+            },
+            "PaginatedResponse": {
+                "$id": "generic_paginated_response",
+                "type": "object",
+                "properties": {
+                    "page": { "type": "integer" },
+                    "pageSize": { "type": "integer" },
+                    "total": { "type": "integer" },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$dynamicRef": "#item"
+                        }
+                    }
+                },
+                "$defs": {
+                    "genericItem": {
+                        "$dynamicAnchor": "item"
+                    }
+                }
+            },
+            "PaginatedProductResponse": {
+                "$ref": "generic_paginated_response",
+                "$defs": {
+                    "productItem": {
+                        "$dynamicAnchor": "item",
+                        "$ref": "#/components/schemas/Product"
+                    }
+                }
+            },
+            "PaymentMethod": {
+                "oneOf": [
+                    { "$ref": "#/components/schemas/CreditCard" },
+                    { "$ref": "#/components/schemas/PayPal" }
+                ],
+                "discriminator": {
+                    "propertyName": "methodType",
+                    "mapping": {
+                        "card": "#/components/schemas/CreditCard",
+                        "paypal_account": "#/components/schemas/PayPal"
+                    }
+                }
+            },
+            "CreditCard": {
+                "type": "object",
+                "properties": {
+                    "methodType": { "type": "string", "enum": ["card"] },
+                    "cardNumber": { "type": "string" },
+                    "expiry": { "type": "string" },
+                    "cvv": { "type": "string", "writeOnly": true }
+                },
+                "required": ["methodType", "cardNumber"]
+            },
+            "PayPal": {
+                "type": "object",
+                "properties": {
+                    "methodType": {
+                        "type": "string",
+                        "enum": ["paypal_account"]
+                    },
+                    "email": { "type": "string", "format": "email" }
+                },
+                "required": ["methodType", "email"]
+            },
+            "CallbackPayload": {
+                "type": "object",
+                "properties": {
+                    "orderId": { "type": "string", "format": "uuid" },
+                    "status": {
+                        "type": "string",
+                        "enum": ["PROCESSED", "FAILED"]
+                    },
+                    "detail": { "type": "string" }
+                }
+            },
+            "InventoryUpdatePayload": {
+                "type": "object",
+                "properties": {
+                    "productId": { "type": "string", "format": "uuid" },
+                    "newStockLevel": { "type": "integer" },
+                    "timestamp": { "type": "string", "format": "date-time" }
+                },
+                "xml": {
+                    "name": "InventoryEvent"
+                }
+            },
+            "ApiError": {
+                "type": "object",
+                "properties": {
+                    "errorCode": { "type": "string" },
+                    "message": { "type": "string" }
+                }
+            }
+        },
+        "responses": {
+            "NotFound": {
+                "description": "The specified resource was not found.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ApiError"
+                        }
+                    }
+                }
+            },
+            "BadRequest": {
+                "description": "Invalid input provided.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "requestBodies": {
+            "OrderProcessingRequest": {
+                "description": "Details for initiating order processing.",
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "notificationUrl": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "description": "The URL to send a callback to upon completion."
+                                }
+                            },
+                            "required": ["notificationUrl"]
+                        },
+                        "examples": {
+                            "standard": {
+                                "summary": "A standard notification endpoint.",
+                                "value": {
+                                    "notificationUrl": "https://client.example.com/order-callback"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "headers": {
+            "ETag": {
+                "description": "An identifier for a specific version of a resource.",
+                "schema": {
+                    "type": "string"
+                }
+            }
+        },
+        "securitySchemes": {
+            "oauth2_user": {
+                "type": "oauth2",
+                "description": "OAuth2 for end-user authentication.",
+                "flows": {
+                    "authorizationCode": {
+                        "authorizationUrl": "https://auth.example-commerce.com/oauth/authorize",
+                        "tokenUrl": "https://auth.example-commerce.com/oauth/token",
+                        "scopes": {
+                            "read:profile": "Read user profile",
+                            "write:profile": "Modify user profile",
+                            "read:orders": "Read user's orders",
+                            "write:orders": "Create orders for user",
+                            "write:products": "Create or update products"
+                        }
+                    }
+                }
+            },
+            "apiKey_internal": {
+                "type": "apiKey",
+                "name": "X-Internal-API-Key",
+                "in": "header",
+                "description": "API Key for internal, machine-to-machine services."
+            }
+        }
+    }
+}
