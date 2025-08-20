@@ -4,8 +4,9 @@ import { resolve } from 'path'
 import { Command } from 'commander'
 import { outputFileSync } from 'fs-extra'
 import { format } from 'prettier'
-import { parseOpenApiSpec, parsePaths } from './parser'
-import { generateModels, generateRouter } from './schema-compiler'
+import { parseOpenApiSpec, parsePaths } from './path_parser'
+import { generateRouter } from './router_generator'
+import { SchemaGenerator } from './schema_generator'
 
 const program = new Command()
 
@@ -25,15 +26,20 @@ program
 
         const spec = parseOpenApiSpec(absoluteInputPath)
 
+        const schemaGenerator = new SchemaGenerator(spec)
+
         // Generate and write models
-        const modelsFileContent = await format(generateModels(spec), {
-            parser: 'typescript',
-            tabWidth: 4,
-            trailingComma: 'es5',
-            useTabs: false,
-            semi: false,
-            singleQuote: true,
-        })
+        const modelsFileContent = await format(
+            schemaGenerator.generateModels(),
+            {
+                parser: 'typescript',
+                tabWidth: 4,
+                trailingComma: 'es5',
+                useTabs: false,
+                semi: false,
+                singleQuote: true,
+            }
+        )
         outputFileSync(
             resolve(absoluteOutputPath, 'models.ts'),
             modelsFileContent
@@ -43,7 +49,14 @@ program
         const parsedPaths = parsePaths(spec)
         const routerFileContent = await format(
             generateRouter(parsedPaths, spec),
-            { parser: 'typescript' }
+            {
+                parser: 'typescript',
+                tabWidth: 4,
+                trailingComma: 'es5',
+                useTabs: false,
+                semi: false,
+                singleQuote: true,
+            }
         )
         outputFileSync(resolve(absoluteOutputPath, 'api.ts'), routerFileContent)
 
