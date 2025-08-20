@@ -1,0 +1,693 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Comprehensive Real-World E-Commerce API",
+        "summary": "An advanced API for managing an online store, including products, orders, users, payments, and analytics.",
+        "description": "This API provides endpoints for e-commerce operations, supporting features like user authentication, product catalog management, order processing, payment integration, and real-time notifications via webhooks. It demonstrates polymorphism in product types, complex schemas with composition, various security schemes, and runtime expressions in callbacks and links.",
+        "termsOfService": "https://example.com/terms",
+        "contact": {
+            "name": "API Support Team",
+            "url": "https://support.example.com",
+            "email": "support@example.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "identifier": "Apache-2.0"
+        },
+        "version": "1.2.0"
+    },
+    "jsonSchemaDialect": "https://spec.openapis.org/oas/3.1/dialect/base",
+    "servers": [
+        {
+            "url": "https://{environment}.example.com/v{version}",
+            "description": "Dynamic server URL with variables",
+            "variables": {
+                "environment": {
+                    "default": "api",
+                    "description": "Server environment (api, staging, dev)",
+                    "enum": ["api", "staging", "dev"]
+                },
+                "version": {
+                    "default": "1",
+                    "description": "API version"
+                }
+            }
+        }
+    ],
+    "paths": {
+        "/products": {
+            "summary": "Product catalog operations",
+            "description": "Endpoints for managing products in the store.",
+            "get": {
+                "tags": ["products"],
+                "summary": "List products",
+                "description": "Retrieve a paginated list of products with filtering options.",
+                "operationId": "listProducts",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "description": "Filter by product category",
+                        "schema": {
+                            "type": "string",
+                            "enum": ["electronics", "clothing", "books"]
+                        }
+                    },
+                    {
+                        "name": "priceRange",
+                        "in": "query",
+                        "description": "Filter by price range (min,max)",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 2,
+                            "maxItems": 2
+                        },
+                        "style": "form",
+                        "explode": false
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Pagination page number",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 20
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Sort criteria",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string",
+                                "enum": ["asc", "desc"]
+                            }
+                        },
+                        "style": "deepObject",
+                        "explode": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response with product list",
+                        "headers": {
+                            "X-Total-Count": {
+                                "description": "Total number of products",
+                                "schema": {
+                                    "type": "integer"
+                                }
+                            },
+                            "X-Rate-Limit-Remaining": {
+                                "description": "Remaining requests in the current rate limit window",
+                                "schema": {
+                                    "type": "integer"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Product"
+                                    }
+                                },
+                                "examples": {
+                                    "electronicsList": {
+                                        "summary": "Example list of electronics",
+                                        "value": [
+                                            {
+                                                "id": "prod123",
+                                                "name": "Smartphone",
+                                                "productType": "Electronics",
+                                                "price": 499.99,
+                                                "specs": {
+                                                    "battery": "5000mAh",
+                                                    "screen": "6.5 inches"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                        "links": {
+                            "nextPage": {
+                                "operationId": "listProducts",
+                                "parameters": {
+                                    "page": "$response.body#/nextPage"
+                                },
+                                "description": "Link to the next page of results"
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false,
+                "security": [
+                    {
+                        "apiKeyAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": ["products"],
+                "summary": "Create a new product",
+                "description": "Add a new product to the catalog. Supports different product types via polymorphism.",
+                "operationId": "createProduct",
+                "requestBody": {
+                    "description": "Product details to create",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Product"
+                            },
+                            "examples": {
+                                "electronicsExample": {
+                                    "summary": "Electronics product example",
+                                    "value": {
+                                        "name": "Laptop",
+                                        "productType": "Electronics",
+                                        "price": 999.99,
+                                        "specs": {
+                                            "cpu": "Intel i7",
+                                            "ram": "16GB"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "application/xml": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Product"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "productData": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                }
+                            },
+                            "encoding": {
+                                "productData": {
+                                    "contentType": "application/json",
+                                    "style": "form",
+                                    "explode": false,
+                                    "allowReserved": true
+                                },
+                                "image": {
+                                    "contentType": "image/png, image/jpeg",
+                                    "headers": {
+                                        "X-Image-Size": {
+                                            "schema": {
+                                                "type": "integer"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Product created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Product"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    }
+                },
+                "callbacks": {
+                    "productCreatedNotification": {
+                        "{$request.body#/notificationUrl}": {
+                            "post": {
+                                "requestBody": {
+                                    "description": "Notification payload for new product",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "event": {
+                                                        "type": "string",
+                                                        "const": "productCreated"
+                                                    },
+                                                    "productId": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "responses": {
+                                    "200": {
+                                        "description": "Notification acknowledged"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "oauth2": ["write:products"]
+                    }
+                ]
+            }
+        },
+        "/orders/{orderId}": {
+            "parameters": [
+                {
+                    "name": "orderId",
+                    "in": "path",
+                    "required": true,
+                    "description": "Unique identifier for the order",
+                    "schema": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            ],
+            "get": {
+                "tags": ["orders"],
+                "summary": "Get order details",
+                "description": "Retrieve details of a specific order.",
+                "operationId": "getOrder",
+                "responses": {
+                    "200": {
+                        "description": "Order details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Order"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    }
+                },
+                "security": [
+                    {
+                        "basicAuth": []
+                    },
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "webhooks": {
+        "orderStatusUpdate": {
+            "post": {
+                "summary": "Webhook for order status changes",
+                "description": "Receive notifications when an order status updates.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "orderId": {
+                                        "type": "string"
+                                    },
+                                    "newStatus": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "shipped",
+                                            "delivered",
+                                            "cancelled"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Webhook received successfully"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Product": {
+                "type": "object",
+                "discriminator": {
+                    "propertyName": "productType",
+                    "mapping": {
+                        "electronics": "#/components/schemas/ElectronicsProduct",
+                        "clothing": "#/components/schemas/ClothingProduct"
+                    }
+                },
+                "required": ["id", "name", "productType", "price"],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string",
+                        "xml": {
+                            "name": "productName"
+                        }
+                    },
+                    "productType": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "number",
+                        "format": "double",
+                        "minimum": 0
+                    }
+                },
+                "xml": {
+                    "name": "Product",
+                    "namespace": "https://example.com/schema/product"
+                },
+                "externalDocs": {
+                    "description": "More about products",
+                    "url": "https://docs.example.com/products"
+                }
+            },
+            "ElectronicsProduct": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Product"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "specs": {
+                                "type": "object",
+                                "additionalProperties": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            "ClothingProduct": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Product"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "size": {
+                                "type": "string",
+                                "enum": ["S", "M", "L", "XL"]
+                            },
+                            "color": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "Order": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "userId": {
+                        "type": "string"
+                    },
+                    "products": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Product"
+                        }
+                    },
+                    "total": {
+                        "type": "number"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": ["pending", "shipped", "delivered"]
+                    }
+                }
+            },
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "integer"
+                    },
+                    "message": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "responses": {
+            "BadRequest": {
+                "description": "Invalid input",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    }
+                }
+            },
+            "NotFound": {
+                "description": "Resource not found",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "parameters": {
+            "userId": {
+                "name": "userId",
+                "in": "header",
+                "description": "User identifier",
+                "schema": {
+                    "type": "string"
+                }
+            }
+        },
+        "examples": {
+            "orderExample": {
+                "summary": "Sample order",
+                "value": {
+                    "id": "order123",
+                    "userId": "user456",
+                    "total": 1499.98
+                }
+            }
+        },
+        "requestBodies": {
+            "updateUser": {
+                "description": "User update details",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "email": {
+                                    "type": "string",
+                                    "format": "email"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "headers": {
+            "X-Auth-Token": {
+                "description": "Authentication token",
+                "schema": {
+                    "type": "string"
+                }
+            }
+        },
+        "securitySchemes": {
+            "apiKeyAuth": {
+                "type": "apiKey",
+                "name": "X-API-Key",
+                "in": "header"
+            },
+            "basicAuth": {
+                "type": "http",
+                "scheme": "basic"
+            },
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            },
+            "oauth2": {
+                "type": "oauth2",
+                "flows": {
+                    "authorizationCode": {
+                        "authorizationUrl": "https://example.com/oauth/authorize",
+                        "tokenUrl": "https://example.com/oauth/token",
+                        "scopes": {
+                            "read:products": "Read products",
+                            "write:products": "Modify products"
+                        }
+                    },
+                    "implicit": {
+                        "authorizationUrl": "https://example.com/oauth/authorize",
+                        "scopes": {
+                            "read:products": "Read products"
+                        }
+                    },
+                    "password": {
+                        "tokenUrl": "https://example.com/oauth/token",
+                        "scopes": {
+                            "write:orders": "Create orders"
+                        }
+                    },
+                    "clientCredentials": {
+                        "tokenUrl": "https://example.com/oauth/token",
+                        "scopes": {
+                            "read:analytics": "Read analytics"
+                        }
+                    }
+                }
+            },
+            "openIdConnect": {
+                "type": "openIdConnect",
+                "openIdConnectUrl": "https://example.com/.well-known/openid-configuration"
+            },
+            "mutualTls": {
+                "type": "mutualTLS",
+                "description": "Client certificate authentication"
+            }
+        },
+        "links": {
+            "getOrderById": {
+                "operationId": "getOrder",
+                "parameters": {
+                    "orderId": "$response.body#/id"
+                },
+                "description": "Link to retrieve the created order"
+            }
+        },
+        "callbacks": {
+            "paymentCallback": {
+                "{$request.body#/callbackUrl}": {
+                    "post": {
+                        "requestBody": {
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "paymentStatus": {
+                                                "type": "string",
+                                                "enum": ["success", "failed"]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "responses": {
+                            "200": {
+                                "description": "Payment callback received"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "pathItems": {
+            "reusablePathItem": {
+                "summary": "Reusable path item for common operations",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/userId"
+                    }
+                ]
+            }
+        }
+    },
+    "security": [
+        {
+            "oauth2": ["read:products"]
+        }
+    ],
+    "tags": [
+        {
+            "name": "products",
+            "description": "Operations related to products",
+            "externalDocs": {
+                "description": "Product documentation",
+                "url": "https://docs.example.com/products"
+            }
+        },
+        {
+            "name": "orders",
+            "description": "Operations related to orders"
+        }
+    ],
+    "externalDocs": {
+        "description": "Full API documentation",
+        "url": "https://docs.example.com"
+    }
+}
