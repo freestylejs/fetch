@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const User = z.object({
     id: z.string().uuid(),
-    username: z.string(),
+    username: z.string().regex(/^[a-zA-Z0-9_-]{3,16}$/),
     email: z.string().email(),
     profile: z
         .object({
@@ -10,7 +10,7 @@ export const User = z.object({
             joinDate: z.string().datetime().optional(),
         })
         .optional(),
-    legacyId: z.number().optional(),
+    legacyId: z.number().int().optional(),
 })
 
 export type UserModel = z.infer<typeof User>
@@ -18,36 +18,38 @@ export type UserModel = z.infer<typeof User>
 export const ProductInput = z.object({
     name: z.string(),
     description: z.string().optional(),
-    price: z.number(),
+    price: z.number().min(0),
 })
 
 export type ProductInputModel = z.infer<typeof ProductInput>
 
-export const Product = z.any()
+export const Product = ProductInput.and(
+    z.object({
+        id: z.string().uuid().optional(),
+        imageUrl: z.string().url().optional(),
+        stock: z.number().int().optional(),
+    })
+)
 
 export type ProductModel = z.infer<typeof Product>
 
 export const PaginatedResponse = z.object({
-    page: z.number().optional(),
-    pageSize: z.number().optional(),
-    total: z.number().optional(),
+    page: z.number().int().optional(),
+    pageSize: z.number().int().optional(),
+    total: z.number().int().optional(),
     items: z.array(z.any()).optional(),
 })
 
 export type PaginatedResponseModel = z.infer<typeof PaginatedResponse>
 
-export const PaginatedProductResponse = GenericPaginatedResponse
+export const PaginatedProductResponse = PaginatedResponse
 
 export type PaginatedProductResponseModel = z.infer<
     typeof PaginatedProductResponse
 >
 
-export const PaymentMethod = z.any()
-
-export type PaymentMethodModel = z.infer<typeof PaymentMethod>
-
 export const CreditCard = z.object({
-    methodType: z.string(),
+    methodType: z.enum(['card']),
     cardNumber: z.string(),
     expiry: z.string().optional(),
     cvv: z.string().optional(),
@@ -56,15 +58,22 @@ export const CreditCard = z.object({
 export type CreditCardModel = z.infer<typeof CreditCard>
 
 export const PayPal = z.object({
-    methodType: z.string(),
+    methodType: z.enum(['paypal_account']),
     email: z.string().email(),
 })
 
 export type PayPalModel = z.infer<typeof PayPal>
 
+export const PaymentMethod = z.discriminatedUnion('methodType', [
+    CreditCard,
+    PayPal,
+])
+
+export type PaymentMethodModel = z.infer<typeof PaymentMethod>
+
 export const CallbackPayload = z.object({
     orderId: z.string().uuid().optional(),
-    status: z.string().optional(),
+    status: z.enum(['PROCESSED', 'FAILED']).optional(),
     detail: z.string().optional(),
 })
 
@@ -72,7 +81,7 @@ export type CallbackPayloadModel = z.infer<typeof CallbackPayload>
 
 export const InventoryUpdatePayload = z.object({
     productId: z.string().uuid().optional(),
-    newStockLevel: z.number().optional(),
+    newStockLevel: z.number().int().optional(),
     timestamp: z.string().datetime().optional(),
 })
 

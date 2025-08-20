@@ -2,7 +2,7 @@ import { f } from '@metal-box/fetch'
 import { z } from 'zod'
 import * as Model from './models'
 
-export const api = f.router('https://api.example.com', {
+export const api = f.router('', {
     books: {
         GET: f
             .builder()
