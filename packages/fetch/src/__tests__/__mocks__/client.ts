@@ -1,10 +1,10 @@
-import { MetalSchemaShape, t } from '@metal-box/type'
-import { type GetRouterConfig, f } from '../..'
+import { type ZodSchema, z } from 'zod'
+import { f, type GetRouterConfig } from '../..'
 import { BASE_URL } from './constant'
 import { Model } from './model'
 
-const ApiResponse = <DataSchema extends MetalSchemaShape>(data: DataSchema) =>
-    t.object({
+const ApiResponse = <DataSchema extends ZodSchema>(data: DataSchema) =>
+    z.object({
         data,
     })
 
@@ -16,7 +16,7 @@ export const api = f.router(BASE_URL, {
                 .def_json()
                 .def_default_referrer('about:client')
                 .def_response(async ({ json }) =>
-                    ApiResponse(t.union(t.string, t.undefined)).parse(
+                    ApiResponse(z.union([z.string(), z.undefined()])).parse(
                         await json()
                     )
                 ),
@@ -51,7 +51,7 @@ export const api = f.router(BASE_URL, {
                 .builder()
                 .def_json()
                 .def_default_referrer('about:client')
-                .def_body(Model.bookRequest.parse)
+                .def_body(Model.book.parse)
                 .def_response(async ({ json }) =>
                     ApiResponse(Model.book).parse(await json())
                 ),

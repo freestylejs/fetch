@@ -1,4 +1,4 @@
-import { FetchUnit, FetchUnitShape, InferFetchUnit } from './fetcher'
+import type { FetchUnit, FetchUnitShape, InferFetchUnit } from './fetcher'
 import {
     type DefaultFetchBuilderShape,
     FetchBuilder,

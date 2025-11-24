@@ -1,5 +1,5 @@
-import { FetchBuilder, type FetchUnitShape, builder } from './core/fetcher'
-import { GetRouterConfig, router } from './core/router'
+import { builder, type FetchBuilder, type FetchUnitShape } from './core/fetcher'
+import { type GetRouterConfig, router } from './core/router'
 import { Middleware } from './utils/middleware'
 
 /**

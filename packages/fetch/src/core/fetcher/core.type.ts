@@ -20,7 +20,7 @@ export type FetchMethod =
 export type FetchHeader = BaseFetchOption['headers'] & {
     [key in FetchHeaderKeyString]?: string
 }
-export type FetchOption = Omit<BaseFetchOption, 'headers'> & {
+export type FetchOption = Omit<BaseFetchOption, 'headers' | 'next'> & {
     headers: FetchHeader
 }
 
