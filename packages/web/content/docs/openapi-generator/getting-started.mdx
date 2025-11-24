@@ -1,0 +1,95 @@
+---
+title: Getting Started
+description: Install and use the OpenAPI Generator to create type-safe API clients.
+---
+
+## Installation
+
+Install the OpenAPI Generator package in your project:
+
+```bash
+npm install --save-dev @freestylejs/openapi-generator
+```
+
+Or use it directly with `npx` without installation:
+
+```bash
+npx @freestylejs/openapi-generator generate --input ./spec.yaml --output ./src/api
+```
+
+## Prerequisites
+
+Before using the OpenAPI Generator, ensure you have:
+
+- **Node.js 18+** installed on your system
+- An **Open API 3.1 specification file** (JSON or YAML format)
+- The **@freestylejs/fetch** library installed in your project (added automatically as a dependency)
+
+## Basic Usage
+
+### Generate Your First Client
+
+Create an API client from your OpenAPI specification:
+
+```bash
+npx @freestylejs/openapi-generator generate \
+  --input ./openapi.yaml \
+  --output ./src/generated
+```
+
+This command generates three files in the output directory:
+
+- **`models.ts`** - Zod schemas for all data types
+- **`api.ts`** - Type-safe router with all API endpoints
+- **`index.ts`** - Re-exports for convenient imports
+
+### Use the Generated Client
+
+Import and use the generated API client in your application:
+
+```typescript
+import { api } from './generated'
+
+// GET request with path parameters
+const user = await api.users.$userId.GET({
+  params: { userId: '123' }
+})
+
+// POST request with request body
+const newPost = await api.posts.POST({
+  body: {
+    title: 'Hello World',
+    content: 'This is my first post'
+  }
+})
+
+// GET request with query parameters
+const posts = await api.posts.GET({
+  query: {
+    page: 1,
+    limit: 10,
+    sort: 'created_at'
+  }
+})
+```
+
+## Project Structure
+
+After generation, your project will have:
+
+```
+your-project/
+├── src/
+│   ├── generated/
+│   │   ├── models.ts      # Zod schemas
+│   │   ├── api.ts         # API router
+│   │   └── index.ts       # Exports
+│   └── your-code.ts       # Your application
+└── openapi.yaml           # API specification
+```
+
+## Next Steps
+
+- [CLI Reference](/en/docs/openapi-generator/cli-reference) - Learn all CLI options
+- [Generated Code](/en/docs/openapi-generator/generated-code) - Understand the output
+- [Validation](/en/docs/openapi-generator/validation) - Use Zod validation

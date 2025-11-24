@@ -1,0 +1,104 @@
+---
+title: Middleware
+description: Intercept and modify requests and responses in the pipeline.
+---
+
+Middleware provides a powerful mechanism to wrap request execution. It is ideal for cross-cutting concerns such as authentication, logging, global error handling, or response transformation.
+
+### Creating Middleware
+
+The `Middleware` class manages a stack of interceptor functions.
+
+```typescript
+import { f } from '@freestylejs/fetch';
+
+const authMiddleware = new f.Middleware();
+
+// Define a middleware function
+authMiddleware.use(async (request, next) => {
+    // --- Request Phase ---
+    // Modify the request before it's sent
+    const token = localStorage.getItem('token');
+    if (token) {
+        request.headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    // --- Execution ---
+    // Call 'next' to proceed to the next middleware or the network call
+    const response = await next(request);
+
+    // --- Response Phase ---
+    // Inspect or modify the response
+    if (response.status === 401) {
+        // Handle token expiration
+        console.warn('Token expired!');
+    }
+
+    return response;
+});
+```
+
+### Common Use Cases
+
+#### 1. Logging Middleware
+
+```typescript
+const loggingMiddleware = new f.Middleware();
+
+loggingMiddleware.use(async (req, next) => {
+    const start = Date.now();
+    console.log(`[REQ] ${req.method} ${req.url}`);
+    
+    try {
+        const res = await next(req);
+        const duration = Date.now() - start;
+        console.log(`[RES] ${res.status} (${duration}ms)`);
+        return res;
+    } catch (err) {
+        console.error(`[ERR] Request failed`, err);
+        throw err;
+    }
+});
+```
+
+### Applying Middleware
+
+You can apply middleware to any `FetchBuilder` using `.def_middleware()`.
+
+```typescript
+const client = f.builder()
+    // Spread the procedures from your middleware instance
+    .def_middleware(...loggingMiddleware.procedures, ...authMiddleware.procedures)
+    .def_url('https://api.example.com');
+```
+
+### Execution Pipeline
+
+Middleware follows an "onion" or "stack" model (similar to Koa or Express).
+
+1.  **Request Phase**: Middleware functions run in the order they were added.
+2.  **Network Call**: The actual `fetch` is executed.
+3.  **Response Phase**: Middleware functions resume execution in **reverse order** (after `await next()`).
+
+```typescript
+const m = new f.Middleware();
+
+m.use(async (req, next) => {
+    console.log('1. Request');
+    await next(req);
+    console.log('4. Response');
+});
+
+m.use(async (req, next) => {
+    console.log('2. Request');
+    await next(req);
+    console.log('3. Response');
+});
+
+// Output:
+// 1. Request
+// 2. Request
+// (Network Request)
+// 3. Response
+// 4. Response
+```

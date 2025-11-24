@@ -1,0 +1,49 @@
+---
+title: Fetch
+description: A type-safe, fluent fetch wrapper for TypeScript.
+---
+
+import { Card, Cards } from 'fumadocs-ui/components/card'
+import { NetworkIcon, RouteIcon, CodeIcon, LayersIcon } from 'lucide-react'
+
+## Philosophy
+
+**Fetch** reimagines HTTP requests in TypeScript. It moves away from loose, untyped `fetch` calls to a structured, type-safe, and fluent API.
+
+It is built on the **Builder Pattern**, ensuring that every request is constructed correctly before it is executed. With first-class support for **Zod** (or any validator), it bridges the gap between runtime data and static types.
+
+## Core Features
+
+<Cards>
+    <Card
+        icon={<CodeIcon />}
+        title="Fluent Builder"
+        description="Construct requests using a chainable, immutable builder API. Readable, maintainable, and safe."
+        href="/en/docs/fetch/core-api/builder"
+    />
+    <Card
+        icon={<NetworkIcon />}
+        title="Type-Safe Requests"
+        description="Infer request bodies, search parameters, and responses automatically. No more 'any'."
+        href="/en/docs/fetch/introduction/core-concepts"
+    />
+    <Card
+        icon={<RouteIcon />}
+        title="Structured Routing"
+        description="Organize your API endpoints into a hierarchical, type-safe router structure."
+        href="/en/docs/fetch/core-api/router"
+    />
+    <Card
+        icon={<LayersIcon />}
+        title="Middleware"
+        description="Intercept and modify requests and responses globally or per-route."
+        href="/en/docs/fetch/core-api/middleware"
+    />
+</Cards>
+
+## What is Next?
+
+<Cards>
+    <Card title="Get Started" href="/en/docs/fetch/introduction/getting-started" />
+    <Card title="Core Concepts" href="/en/docs/fetch/introduction/core-concepts" />
+</Cards>
