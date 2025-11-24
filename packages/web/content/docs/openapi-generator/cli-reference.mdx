@@ -12,7 +12,7 @@ The OpenAPI Generator provides a single `generate` command for creating API clie
 Generate a type-safe API client from an OpenAPI specification.
 
 ```bash
-openapi-generator generate [options]
+create-freestyle-fetch generate [options]
 ```
 
 ## Options
@@ -31,7 +31,7 @@ openapi-generator generate [options]
 Generate client files from a local specification:
 
 ```bash
-openapi-generator generate \
+create-freestyle-fetch generate \
   --input ./api-spec.yaml \
   --output ./src/api
 ```
@@ -41,7 +41,7 @@ openapi-generator generate \
 Paths are resolved relative to the current working directory:
 
 ```bash
-openapi-generator generate \
+create-freestyle-fetch generate \
   -i ../specs/api.json \
   -o ./generated
 ```
@@ -146,7 +146,7 @@ src/generated/
 ```json
 {
   "scripts": {
-    "generate": "openapi-generator generate -i ./spec.json -o ./src/generated",
+    "generate": "create-freestyle-fetch generate -i ./spec.json -o ./src/generated",
     "prebuild": "npm run generate"
   }
 }
@@ -171,5 +171,5 @@ steps:
 
 ## Related
 
-- [Getting Started](/en/docs/openapi-generator/getting-started) - Installation and basic usage
-- [Generated Code](/en/docs/openapi-generator/generated-code) - Understanding the output
+- [Getting Started](/en/docs/create-freestyle-fetch/getting-started) - Installation and basic usage
+- [Generated Code](/en/docs/create-freestyle-fetch/generated-code) - Understanding the output
