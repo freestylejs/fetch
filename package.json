@@ -42,14 +42,14 @@
         "@vitest/coverage-v8": "4.0.6",
         "husky": "latest",
         "lint-staged": "latest",
+        "msw": "^2.12.3",
         "rimraf": "latest",
         "tsup": "latest",
         "turbo": "latest",
         "typescript": "latest",
         "vite": "latest",
         "vite-tsconfig-paths": "latest",
-        "vitest": "latest",
-        "msw": "^2.12.3"
+        "vitest": "latest"
     },
     "engines": {
         "node": ">=20.0.0"
