@@ -1,4 +1,4 @@
-import type { ConcreteBoolean, JSON, OmitUnknown } from '../../utils/types'
+import type { ConcreteBoolean, Json, OmitUnknown } from '../../utils/types'
 import { type FetchErrorCode, FetchResponseError } from '../error'
 import type { FetchBuilder } from './builder'
 import type {
@@ -375,7 +375,7 @@ export class FetchUnit<
                     (this.$builder.isJsonMode
                         ? {
                               response,
-                              json: () => response.json() as Promise<JSON>,
+                              json: () => response.json() as Promise<Json>,
                           }
                         : { response }) as any
                 )

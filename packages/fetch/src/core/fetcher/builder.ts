@@ -1,13 +1,13 @@
-import { Middleware, MiddlewareFunction } from '../../utils/middleware'
-import { Procedure, ProcedureSet } from '../../utils/procedure'
-import type { ConcreteBoolean, JSON } from '../../utils/types'
+import { Middleware, type MiddlewareFunction } from '../../utils/middleware'
+import { type Procedure, ProcedureSet } from '../../utils/procedure'
+import type { ConcreteBoolean, Json } from '../../utils/types'
 import {
-    FetchErrorCode,
+    type FetchErrorCode,
     FetchPathParamsError,
-    FetchResponseError,
+    type FetchResponseError,
     FetchSearchParamsError,
 } from '../error'
-import {
+import type {
     DefaultFetchModeOptions,
     FetchMethod,
     FetchMethodString,
@@ -452,7 +452,7 @@ export class FetchBuilder<
      * const fetchUnit = f.builder().def_body(BodyZod.parse)
      *
      * // Example using metal-box/type
-     * import { t } from "@metal-box/type"
+     * import { t } from "@freestylejs/schema"
      *
      * const BodyMetal = t.object({ name: t.string })
      * const fetchUnit2 = f.builder().def_body(BodyMetal.parse)
@@ -486,7 +486,7 @@ export class FetchBuilder<
         responseArgument: $ModeOptions['isJsonMode'] extends true
             ? {
                   response: Response
-                  json: () => Promise<JSON>
+                  json: () => Promise<Json>
               }
             : {
                   response: Response
@@ -501,7 +501,7 @@ export class FetchBuilder<
             responseArgument: $ModeOptions['isJsonMode'] extends true
                 ? {
                       response: Response
-                      json: () => Promise<JSON>
+                      json: () => Promise<Json>
                   }
                 : {
                       response: Response

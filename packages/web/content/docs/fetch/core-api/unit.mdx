@@ -1,0 +1,64 @@
+---
+title: FetchUnit
+description: The executable request object.
+---
+
+The `FetchUnit` is the final product of the `FetchBuilder` **created by `build` method**. It represents a fully configured request ready to be executed.
+
+### Methods
+
+#### `query(options?)`
+
+Executes the HTTP request.
+
+-   **Returns**: `Promise<T>` (where `T` is your defined response type).
+-   **Options**:
+    -   `path`: Object for dynamic path parameters (required if URL has `$param`).
+    -   `body`: Request body (required if `def_body` is set).
+    -   `search`: Search parameters (required if `def_searchparams` is set).
+    -   `headers`: Additional headers to merge.
+    -   `signal`: `AbortSignal` for cancellation.
+
+```typescript
+const response = await unit.query({
+    path: { id: '123' },
+    body: { name: 'New Name' }
+});
+```
+
+#### `set_options(options)`
+
+Creates a **new** `FetchUnit` with updated default fetch options. This is useful for overriding defaults (like headers) for a specific instance without rebuilding the whole chain.
+
+```typescript
+const authorizedUnit = unit.set_options({
+    headers: { 'Authorization': 'Bearer new-token' }
+});
+```
+
+#### `copy()`
+
+Creates a deep copy of the `FetchUnit`.
+
+```typescript
+const clone = unit.copy();
+```
+
+### Aborting Requests
+
+You can cancel a request using the standard `AbortController`.
+
+```typescript
+const controller = new AbortController();
+
+unit.query({
+    signal: controller.signal
+}).catch(err => {
+    if (err.name === 'AbortError') {
+        console.log('Request aborted');
+    }
+});
+
+// Cancel the request
+controller.abort();
+```

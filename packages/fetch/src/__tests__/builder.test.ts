@@ -1,5 +1,5 @@
-import { t } from '@metal-box/type'
 import { describe, expect, it, vi } from 'vitest'
+import { z } from 'zod'
 import { f } from '..'
 import { FetchBuilder } from '../core/fetcher'
 import { FetchUnit } from '../core/fetcher/unit'
@@ -32,7 +32,7 @@ describe('FetchBuilder', () => {
     })
 
     it('should define a body validator', () => {
-        const bodySchema = t.object({ name: t.string })
+        const bodySchema = z.object({ name: z.string() })
         const b = f.builder().def_body(bodySchema.parse)
         const testBody = { name: 'test' }
         expect(b.bodyValidator(testBody)).toEqual(testBody)

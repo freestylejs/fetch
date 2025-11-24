@@ -1,0 +1,54 @@
+---
+title: Core Concepts
+description: Understand the architecture of Fetch.
+---
+
+Fetch is built on three main pillars: the **Builder**, the **Unit**, and the **Router**. Understanding these concepts is key to using the library effectively.
+
+### The Builder Pattern
+
+Unlike the standard `fetch` API, where you pass a large configuration object, Fetch uses a **Fluent Builder** pattern.
+
+-   **Immutability**: Every method call on the builder returns a *new* instance. This allows you to create a "base builder" and extend it for specific requests without side effects.
+-   **Progressive Typing**: As you add definitions (like `.def_body()` or `.def_response()`), the builder's internal type definition evolves. This ensures that the final execute function knows exactly what inputs it needs and what output it returns.
+
+```typescript
+const base = f.builder().def_url('https://api.com');
+
+// New instance, 'base' is unchanged
+const postRequest = base.def_method('POST'); 
+```
+
+### The Fetch Unit
+
+When you call `.build()`, you get a **FetchUnit**. A Unit is a sealed, executable representation of a request.
+
+-   **Execution**: The Unit exposes the `.query()` method.
+-   **Requirements**: If you defined dynamic URL parameters (e.g., `$id`) or a request body in the builder, the `.query()` method will *require* them as arguments. You cannot compile a request that is missing data.
+
+```typescript
+// If the builder defined a body validator...
+const unit = builder.def_body(schema.parse).build();
+
+// ...the query method forces you to provide it.
+unit.query({ body: ... }); 
+```
+
+### The Router
+
+The **Router** is a structural tool. It doesn't change how requests are executed but organizes *where* they live.
+
+-   **Mirroring**: The router structure typically mirrors your API's URL path structure.
+-   **Namespace**: It groups related endpoints (e.g., `api.users.get`, `api.users.post`).
+-   **Type Inference**: You can export the type of your router (`GetRouterConfig`), allowing you to use your API client type in other parts of your application (like React hooks or Vue composables) without importing the actual runtime logic.
+
+### Type Safety
+
+Fetch aims for **end-to-end type safety**.
+
+1.  **Input**: You validate inputs (body, search params) using schemas.
+2.  **Transport**: The builder tracks these types.
+3.  **Output**: You validate responses using schemas.
+4.  **Result**: The `.query()` result is fully typed.
+
+This eliminates the need to manually cast `response.json() as User`. If the server response doesn't match the schema, the validation logic throws, preventing runtime errors from propagating silently.

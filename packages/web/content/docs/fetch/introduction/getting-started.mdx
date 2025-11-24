@@ -1,0 +1,96 @@
+---
+title: Getting Started
+description: Install and make your first request with Fetch.
+---
+
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+
+### Quick Start
+
+This guide will help you set up Fetch and start making type-safe HTTP requests.
+
+<Steps>
+<Step>
+### 1. Prerequisites
+
+Ensure you have **TypeScript 4.5+** installed. Fetch relies on advanced TypeScript features for inference.
+
+</Step>
+<Step>
+### 2. Installation
+
+Install the `@freestylejs/fetch` package. We also recommend `zod` for validation. But you can use any library you want.
+
+<Tabs items={['npm', 'pnpm', 'yarn']} defaultValue="npm" groupId="package-manager">
+  <Tab value="npm">
+    ```bash
+    npm install @freestylejs/fetch zod
+    ```
+  </Tab>
+  <Tab value="pnpm">
+    ```bash
+    pnpm add @freestylejs/fetch zod
+    ```
+  </Tab>
+  <Tab value="yarn">
+    ```bash
+    yarn add @freestylejs/fetch zod
+    ```
+  </Tab>
+</Tabs>
+
+</Step>
+<Step>
+### 3. Create a Request Builder
+
+Import the `f` namespace to define a request. In this example, we'll fetch a user profile.
+
+```typescript
+import { f } from '@freestylejs/fetch';
+import { z } from 'zod';
+
+// 1. Define the response schema
+const UserSchema = z.object({
+    id: z.number(), // JSONPlaceholder uses numbers for IDs in response
+    name: z.string(),
+    email: z.email(),
+});
+
+// 2. Build the request
+const getUser = f.builder()
+    .def_method('GET')
+    // Define URL with a dynamic parameter ($id)
+    .def_url('https://jsonplaceholder.typicode.com/users/$id')
+    // Enable JSON mode (sets Content-Type and adds .json() helper)
+    .def_json()
+    // Handle and validate the response
+    .def_response(async ({ json }) => {
+        const data = await json();
+        return UserSchema.parse(data);
+    })
+    .build();
+```
+</Step>
+<Step>
+### 4. Execute the Request
+
+Use the `.query()` method to execute the request. Notice how the builder forces you to provide the `id` parameter because we defined `$id` in the URL.
+
+```typescript
+// The type of 'user' is inferred automatically as { id: string, name: string, email: string }
+const user = await getUser.query({
+    path: {
+        id: '1' // Type-safe: inferred from url (string because URL params are strings)
+    }
+});
+
+console.log(`Hello, ${user.name}!`);
+```
+</Step>
+</Steps>
+
+## Next Steps
+
+-   Learn about the **[Core Concepts](/en/docs/fetch/introduction/core-concepts)**.
+-   See how to build a **[Router](/en/docs/fetch/core-api/router)**.

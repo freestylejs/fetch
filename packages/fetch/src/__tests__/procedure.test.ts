@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { Procedure, ProcedureSet } from '../utils/procedure'
+import { type Procedure, ProcedureSet } from '../utils/procedure'
 import { label } from './utils/test.label'
 
 describe(label.unit('Procedure'), () => {

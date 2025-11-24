@@ -8,7 +8,6 @@ export class ProcedureSet<I> {
         new Set()
 
     private procedureList: Array<ProcedureRegistration<I>> = []
-    public constructor() {}
 
     public get procedures(): ReadonlyArray<ProcedureRegistration<I>> {
         return Array.from(this.registeredProcedure)

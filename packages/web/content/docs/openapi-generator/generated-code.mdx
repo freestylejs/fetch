@@ -1,0 +1,205 @@
+---
+title: Generated Code
+description: Understanding the structure and usage of generated API clients.
+---
+
+## Overview
+
+The OpenAPI Generator creates three TypeScript files that work together to provide a complete, type-safe API client.
+
+## File Structure
+
+### models.ts
+
+Contains all Zod schemas derived from your OpenAPI components:
+
+- **Schemas** - Converted from `components.schemas` definitions
+- **Type exports** - TypeScript types inferred from Zod schemas
+- **Validation** - Runtime validation using Zod
+
+Example generated model:
+
+```typescript
+import { z } from 'zod'
+
+export const User = z.object({
+  id: z.string(),
+  username: z.string(),
+  email: z.email(),
+  createdAt: z.iso.datetime()
+})
+
+export type UserModel = z.infer<typeof User>
+```
+
+### api.ts
+
+Contains the hierarchical router mapping all API endpoints:
+
+- **Base URL** - Extracted from `servers[0].url` in the specification
+- **Nested routes** - Path segments become nested objects
+- **HTTP methods** - Each method is a pre-configured builder
+- **Type inference** - Full TypeScript support for all operations
+
+Example generated API:
+
+```typescript
+import { f } from '@freestylejs/fetch'
+import { z } from 'zod'
+import * as Model from './models'
+
+export const api = f.router('https://api.example.com', {
+  users: {
+    $userId: {
+      GET: f.builder()
+        .def_json()
+        .def_response(async ({ json }) => Model.User.parse(await json())),
+      
+      posts: {
+        GET: f.builder()
+          .def_json()
+          .def_searchparams(z.object({
+            page: z.number().optional(),
+            limit: z.number().optional()
+          }).parse)
+          .def_response(async ({ json }) => z.array(Model.Post).parse(await json()))
+      }
+    }
+  }
+})
+```
+
+### index.ts
+
+Re-exports all generated code:
+
+```typescript
+export * from './api'
+export * from './models'
+```
+
+## Usage Patterns
+
+### Path Parameters
+
+Dynamic path segments use the `$paramName` syntax:
+
+```typescript
+// OpenAPI: /users/{userId}
+// Generated: api.users.$userId
+
+const user = await api.users.$userId.GET({
+  params: { userId: '123' }
+})
+```
+
+### Query Parameters
+
+Query parameters are validated with Zod schemas:
+
+```typescript
+// OpenAPI: /users?page=1&limit=10
+// Generated with searchparams
+
+const users = await api.users.GET({
+  query: {
+    page: 1,
+    limit: 10
+  }
+})
+```
+
+### Request Bodies
+
+Request bodies are validated against Zod schemas:
+
+```typescript
+// OpenAPI: POST /users with body
+// Generated with def_body
+
+const newUser = await api.users.POST({
+  body: {
+    username: 'john',
+    email: 'john@example.com'
+  }
+})
+```
+
+### Response Validation
+
+Responses are automatically validated:
+
+```typescript
+// Response is validated with zod at runtime
+const user = await api.users.$userId.GET({
+  params: { userId: '123' }
+})
+
+// TypeScript knows the exact shape
+user.username // string
+user.email    // string
+```
+
+## Type Inference
+
+The generated client provides complete type inference:
+
+### Request Types
+
+```typescript
+// TypeScript infers the shape of params, query, and body
+api.users.$userId.GET({
+  params: { userId: '123' },  // Type: { userId: string }
+  query: { include: 'posts' } // Type: { include?: string }
+})
+```
+
+### Response Types
+
+```typescript
+// Response type is inferred from the Zod schema
+const user = await api.users.$userId.GET({
+  params: { userId: '123' }
+})
+
+// user: UserModel
+```
+
+## Schema Conversion
+
+The generator converts OpenAPI types to Zod schemas:
+
+| OpenAPI Type | Zod Schema | Example |
+| ------------ | ---------- | ------- |
+| `string` | `z.string()` | `"hello"` |
+| `number` | `z.number()` | `42` |
+| `integer` | `z.number().int()` | `10` |
+| `boolean` | `z.boolean()` | `true` |
+| `array` | `z.array(...)` | `[1, 2, 3]` |
+| `object` | `z.object({...})` | `{ key: "value" }` |
+| `string` (format: date-time) | `z.iso.datetime()` | `"2024-01-01T00:00:00Z"` |
+| `string` (format: email) | `z.email()` | `"user@example.com"` |
+| `string` (format: uuid) | `z.uuid()` | `"123e4567-e89b-12d3-..."` |
+| `string` (format: uri) | `z.url()` | `"https://example.com"` |
+| `string` (enum) | `z.enum([...])` | `"active"` |
+| `allOf` | `Schema1.and(Schema2)` | Intersection |
+| `oneOf` | `z.union([...])` | Union |
+| `oneOf` (discriminator) | `z.discriminatedUnion(...)` | Discriminated union |
+
+## Naming Conventions
+
+The generator converts OpenAPI names to PascalCase:
+
+- `user-profile` → `UserProfile`
+- `api_key` → `ApiKey`
+- `userSettings` → `UserSettings`
+
+Special characters like `$` are preserved:
+
+- `$special` → `$Special`
+
+## Related
+
+- [Validation](/en/docs/openapi-generator/validation) - Runtime validation details
+- [CLI Reference](/en/docs/openapi-generator/cli-reference) - Generation options
+- [Fetch Builder](/en/docs/fetch/core-api/builder) - Understanding the builder API

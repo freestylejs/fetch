@@ -6,6 +6,10 @@ export default defineConfig({
     plugins: [tsconfigPaths()],
     test: {
         root: 'packages',
+        coverage: {
+            reporter: ['html', 'text'],
+            provider: 'v8',
+        },
     },
     resolve: {},
 })

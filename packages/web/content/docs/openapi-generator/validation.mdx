@@ -1,0 +1,290 @@
+---
+title: Validation
+description: Runtime validation with Zod in generated API clients.
+---
+
+## Overview
+
+The OpenAPI Generator creates Zod schemas for all data types in your API specification. These schemas provide runtime validation for requests and responses, ensuring type safety at both compile-time and runtime.
+
+## Automatic Validation
+
+### Response Validation
+
+All responses are automatically validated before being returned:
+
+```typescript
+const user = await api.users.$userId.GET({
+  params: { userId: '123' }
+})
+
+// If the response doesn't match the User schema, Zod throws an error
+// Otherwise, user is guaranteed to match UserModel
+```
+
+The validation happens in the `.def_response()` method:
+
+```typescript
+.def_response(async ({ json }) => Model.User.parse(await json()))
+```
+
+### Request Body Validation
+
+Request bodies are validated using the `.def_body()` method:
+
+```typescript
+POST: f.builder()
+  .def_json()
+  .def_body(Model.CreateUser.parse)
+```
+
+When you make a request, the body is validated:
+
+```typescript
+await api.users.POST({
+  body: {
+    username: 'john',
+    email: 'invalid-email' // ❌ Zod error: Invalid email
+  }
+})
+```
+
+### Query Parameter Validation
+
+Query parameters are validated with `.def_searchparams()`:
+
+```typescript
+GET: f.builder()
+  .def_json()
+  .def_searchparams(z.object({
+    page: z.number().optional(),
+    limit: z.number().max(100).optional()
+  }).parse)
+```
+
+Invalid query parameters throw errors:
+
+```typescript
+await api.users.GET({
+  query: {
+    page: 1,
+    limit: 200 // ❌ Zod error: Number must be less than or equal to 100
+  }
+})
+```
+
+## Handling Validation Errors
+
+### Zod Error Structure
+
+When validation fails, Zod throws a `ZodError`:
+
+```typescript
+import { ZodError } from 'zod'
+
+try {
+  const user = await api.users.$userId.GET({
+    params: { userId: '123' }
+  })
+} catch (error) {
+  if (error instanceof ZodError) {
+    console.error('Validation failed:', error.errors)
+    // [{ path: ['email'], message: 'Invalid email' }]
+  }
+}
+```
+
+### Custom Error Handling
+
+Use the fetch library's error handlers for more control:
+
+```typescript
+const user = await api.users.$userId.GET({
+  params: { userId: '123' }
+}).fetch({
+  onError: (error) => {
+    if (error instanceof ZodError) {
+      // Handle validation errors
+      console.error('Data validation failed:', error.flatten())
+    } else {
+      // Handle other errors
+      console.error('Request failed:', error)
+    }
+  }
+})
+```
+
+## Schema Constraints
+
+The generator translates OpenAPI constraints to Zod:
+
+### String Constraints
+
+```typescript
+// OpenAPI
+{
+  "type": "string",
+  "minLength": 3,
+  "maxLength": 50,
+  "pattern": "^[a-zA-Z]+$"
+}
+
+// Generated Zod
+z.string().min(3).max(50).regex(/^[a-zA-Z]+$/)
+```
+
+### Number Constraints
+
+```typescript
+// OpenAPI
+{
+  "type": "number",
+  "minimum": 0,
+  "maximum": 100
+}
+
+// Generated Zod
+z.number().min(0).max(100)
+```
+
+### Array Constraints
+
+```typescript
+// OpenAPI
+{
+  "type": "array",
+  "items": { "type": "string" },
+  "minItems": 1,
+  "maxItems": 10
+}
+
+// Generated Zod
+z.array(z.string()).min(1).max(10)
+```
+
+### Object Constraints
+
+```typescript
+// OpenAPI
+{
+  "type": "object",
+  "required": ["name", "email"],
+  "properties": {
+    "name": { "type": "string" },
+    "email": { "type": "string", "format": "email" },
+    "age": { "type": "integer" }
+  }
+}
+
+// Generated Zod
+z.object({
+  name: z.string(),
+  email: z.email(),
+  age: z.number().int().optional()
+})
+```
+
+## Advanced Validation
+
+### Nullable Types (OAS 3.1)
+
+The generator supports OpenAPI 3.1 nullable types:
+
+```typescript
+// OpenAPI
+{
+  "type": ["string", "null"]
+}
+
+// Generated Zod
+z.string().nullable()
+```
+
+### Enums
+
+Enums are converted to Zod enums:
+
+```typescript
+// OpenAPI
+{
+  "type": "string",
+  "enum": ["active", "inactive", "pending"]
+}
+
+// Generated Zod
+z.enum(['active', 'inactive', 'pending'])
+```
+
+### Discriminated Unions
+
+The generator creates discriminated unions for `oneOf` with discriminators:
+
+```typescript
+// OpenAPI
+{
+  "oneOf": [
+    { "$ref": "#/components/schemas/Cat" },
+    { "$ref": "#/components/schemas/Dog" }
+  ],
+  "discriminator": {
+    "propertyName": "type"
+  }
+}
+
+// Generated Zod
+z.discriminatedUnion('type', [Cat, Dog])
+```
+
+### Intersection Types
+
+`allOf` creates intersection types:
+
+```typescript
+// OpenAPI
+{
+  "allOf": [
+    { "$ref": "#/components/schemas/BaseEntity" },
+    { "$ref": "#/components/schemas/Timestamped" }
+  ]
+}
+
+// Generated Zod
+BaseEntity.and(Timestamped)
+```
+
+## Performance Considerations
+
+### Schema Caching
+
+Zod schemas are created once and reused for all requests:
+
+```typescript
+// The schema is defined once
+export const User = z.object({
+  id: z.string(),
+  name: z.string()
+})
+
+// And reused for every request
+Model.User.parse(data) // No schema recreation
+```
+
+### Lazy Validation
+
+Consider using `.safeParse()` for non-critical validations:
+
+```typescript
+const result = Model.User.safeParse(data)
+
+if (result.success) {
+  const user = result.data
+} else {
+  console.warn('Invalid user data:', result.error)
+}
+```
+
+## Related
+
+- [Generated Code](/en/docs/openapi-generator/generated-code) - Understanding the output structure
+- [Zod Documentation](https://zod.dev) - Complete Zod reference
+- [Fetch Builder](/en/docs/fetch/core-api/builder) - Builder API details

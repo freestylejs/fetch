@@ -1,0 +1,18 @@
+---
+title: f (Namespace)
+description: The global entry point for Fetch.
+---
+
+The `f` namespace is your starting point. It bundles the core factories and classes into a single, convenient import.
+
+```typescript
+import { f } from '@freestylejs/fetch';
+```
+
+### API Reference
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| [`f.builder`](/en/docs/fetch/core-api/builder) | `() => FetchBuilder` | **Factory**. Creates a new [FetchBuilder](/en/docs/fetch/core-api/builder) instance. Start here to define a new request. |
+| [`f.router`](/en/docs/fetch/core-api/router) | `Function` | **Utility**. Creates a structured [Router](/en/docs/fetch/core-api/router) client. |
+| [`f.Middleware`](/en/docs/fetch/core-api/middleware) | `Class` | **Class**. Instantiates a new [Middleware](/en/docs/fetch/core-api/middleware) manager. |
