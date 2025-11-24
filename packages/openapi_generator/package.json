@@ -1,5 +1,5 @@
 {
-    "name": "@freestylejs/openapi-generator",
+    "name": "create-freestyle-fetch",
     "version": "0.0.1",
     "description": "Generate freestylejs fetch client from OpenAPI spec",
     "author": "danpacho",
@@ -9,7 +9,7 @@
         "access": "public"
     },
     "bin": {
-        "metal-openapi-gen": "dist/index.js"
+        "create-freestyle-fetch": "dist/index.js"
     },
     "scripts": {
         "build": "tsup",

@@ -51,7 +51,7 @@ openapi-generator generate \
 Run the generator without installation:
 
 ```bash
-npx @freestylejs/openapi-generator generate \
+npx create-freestyle-fetch generate \
   --input ./openapi.json \
   --output ./src/generated
 ```
@@ -161,7 +161,7 @@ Integrate generation into your CI/CD pipeline:
 steps:
   - name: Generate API Client
     run: |
-      npx @freestylejs/openapi-generator generate \
+      npx create-freestyle-fetch generate \
         --input ./openapi.json \
         --output ./src/generated
   

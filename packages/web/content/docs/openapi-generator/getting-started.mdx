@@ -8,13 +8,13 @@ description: Install and use the OpenAPI Generator to create type-safe API clien
 Install the OpenAPI Generator package in your project:
 
 ```bash
-npm install --save-dev @freestylejs/openapi-generator
+npm install --save-dev create-freestyle-fetch
 ```
 
 Or use it directly with `npx` without installation:
 
 ```bash
-npx @freestylejs/openapi-generator generate --input ./spec.yaml --output ./src/api
+npx create-freestyle-fetch generate --input ./spec.yaml --output ./src/api
 ```
 
 ## Prerequisites
@@ -32,7 +32,7 @@ Before using the OpenAPI Generator, ensure you have:
 Create an API client from your OpenAPI specification:
 
 ```bash
-npx @freestylejs/openapi-generator generate \
+npx create-freestyle-fetch generate \
   --input ./openapi.yaml \
   --output ./src/generated
 ```
