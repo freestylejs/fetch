@@ -1042,7 +1042,7 @@ describe('SchemaGenerator', () => {
             const generator = new SchemaGenerator(spec)
             expect(() =>
                 generator.generateZodSchema(undefined as any, 'NonExistent')
-            ).toThrow('Schema with name NonExistent not found')
+            ).toThrow('Schema "NonExistent" not found in specification')
         })
 
         it('should handle caching of processed schemas', () => {
@@ -1178,7 +1178,7 @@ describe('SchemaGenerator', () => {
                     spec.components!.schemas!.Test as OpenAPIV3_1.SchemaObject,
                     'Test'
                 )
-            ).toThrow('Base schema BaseSchema not found in processed schemas')
+            ).toThrow('Base schema "BaseSchema" not found in processed schemas')
         })
     })
 })
