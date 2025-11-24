@@ -1,4 +1,5 @@
 import type { OpenAPIV3_1 } from 'openapi-types'
+import { SchemaValidationError } from './errors'
 import { toPascalCase } from './utils'
 
 function isReferenceObject(obj: any): obj is OpenAPIV3_1.ReferenceObject {
@@ -46,14 +47,31 @@ export class SchemaGenerator {
         schema: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject
     } {
         if (!ref.startsWith('#/components/schemas/')) {
-            throw new Error(
-                `Unsupported $ref format: ${ref}. Only local component schema references are supported.`
+            throw new SchemaValidationError(
+                `Unsupported $ref format: ${ref}`,
+                'unknown',
+                ref,
+                'Use the format "#/components/schemas/SchemaName" for schema references'
             )
         }
         const name = ref.split('/').pop()
-        if (!name) throw new Error(`Invalid $ref: ${ref}`)
+        if (!name) {
+            throw new SchemaValidationError(
+                `Invalid $ref path: ${ref}`,
+                'unknown',
+                ref,
+                'Ensure $ref follows "#/components/schemas/SchemaName" format'
+            )
+        }
         const schema = this.spec.components?.schemas?.[name]
-        if (!schema) throw new Error(`Schema not found for $ref: ${ref}`)
+        if (!schema) {
+            throw new SchemaValidationError(
+                `Schema not found for $ref: ${ref}`,
+                name,
+                ref,
+                `Check that the schema "${name}" is defined in components.schemas`
+            )
+        }
         return { name, schema }
     }
 
@@ -63,7 +81,12 @@ export class SchemaGenerator {
     ): string {
         const schema = schemaObject || this.spec.components?.schemas?.[name]
         if (!schema) {
-            throw new Error(`Schema with name ${name} not found.`)
+            throw new SchemaValidationError(
+                `Schema "${name}" not found in specification`,
+                name,
+                `components.schemas.${name}`,
+                'Check that the schema is defined in the components.schemas section'
+            )
         }
 
         if (this.processedSchemas.has(name) && !schemaObject) {
@@ -95,8 +118,11 @@ export class SchemaGenerator {
                     this.processedSchemas.get(baseSchemaName)
 
                 if (!baseSchemaString) {
-                    throw new Error(
-                        `Base schema ${baseSchemaName} not found in processed schemas`
+                    throw new SchemaValidationError(
+                        `Base schema "${baseSchemaName}" not found in processed schemas`,
+                        baseSchemaName,
+                        `allOf[0].$ref`,
+                        'Ensure the base schema is defined before using it in allOf'
                     )
                 }
 
@@ -127,10 +153,14 @@ export class SchemaGenerator {
             if (schema.oneOf && schema.discriminator) {
                 const discriminator = schema.discriminator.propertyName
                 const options = items.map((s) => {
-                    if (!isReferenceObject(s))
-                        throw new Error(
-                            'oneOf with discriminator must use $ref objects'
+                    if (!isReferenceObject(s)) {
+                        throw new SchemaValidationError(
+                            'oneOf with discriminator must use $ref objects',
+                            name,
+                            'oneOf',
+                            'Move inline schemas to components.schemas and reference them with $ref'
                         )
+                    }
                     return this.mapSchemaObjectToZod(name, s)
                 })
                 const zodSchema = `z.discriminatedUnion('${discriminator}', [${options.join(', ')}])`
