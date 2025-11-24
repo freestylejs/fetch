@@ -1,40 +1,40 @@
-import { Infer, t } from '@metal-box/type'
+import { z } from 'zod'
 
-const Book = t.object({
-    name: t.string,
-    price: t.number,
-    category: t.string,
+const Book = z.object({
+    name: z.string(),
+    price: z.number(),
+    category: z.string(),
     // server data
-    publish_date: t.string,
-    uuid: t.string,
+    publish_date: z.string(),
+    uuid: z.string(),
 })
 
-export type BookModel = Infer<typeof Book>
+export type BookModel = z.Infer<typeof Book>
 
-const BookRequest = t.object({
-    name: t.string,
-    price: t.number,
-    category: t.string,
+const BookRequest = z.object({
+    name: z.string(),
+    price: z.number(),
+    category: z.string(),
 })
-export type BookRequestModel = Infer<typeof BookRequest>
+export type BookRequestModel = z.Infer<typeof BookRequest>
 
-const BookList = t.array(Book)
-export type BookModelList = Infer<typeof BookList>
+const BookList = z.array(Book)
+export type BookModelList = z.Infer<typeof BookList>
 
-const BookQueryBody = t.object({
-    name: t.string,
+const BookQueryBody = z.object({
+    name: z.string(),
 })
-export type BookQueryBodyModel = Infer<typeof BookQueryBody>
+export type BookQueryBodyModel = z.Infer<typeof BookQueryBody>
 
-const Author = t.object({
-    name: t.null.array,
+const Author = z.object({
+    name: z.array(z.null()),
     books: BookList,
 })
 
-export type AuthorModel = Infer<typeof Author>
+export type AuthorModel = z.Infer<typeof Author>
 
-const AuthorList = t.array(Author)
-export type AuthorListModel = Infer<typeof AuthorList>
+const AuthorList = z.array(Author)
+export type AuthorListModel = z.Infer<typeof AuthorList>
 
 export const Model = {
     // books
