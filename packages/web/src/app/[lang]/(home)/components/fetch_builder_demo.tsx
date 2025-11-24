@@ -1,4 +1,4 @@
-// biome-ignore format: manual indentation needed for code preview
+/** biome-ignore-all lint/style/useConsistentCurlyBraces: <component> */
 
 'use client'
 
@@ -40,14 +40,14 @@ export const FetchBuilderDemo = () => {
     }
 
     return (
-        <div className="grid size-full grid-cols-1 gap-6 p-6 md:grid-cols-2 select-none">
+        <div className="grid size-full select-none grid-cols-1 gap-6 p-6 md:grid-cols-2">
             {/* Left: Interactive Builder Config */}
             <div className="flex flex-col items-center justify-center gap-8">
                 <div className="flex flex-col gap-3">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                    <div className="font-bold text-[10px] text-zinc-400 uppercase tracking-wider">
                         Configure Builder
                     </div>
-                    <div className="flex flex-col gap-2 w-60">
+                    <div className="flex w-60 flex-col gap-2">
                         {/* 1. Method */}
                         <button
                             disabled={config.built}
@@ -58,7 +58,7 @@ export const FetchBuilderDemo = () => {
                                 }))
                             }
                             className={cn(
-                                'flex items-center justify-between rounded-lg border px-3 py-2 text-xs font-medium transition-all',
+                                'flex items-center justify-between rounded-lg border px-3 py-2 font-medium text-xs transition-all',
                                 config.built
                                     ? 'opacity-50'
                                     : 'hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20',
@@ -78,12 +78,12 @@ export const FetchBuilderDemo = () => {
                                 setConfig((p) => ({ ...p, url: !p.url }))
                             }
                             className={cn(
-                                'flex items-center justify-between rounded-lg border px-3 py-2 text-xs font-medium transition-all',
+                                'flex items-center justify-between rounded-lg border px-3 py-2 font-medium text-xs transition-all',
                                 config.url
                                     ? 'border-amber-500 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20'
                                     : config.built
                                       ? 'opacity-50'
-                                      : 'hover:border-zinc-300 border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900'
+                                      : 'border-zinc-200 bg-white hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900'
                             )}
                         >
                             <span>Add Dynamic URL</span>
@@ -106,12 +106,12 @@ export const FetchBuilderDemo = () => {
                                 setConfig((p) => ({ ...p, json: !p.json }))
                             }
                             className={cn(
-                                'flex items-center justify-between rounded-lg border px-3 py-2 text-xs font-medium transition-all',
+                                'flex items-center justify-between rounded-lg border px-3 py-2 font-medium text-xs transition-all',
                                 config.json
                                     ? 'border-purple-500 bg-purple-50 dark:border-purple-800 dark:bg-purple-900/20'
                                     : config.built
                                       ? 'opacity-50'
-                                      : 'hover:border-zinc-300 border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900'
+                                      : 'border-zinc-200 bg-white hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900'
                             )}
                         >
                             <span>Enable JSON Mode</span>
@@ -133,7 +133,7 @@ export const FetchBuilderDemo = () => {
                                 setConfig((p) => ({ ...p, built: !p.built }))
                             }
                             className={cn(
-                                'mt-2 rounded-lg px-3 py-2 text-xs font-bold text-white transition-all',
+                                'mt-2 rounded-lg px-3 py-2 font-bold text-white text-xs transition-all',
                                 config.built
                                     ? 'bg-red-500 hover:bg-red-600'
                                     : 'bg-zinc-900 hover:bg-zinc-700 dark:bg-zinc-100 dark:text-black'
@@ -147,25 +147,25 @@ export const FetchBuilderDemo = () => {
                 {/* Execution Control */}
                 <div
                     className={cn(
-                        'flex flex-col gap-3 w-60 transition-all duration-500',
+                        'flex w-60 flex-col gap-3 transition-all duration-500',
                         config.built
-                            ? 'opacity-100 translate-y-0'
-                            : 'opacity-0 translate-y-4 pointer-events-none'
+                            ? 'translate-y-0 opacity-100'
+                            : 'pointer-events-none translate-y-4 opacity-0'
                     )}
                 >
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                    <div className="font-bold text-[10px] text-zinc-400 uppercase tracking-wider">
                         Execute Request
                     </div>
 
                     {config.url && (
                         <div className="flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
-                            <span className="text-xs font-mono text-amber-500">
+                            <span className="font-mono text-amber-500 text-xs">
                                 id:
                             </span>
                             <input
                                 value={id}
                                 onChange={(e) => setId(e.target.value)}
-                                className="w-full bg-transparent text-sm font-mono text-zinc-700 outline-none dark:text-zinc-200"
+                                className="w-full bg-transparent font-mono text-sm text-zinc-700 outline-none dark:text-zinc-200"
                                 spellCheck={false}
                             />
                         </div>
@@ -175,7 +175,7 @@ export const FetchBuilderDemo = () => {
                         onClick={handleSend}
                         disabled={status === 'loading'}
                         className={cn(
-                            'flex items-center justify-center rounded-lg py-2 text-xs font-bold transition-all',
+                            'flex items-center justify-center rounded-lg py-2 font-bold text-xs transition-all',
                             status === 'success'
                                 ? 'bg-emerald-500 text-white'
                                 : 'bg-blue-600 text-white hover:bg-blue-700'
@@ -191,7 +191,7 @@ export const FetchBuilderDemo = () => {
             </div>
 
             {/* Right: Live Code Generation */}
-            <div className="flex flex-col justify-center gap-1 rounded-xl border border-zinc-200 bg-zinc-900 p-4 font-mono text-xs text-zinc-400 shadow-inner dark:border-zinc-800 overflow-auto custom-scrollbar">
+            <div className="custom-scrollbar flex flex-col justify-center gap-1 overflow-auto rounded-xl border border-zinc-200 bg-zinc-900 p-4 font-mono text-xs text-zinc-400 shadow-inner dark:border-zinc-800">
                 <div>
                     <span className="text-purple-400">const</span> getUser =
                     f.builder()
@@ -210,7 +210,7 @@ export const FetchBuilderDemo = () => {
 
                 {/* URL */}
                 {config.url && (
-                    <div className="pl-4 animate-in fade-in slide-in-from-left-2">
+                    <div className="fade-in slide-in-from-left-2 animate-in pl-4">
                         .def_url(
                         <span className="text-green-400">
                             "https://api/users/
@@ -222,14 +222,14 @@ export const FetchBuilderDemo = () => {
 
                 {/* JSON */}
                 {config.json && (
-                    <div className="pl-4 animate-in fade-in slide-in-from-left-2">
+                    <div className="fade-in slide-in-from-left-2 animate-in pl-4">
                         .def_json()
                     </div>
                 )}
 
                 {/* Build */}
                 {config.built && (
-                    <div className="pl-4 animate-in fade-in slide-in-from-left-2 font-bold text-zinc-100">
+                    <div className="fade-in slide-in-from-left-2 animate-in pl-4 font-bold text-zinc-100">
                         .build()
                     </div>
                 )}
@@ -241,8 +241,8 @@ export const FetchBuilderDemo = () => {
                     className={cn(
                         'transition-all duration-500',
                         config.built
-                            ? 'opacity-100 translate-y-0'
-                            : 'opacity-0 translate-y-4'
+                            ? 'translate-y-0 opacity-100'
+                            : 'translate-y-4 opacity-0'
                     )}
                 >
                     <div>

@@ -1,4 +1,4 @@
-// biome-ignore format: manual indentation needed for code preview
+/** biome-ignore-all lint/style/useConsistentCurlyBraces: <component> */
 
 'use client'
 
@@ -28,14 +28,14 @@ export const RouterDemo = () => {
     )
 
     return (
-        <div className="flex size-full flex-col items-center justify-center gap-6 p-6 select-none">
+        <div className="flex size-full select-none flex-col items-center justify-center gap-6 p-6">
             <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
                 {/* Left: Router Definition (Interactive Code) */}
-                <div className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white/50 p-4 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/50 h-[320px] overflow-y-auto custom-scrollbar">
-                    <div className="mb-1 text-[10px] font-bold tracking-wider text-zinc-500 uppercase">
+                <div className="no-scrollbar custom-scrollbar flex h-80 flex-col gap-2 overflow-y-auto rounded-xl border border-zinc-200 bg-white/50 p-4 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/50">
+                    <div className="mb-1 font-bold text-[10px] text-zinc-500 uppercase tracking-wider">
                         1. Define Router
                     </div>
-                    <div className="font-mono text-xs leading-relaxed cursor-default">
+                    <div className="cursor-default font-mono text-xs leading-relaxed">
                         <div>
                             <span className="text-purple-600 dark:text-purple-500">
                                 const
@@ -54,7 +54,7 @@ export const RouterDemo = () => {
                                 className={cn(
                                     'cursor-pointer transition-colors duration-200',
                                     isPathActive('auth')
-                                        ? 'text-zinc-900 font-bold dark:text-zinc-100'
+                                        ? 'font-bold text-zinc-900 dark:text-zinc-100'
                                         : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300',
                                     isHovered('auth') &&
                                         'underline decoration-zinc-400 underline-offset-2'
@@ -74,7 +74,7 @@ export const RouterDemo = () => {
                                 className={cn(
                                     'cursor-pointer transition-colors duration-200',
                                     isPathActive('login')
-                                        ? 'text-blue-600 font-bold dark:text-blue-400'
+                                        ? 'font-bold text-blue-600 dark:text-blue-400'
                                         : 'text-zinc-500 hover:text-blue-500/70',
                                     isHovered('login') &&
                                         'underline decoration-blue-400 underline-offset-2'
@@ -93,14 +93,14 @@ export const RouterDemo = () => {
                             </span>
                             {/* FIX: Escaped curly brace */}: {'{'}
                             {isPathActive('login') ? (
-                                <div className="pl-4 animate-in fade-in slide-in-from-left-2 duration-200">
-                                    <span className="text-emerald-600 font-bold dark:text-emerald-400">
+                                <div className="fade-in slide-in-from-left-2 animate-in pl-4 duration-200">
+                                    <span className="font-bold text-emerald-600 dark:text-emerald-400">
                                         POST
                                     </span>
                                     : <BuilderCode />,
                                 </div>
                             ) : (
-                                <span className="text-zinc-400 px-1">...</span>
+                                <span className="px-1 text-zinc-400">...</span>
                             )}
                             {/* FIX: Escaped curly brace */}
                             {'}'}
@@ -113,7 +113,7 @@ export const RouterDemo = () => {
                                 className={cn(
                                     'cursor-pointer transition-colors duration-200',
                                     isPathActive('users')
-                                        ? 'text-zinc-900 font-bold dark:text-zinc-100'
+                                        ? 'font-bold text-zinc-900 dark:text-zinc-100'
                                         : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300',
                                     isHovered('users') &&
                                         'underline decoration-zinc-400 underline-offset-2'
@@ -133,7 +133,7 @@ export const RouterDemo = () => {
                                 className={cn(
                                     'cursor-pointer transition-colors duration-200',
                                     isPathActive('$id')
-                                        ? 'text-amber-600 font-bold dark:text-amber-500'
+                                        ? 'font-bold text-amber-600 dark:text-amber-500'
                                         : 'text-zinc-500 hover:text-amber-500/70',
                                     isHovered('$id') &&
                                         'underline decoration-amber-500 underline-offset-2'
@@ -156,7 +156,7 @@ export const RouterDemo = () => {
                                     'cursor-pointer transition-colors duration-200',
                                     isPathActive('GET') &&
                                         !activePath.includes('posts')
-                                        ? 'text-emerald-600 font-bold dark:text-emerald-400'
+                                        ? 'font-bold text-emerald-600 dark:text-emerald-400'
                                         : 'text-zinc-500 hover:text-emerald-500/70',
                                     isHovered('GET') &&
                                         'underline decoration-emerald-400 underline-offset-2'
@@ -178,7 +178,7 @@ export const RouterDemo = () => {
                                 className={cn(
                                     'cursor-pointer transition-colors duration-200',
                                     isPathActive('posts')
-                                        ? 'text-zinc-900 font-bold dark:text-zinc-100'
+                                        ? 'font-bold text-zinc-900 dark:text-zinc-100'
                                         : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300',
                                     isHovered('posts') &&
                                         'underline decoration-zinc-400 underline-offset-2'
@@ -198,14 +198,14 @@ export const RouterDemo = () => {
                             </span>
                             {/* FIX: Escaped curly brace */}: {'{'}
                             {isPathActive('posts') ? (
-                                <div className="pl-4 animate-in fade-in slide-in-from-left-2 duration-200">
-                                    <span className="text-emerald-600 font-bold dark:text-emerald-400">
+                                <div className="fade-in slide-in-from-left-2 animate-in pl-4 duration-200">
+                                    <span className="font-bold text-emerald-600 dark:text-emerald-400">
                                         GET
                                     </span>
                                     : <BuilderCode />
                                 </div>
                             ) : (
-                                <span className="text-zinc-400 px-1">...</span>
+                                <span className="px-1 text-zinc-400">...</span>
                             )}
                             {'}'}
                         </div>
@@ -217,17 +217,17 @@ export const RouterDemo = () => {
                 </div>
 
                 {/* Right: Usage Preview (Generated Code) */}
-                <div className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-zinc-900 p-4 shadow-lg dark:border-zinc-800 h-[320px]">
-                    <div className="flex items-center justify-between text-[10px] font-bold tracking-wider text-zinc-400 uppercase">
+                <div className="no-scrollbar flex h-80 flex-col gap-2 rounded-xl border border-zinc-200 bg-zinc-900 p-4 shadow-lg dark:border-zinc-800">
+                    <div className="flex items-center justify-between font-bold text-[10px] text-zinc-400 uppercase tracking-wider">
                         <span>2. Type-Safe Usage</span>
                         {activePath.length > 0 && (
-                            <div className="flex items-center gap-1 text-green-500 animate-in fade-in duration-300">
-                                <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                            <div className="fade-in flex animate-in items-center gap-1 text-green-500 duration-300">
+                                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-500" />
                                 Synced
                             </div>
                         )}
                     </div>
-                    <div className="font-mono text-xs text-zinc-300 leading-relaxed whitespace-pre-wrap overflow-y-auto custom-scrollbar">
+                    <div className="custom-scrollbar overflow-y-auto whitespace-pre-wrap font-mono text-xs text-zinc-300 leading-relaxed">
                         <span className="text-purple-400">await</span>{' '}
                         <span className="text-blue-400">api</span>
                         {activePath.length === 0 && (
@@ -249,7 +249,7 @@ export const RouterDemo = () => {
                                     className={cn(
                                         'transition-all duration-200',
                                         isSegmentHovered &&
-                                            'scale-110 font-bold inline-block text-white shadow-white/20 drop-shadow-md',
+                                            'inline-block scale-110 font-bold text-white shadow-white/20 drop-shadow-md',
                                         colorClass
                                     )}
                                 >
@@ -261,14 +261,14 @@ export const RouterDemo = () => {
                         {['GET', 'POST', 'PUT', 'DELETE'].includes(
                             activePath[activePath.length - 1]
                         ) && (
-                            <div className="animate-in fade-in slide-in-from-left-2 duration-300">
+                            <div className="fade-in slide-in-from-left-2 animate-in duration-300">
                                 .<span className="text-yellow-400">query</span>(
                                 {/* FIX: Replaced invalid nested syntax with explicit string escaping */}
                                 {'{'}
                                 {activePath.includes('$id') && (
                                     <div
                                         className={cn(
-                                            'pl-4 transition-colors duration-200 rounded',
+                                            'rounded pl-4 transition-colors duration-200',
                                             hovered === '$id' &&
                                                 'bg-amber-500/20'
                                         )}
@@ -287,7 +287,7 @@ export const RouterDemo = () => {
                                 {activePath.includes('login') && (
                                     <div
                                         className={cn(
-                                            'pl-4 transition-colors duration-200 rounded',
+                                            'rounded pl-4 transition-colors duration-200',
                                             hovered === 'login' &&
                                                 'bg-blue-500/20'
                                         )}

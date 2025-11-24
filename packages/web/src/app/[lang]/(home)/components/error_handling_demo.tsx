@@ -1,6 +1,6 @@
 // biome-ignore format: manual indentation needed for code preview
 
-'use client'
+"use client";
 
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
@@ -42,18 +42,18 @@ export const ErrorHandlingDemo = () => {
     const addLog = (msg: string) => setLog((prev) => [...prev, msg])
 
     return (
-        <div className="grid size-full grid-cols-1 gap-6 p-6 md:grid-cols-2 select-none">
+        <div className="grid size-full select-none grid-cols-1 gap-6 p-6 md:grid-cols-2">
             {/* Left: Interactive Control */}
-            <div className="flex flex-col items-center justify-center gap-8">
-                <div className="flex flex-col gap-2 items-center">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+            <div className="no-scrollbar flex flex-col items-center justify-center gap-8">
+                <div className="flex flex-col items-center gap-2">
+                    <div className="font-bold text-[10px] text-zinc-400 uppercase tracking-wider">
                         Server Simulation
                     </div>
                     <div className="flex overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700">
                         <button
                             onClick={() => setResponseType('200')}
                             className={cn(
-                                'px-4 py-1.5 text-xs font-medium transition-colors',
+                                'px-4 py-1.5 font-medium text-xs transition-colors',
                                 responseType === '200'
                                     ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
                                     : 'hover:bg-zinc-50 dark:hover:bg-zinc-800'
@@ -65,7 +65,7 @@ export const ErrorHandlingDemo = () => {
                         <button
                             onClick={() => setResponseType('404')}
                             className={cn(
-                                'px-4 py-1.5 text-xs font-medium transition-colors',
+                                'px-4 py-1.5 font-medium text-xs transition-colors',
                                 responseType === '404'
                                     ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
                                     : 'hover:bg-zinc-50 dark:hover:bg-zinc-800'
@@ -77,7 +77,7 @@ export const ErrorHandlingDemo = () => {
                         <button
                             onClick={() => setResponseType('500')}
                             className={cn(
-                                'px-4 py-1.5 text-xs font-medium transition-colors',
+                                'px-4 py-1.5 font-medium text-xs transition-colors',
                                 responseType === '500'
                                     ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                                     : 'hover:bg-zinc-50 dark:hover:bg-zinc-800'
@@ -97,7 +97,7 @@ export const ErrorHandlingDemo = () => {
                             <div
                                 key={i}
                                 className={cn(
-                                    'animate-in fade-in slide-in-from-left-2',
+                                    'fade-in slide-in-from-left-2 animate-in',
                                     l.includes('✓')
                                         ? 'text-emerald-600 dark:text-emerald-400'
                                         : l.includes('⚠')
@@ -109,7 +109,7 @@ export const ErrorHandlingDemo = () => {
                             </div>
                         ))}
                         {log.length === 0 && (
-                            <div className="text-zinc-300 dark:text-zinc-700 italic">
+                            <div className="text-zinc-300 italic dark:text-zinc-700">
                                 Waiting for execution...
                             </div>
                         )}
@@ -119,14 +119,14 @@ export const ErrorHandlingDemo = () => {
                 <button
                     onClick={execute}
                     disabled={activeBlock !== 'none'}
-                    className="rounded-full bg-zinc-900 px-6 py-2 text-xs font-bold text-white transition-all hover:scale-105 hover:bg-zinc-700 disabled:scale-100 disabled:opacity-50 dark:bg-zinc-100 dark:text-black"
+                    className="rounded-full bg-zinc-900 px-6 py-2 font-bold text-white text-xs transition-all hover:scale-105 hover:bg-zinc-700 disabled:scale-100 disabled:opacity-50 dark:bg-zinc-100 dark:text-black"
                 >
                     {activeBlock === 'none' ? 'Execute Request' : 'Running...'}
                 </button>
             </div>
 
             {/* Right: Code Sync */}
-            <div className="flex flex-col justify-center gap-1 rounded-xl border border-zinc-200 bg-zinc-900 p-4 font-mono text-xs text-zinc-400 shadow-inner dark:border-zinc-800 overflow-auto custom-scrollbar">
+            <div className="no-scrollbar custom-scrollbar flex flex-col justify-center gap-1 overflow-auto rounded-xl border border-zinc-200 bg-zinc-900 p-4 font-mono text-xs text-zinc-400 shadow-inner dark:border-zinc-800">
                 <div>
                     <span className="text-purple-400">const</span> request =
                     f.builder()
@@ -136,7 +136,7 @@ export const ErrorHandlingDemo = () => {
                 {/* Request Handler */}
                 <div
                     className={cn(
-                        'pl-4 transition-all duration-300 rounded px-2 -mx-2',
+                        '-mx-2 rounded px-2 pl-4 transition-all duration-300',
                         activeBlock === 'request'
                             ? 'bg-blue-500/20 text-blue-200'
                             : 'opacity-50'
@@ -148,7 +148,7 @@ export const ErrorHandlingDemo = () => {
                 {/* Success Handler */}
                 <div
                     className={cn(
-                        'pl-4 transition-all duration-300 rounded px-2 -mx-2',
+                        '-mx-2 rounded px-2 pl-4 transition-all duration-300',
                         activeBlock === 'success'
                             ? 'bg-emerald-500/20 text-emerald-200'
                             : 'opacity-50'
@@ -161,7 +161,7 @@ export const ErrorHandlingDemo = () => {
                 {/* Error Handler */}
                 <div
                     className={cn(
-                        'pl-4 transition-all duration-300 rounded px-2 -mx-2',
+                        '-mx-2 rounded px-2 pl-4 transition-all duration-300',
                         activeBlock === 'error'
                             ? 'bg-amber-500/20 text-amber-200'
                             : 'opacity-50'
@@ -179,7 +179,7 @@ export const ErrorHandlingDemo = () => {
                 {/* Finally Handler */}
                 <div
                     className={cn(
-                        'pl-4 transition-all duration-300 rounded px-2 -mx-2',
+                        '-mx-2 rounded px-2 pl-4 transition-all duration-300',
                         activeBlock === 'finally'
                             ? 'bg-zinc-500/20 text-zinc-100'
                             : 'opacity-50'

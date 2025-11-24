@@ -1,4 +1,4 @@
-// biome-ignore format: manual indentation needed for code preview
+/** biome-ignore-all lint/style/useConsistentCurlyBraces: <component> */
 
 'use client'
 
@@ -29,7 +29,7 @@ export const BodyValidationDemo = () => {
     }
 
     return (
-        <div className="grid size-full grid-cols-1 gap-6 p-6 md:grid-cols-2 select-none">
+        <div className="grid size-full select-none grid-cols-1 gap-6 p-6 md:grid-cols-2">
             {/* Left: Input Form */}
             <div className="flex flex-col items-center justify-center gap-6">
                 <div
@@ -42,7 +42,7 @@ export const BodyValidationDemo = () => {
                 >
                     <div className="flex flex-col gap-3">
                         <div className="flex flex-col gap-1">
-                            <label className="text-[10px] font-bold text-zinc-400 uppercase">
+                            <label className="font-bold text-[10px] text-zinc-400 uppercase">
                                 body.name
                             </label>
                             <input
@@ -58,7 +58,7 @@ export const BodyValidationDemo = () => {
                             />
                         </div>
                         <div className="flex flex-col gap-1">
-                            <label className="text-[10px] font-bold text-zinc-400 uppercase">
+                            <label className="font-bold text-[10px] text-zinc-400 uppercase">
                                 body.age
                             </label>
                             <input
@@ -79,7 +79,7 @@ export const BodyValidationDemo = () => {
                         onClick={checkType}
                         disabled={status === 'checking'}
                         className={cn(
-                            'mt-1 flex items-center justify-center rounded-lg py-2 text-sm font-bold transition-all duration-300',
+                            'mt-1 flex items-center justify-center rounded-lg py-2 font-bold text-sm transition-all duration-300',
                             status === 'valid'
                                 ? 'bg-emerald-500 text-white'
                                 : status === 'invalid'
@@ -99,7 +99,7 @@ export const BodyValidationDemo = () => {
             </div>
 
             {/* Right: Code Sync Visual */}
-            <div className="flex flex-col justify-center gap-1 rounded-xl border border-zinc-200 bg-zinc-900 p-4 font-mono text-xs text-zinc-400 shadow-inner dark:border-zinc-800 overflow-auto custom-scrollbar">
+            <div className="custom-scrollbar flex flex-col justify-center gap-1 overflow-auto rounded-xl border border-zinc-200 bg-zinc-900 p-4 font-mono text-xs text-zinc-400 shadow-inner dark:border-zinc-800">
                 <div>
                     <span className="text-purple-400">const</span> createUser =
                     f.builder()
@@ -116,7 +116,7 @@ export const BodyValidationDemo = () => {
                             status === 'checking' ||
                                 status === 'valid' ||
                                 (status === 'invalid' && !isValidName)
-                                ? 'text-blue-300 font-bold scale-105 origin-left'
+                                ? 'origin-left scale-105 font-bold text-blue-300'
                                 : 'text-zinc-500'
                         )}
                     >
@@ -128,7 +128,7 @@ export const BodyValidationDemo = () => {
                             status === 'checking' ||
                                 status === 'valid' ||
                                 (status === 'invalid' && !isValidAge)
-                                ? 'text-blue-300 font-bold scale-105 origin-left'
+                                ? 'origin-left scale-105 font-bold text-blue-300'
                                 : 'text-zinc-500'
                         )}
                     >
