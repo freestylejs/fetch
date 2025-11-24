@@ -1,0 +1,35 @@
+{
+    "name": "create-freestyle-fetch",
+    "version": "1.0.0",
+    "description": "Generate freestylejs fetch client from OpenAPI spec",
+    "author": "danpacho",
+    "license": "MIT",
+    "keywords": ["openapi", "generator", "fetch"],
+    "publishConfig": {
+        "access": "public"
+    },
+    "bin": {
+        "create-freestyle-fetch": "dist/index.js"
+    },
+    "scripts": {
+        "build": "tsup",
+        "build:fast": "tsup --no-dts",
+        "dev": "pnpm build --sourcemap --watch",
+        "test": "vitest",
+        "ts:typecheck": "tsc --noEmit --skipLibCheck"
+    },
+    "dependencies": {
+        "@freestylejs/fetch": "workspace:^",
+        "commander": "^14.0.2",
+        "fs-extra": "^11.3.2",
+        "openapi-types": "^12.1.3",
+        "swagger-parser": "^10.0.3",
+        "zod": "^4.1.13",
+        "chalk": "^5.6.2"
+    },
+    "devDependencies": {
+        "@types/fs-extra": "^11.0.4",
+        "@types/node": "^20.14.2",
+        "ts-expect": "^1.3.0"
+    }
+}

@@ -1,0 +1,153 @@
+---
+title: FetchBuilder
+description: The fluent interface for constructing and configuring HTTP requests.
+---
+
+The `FetchBuilder` is the cornerstone of Fetch. It employs a **Fluent Interface** pattern, allowing you to chain configuration methods to define every aspect of an HTTP request.
+
+Each method call returns a **new, immutable** instance of the builder, ensuring that your base configurations remain reusable and side-effect-free.
+
+### Initialization
+
+You create a builder instance using the `f.builder()` factory method.
+
+```typescript
+import { f } from '@freestylejs/fetch';
+
+const builder = f.builder();
+```
+
+---
+
+### HTTP Configuration
+
+These methods configure the fundamental properties of the HTTP request.
+
+| Method | Signature | Description |
+| :--- | :--- | :--- |
+| `def_method` | `(method: FetchMethod) => Builder` | Sets the HTTP method (e.g., `'GET'`, `'POST'`, `'PUT'`, `'DELETE'`). Defaults to `'GET'`. |
+| `def_url` | `(url: string) => Builder` | Sets the request URL. Supports [Dynamic Paths](/en/docs/fetch/core-api/router#dynamic-paths) using the `$` prefix (e.g., `/users/$id`). |
+| `def_json` | `() => Builder` | Activates JSON mode. Automatically sets `Content-Type: application/json` and enables the `.json()` helper in the response handler. |
+| `def_query_mode` | `(mode: 'throw' \| 'not_throw') => Builder` | Determines if the `query()` method should throw an error on failure (`'throw'`) or return `undefined` (`'not_throw'`). Defaults to `'throw'`. |
+
+#### Example
+
+```typescript
+const getPost = f.builder()
+    .def_method('GET')
+    .def_url('https://api.example.com/posts/$postId')
+    .def_json();
+    .build()
+```
+
+---
+
+### Data Validation & Transformation
+
+These methods define the shape of data entering and leaving your request. They are crucial for **TypeScript inference**.
+
+| Method | Signature | Description |
+| :--- | :--- | :--- |
+| `def_body` | `(validator: (input: unknown) => T) => Builder` | Defines the request body schema. The `query()` method will require a `body` matching type `T`. |
+| `def_searchparams` | `(validator: (input: unknown) => T) => Builder` | Defines the URL search parameters schema. The `query()` method will require `search` matching type `T`. |
+| `def_response` | `(handler: (ctx) => R) => Builder` | Defines how to handle and transform the response. The return type `R` becomes the result of `query()`. |
+
+#### Example: Strictly Typed Request
+
+This example uses **Zod**, but you can use any validator function.
+
+```typescript
+import { z } from 'zod';
+
+const CreateUser = f.builder()
+    .def_method('POST')
+    .def_url('/users')
+    // 1. Enforce Body Shape
+    .def_body(z.object({
+        name: z.string(),
+        email: z.email(),
+    }).parse)
+    // 2. Enforce Search Params
+    .def_searchparams(z.object({
+        verbose: z.boolean().optional()
+    }).parse)
+    // 3. Parse Response
+    .def_response(async ({ json }) => {
+        const data = await json();
+        return z.object({ id: z.string() }).parse(data);
+    })
+    // 4. Build fetcher
+    .build()
+
+// Usage
+await CreateUser.query({
+    body: { name: 'Alice', email: 'alice@example.com' }, // Typed
+    search: { verbose: true } // Typed
+});
+```
+
+---
+
+### Lifecycle Hooks
+
+Hooks allow you to inject logic at specific stages of the request lifecycle.
+
+| Method | Description |
+| :--- | :--- |
+| `def_request_handler` | **Pre-flight interceptor.** Receives the standard `Request` object immediately before it is sent. Return the modified request. |
+| `def_fetch_err_handler` | **HTTP Error Handler.** Triggered when the response status is **not** 2xx. Receives `{ error: FetchResponseError, status: number }`. |
+| `def_unknown_err_handler` | **Network Error Handler.** Triggered when the fetch call itself fails (e.g., network offline, DNS failure). Receives `{ error: unknown }`. |
+| `def_final_handler` | **Finally Block.** Executed after the request completes, regardless of success or failure. Useful for cleanup or logging. |
+
+#### Example: Error Handling
+
+```typescript
+const safeRequest = f.builder()
+    .def_fetch_err_handler(({ status, error }) => {
+        if (status === 401) {
+            console.error('Unauthorized access');
+            // Redirect to login...
+        }
+    })
+    .def_final_handler(() => {
+        console.log('Request finished');
+    });
+```
+
+---
+
+### Middleware
+
+You can attach middleware to specific builders. For global middleware, it is recommended to use a shared builder instance or apply it manually.
+
+| Method | Signature |
+| :--- | :--- |
+| `def_middleware` | `(...middleware: MiddlewareFunction[]) => Builder` |
+
+See the [Middleware Guide](/en/docs/fetch/core-api/middleware) for detailed usage.
+
+---
+
+### Default Fetch Options
+
+You can pre-configure standard `fetch` options. These defaults can still be overridden when executing the query.
+
+| Method | Description |
+| :--- | :--- |
+| `def_default_headers` | Sets default headers. Merged with headers provided at query time. |
+| `def_default_cache` | Sets the cache mode (e.g., `'no-store'`, `'force-cache'`). |
+| `def_default_credentials` | Sets credentials mode (e.g., `'include'`, `'same-origin'`). |
+| `def_default_mode` | Sets the CORS mode (e.g., `'cors'`, `'no-cors'`). |
+| `def_default_redirect` | Sets redirect behavior (e.g., `'follow'`, `'error'`). |
+| `def_default_referrer` | Sets the referrer. |
+| `def_default_referrer_policy` | Sets the referrer policy. |
+| `def_default_integrity` | Sets the subresource integrity hash. |
+| `def_default_keepalive` | Enables/disables keepalive. |
+| `def_default_window` | Sets the associated window. |
+| `def_default_priority` | Sets the request priority. |
+
+```typescript
+const authenticatedBuilder = f.builder()
+    .def_default_headers({ 'Authorization': 'Bearer ...' })
+    .def_default_cache('no-store');
+```

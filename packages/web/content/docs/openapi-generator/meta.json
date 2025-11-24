@@ -1,0 +1,10 @@
+{
+    "title": "OpenAPI Generator",
+    "pages": [
+        "index",
+        "getting-started",
+        "cli-reference",
+        "generated-code",
+        "validation"
+    ]
+}

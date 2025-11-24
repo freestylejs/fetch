@@ -1,41 +1,49 @@
-name-template: 'v$RESOLVED_VERSION 🔮'
+name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
 categories:
-    - title: 'New Features 🚀'
-      labels:
-          - 'feature'
-          - 'enhancement'
-    - title: 'Bug Fixes 🐛'
-      labels:
-          - 'fix'
-          - 'bugfix'
-          - 'bug'
-    - title: 'Breaking 🤯'
-      labels:
-          - 'breaking'
-    - title: 'Maintenance 🍦'
-      labels:
-          - 'maintenance'
+  - title: 'New Features'
+    labels:
+      - 'feature'
+      
+  - title: 'Bug Fixes'
+    labels:
+      - 'bugfix'
+      - 'bug'
+
+  - title: 'Breaking Changes'
+    labels:
+      - 'breaking'
+
+  - title: 'Maintenance'
+    labels:
+      - 'refactor'
 category-template: '### $TITLE'
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 change-title-escapes: '\<*_&'
 no-changes-template: 'No changes'
 exclude-labels:
-    - 'skip-changelog'
+  - 'skip-changelog'
 version-resolver:
-    major:
-        labels:
-            - 'breaking'
-    minor:
-        labels:
-            - 'feature'
-            - 'enhancement'
-    patch:
-        labels:
-            - 'maintenance'
-            - 'patch'
-    default: 'patch'
-template: |
-    $CHANGES
+  major:
+    labels:
+      - 'breaking'
+  minor:
+    labels:
+      - 'feature'
+  patch:
+    labels:
+      - 'refactor'
+      - 'bugfix'
+      - 'bug'
+  default: 'patch'
 
-    **Full Changelog**: https://github.com/metal-ts/fetch/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
+template: |
+  ## What’s Changed
+
+  $CHANGES
+
+  ## Contributors
+
+  $CONTRIBUTORS
+
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION

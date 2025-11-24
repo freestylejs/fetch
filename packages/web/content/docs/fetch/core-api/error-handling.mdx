@@ -1,0 +1,98 @@
+---
+title: Error Handling
+description: Strategies for managing HTTP and network errors.
+---
+
+Fetch provides structured ways to handle errors, distinguishing between **HTTP Errors** (e.g., 404, 500) and **Network Errors** (e.g., offline, DNS failure).
+
+### Error Types
+
+#### 1. HTTP Errors (`def_fetch_err_handler`)
+
+These occur when the server returns a response with a status code outside the 200-299 range.
+
+The handler receives an object with:
+-   `error`: A `FetchResponseError` containing the response details.
+-   `status`: The HTTP status code.
+
+```typescript
+f.builder()
+    .def_fetch_err_handler(async ({ error, status }) => {
+        if (status === 404) {
+            console.error('Resource not found');
+        }
+        
+        // You can read the error body
+        const errorBody = await error.response.json();
+        console.error('Server message:', errorBody.message);
+    });
+```
+
+#### 2. Network Errors (`def_unknown_err_handler`)
+
+These occur when the `fetch` call itself fails to complete, usually due to network issues.
+
+```typescript
+f.builder()
+    .def_unknown_err_handler(({ error }) => {
+        console.error('Network failure:', error);
+        // Show offline message to user
+    });
+```
+
+### Handling Strategies
+
+#### Global Handling
+
+Create a base builder with your error handlers and reuse it across your application.
+
+```typescript
+// api-client.ts
+export const baseClient = f.builder()
+    .def_url('https://api.myapp.com')
+    .def_fetch_err_handler(({ status }) => {
+        if (status === 401) {
+            // Global logout trigger
+            logout();
+        }
+    });
+
+// users.ts
+import { baseClient } from './api-client';
+
+export const getUser = baseClient
+    .def_method('GET')
+    .def_url('/users/$id')
+    .build();
+```
+
+#### Per-Request Handling
+
+You can add specific handlers to individual requests. Note that handlers are **additive**; both global and local handlers will run unless you manage them otherwise.
+
+```typescript
+const getCriticalData = baseClient
+    .def_fetch_err_handler(({ status }) => {
+        // Specific handling for this request
+        if (status === 503) {
+            retryRequest();
+        }
+    })
+    .build();
+```
+
+### Throwing vs. Returning Undefined
+
+By default, `query()` throws an error if the request fails. You can change this behavior using `def_query_mode`.
+
+```typescript
+const safeFetcher = f.builder()
+    .def_query_mode('not_throw') // Returns undefined on error
+    .build();
+
+const result = await safeFetcher.query();
+
+if (!result) {
+    console.log('Request failed, but no exception was thrown.');
+}
+```

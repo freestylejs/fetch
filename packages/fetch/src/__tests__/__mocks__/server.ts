@@ -1,6 +1,6 @@
 import { HttpResponse, http } from 'msw'
 import { BASE_URL } from './constant'
-import { type BookModel, BookRequestModel, Model } from './model'
+import { type BookModel, type BookRequestModel, Model } from './model'
 
 type UUID = string
 type DB_COLLECTION = Map<UUID, BookModel>
@@ -53,11 +53,13 @@ class BookDatabase {
     }
 
     // REST @PUT books/:id
-    public updateBook(id: UUID, book: BookModel): BookModel {
+    public updateBook(id: UUID, book: BookModel): BookModel | undefined {
         const originalBook = this.db.get(id)
+        if (!originalBook) return undefined
+
         const updatedBook = { ...originalBook, ...book }
         this.db.set(id, updatedBook)
-        return book
+        return updatedBook
     }
 }
 

@@ -1,9 +1,9 @@
 export type IncludeString = string & {}
 
-export type JSON_Supported = string | number | boolean | null
-export type JSON =
-    | Record<string, JSON_Supported>
-    | Array<JSON_Supported>
+export type JsonPrimitives = string | number | boolean | null
+export type Json =
+    | Record<string, JsonPrimitives>
+    | Array<JsonPrimitives>
     | string
     | number
     | boolean

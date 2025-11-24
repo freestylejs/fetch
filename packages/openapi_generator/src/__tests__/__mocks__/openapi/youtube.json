@@ -1,0 +1,521 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "YouTube Data API v3",
+        "version": "v3",
+        "description": "Supports core YouTube features, such as uploading videos, creating and managing playlists, searching for content, and much more.",
+        "termsOfService": "https://developers.google.com/youtube/terms/api-services-terms-of-service",
+        "contact": {
+            "name": "Google",
+            "url": "https://google.com"
+        },
+        "license": {
+            "name": "Creative Commons Attribution 3.0",
+            "url": "http://creativecommons.org/licenses/by/3.0/"
+        }
+    },
+    "servers": [
+        {
+            "url": "https://youtube.googleapis.com/",
+            "description": "Production Server"
+        }
+    ],
+    "paths": {
+        "/youtube/v3/videos": {
+            "get": {
+                "tags": ["Videos"],
+                "summary": "Retrieves a list of resources, possibly filtered.",
+                "description": "Returns a list of videos that match the API request parameters.",
+                "operationId": "youtube.videos.list",
+                "parameters": [
+                    {
+                        "name": "part",
+                        "in": "query",
+                        "description": "The part parameter specifies a comma-separated list of one or more video resource properties that the API response will include.",
+                        "required": true,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "contentDetails",
+                                    "fileDetails",
+                                    "id",
+                                    "liveStreamingDetails",
+                                    "localizations",
+                                    "player",
+                                    "processingDetails",
+                                    "recordingDetails",
+                                    "snippet",
+                                    "statistics",
+                                    "status",
+                                    "suggestions",
+                                    "topicDetails"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "Return videos with the given IDs.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "chart",
+                        "in": "query",
+                        "description": "Return the most popular videos for the specified content region and video category.",
+                        "schema": {
+                            "type": "string",
+                            "enum": ["chartUnspecified", "mostPopular"]
+                        }
+                    },
+                    {
+                        "name": "maxResults",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 50,
+                            "default": 5
+                        }
+                    },
+                    {
+                        "name": "pageToken",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VideoListResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Oauth2": [
+                            "https://www.googleapis.com/auth/youtube",
+                            "https://www.googleapis.com/auth/youtube.readonly"
+                        ]
+                    }
+                ]
+            },
+            "post": {
+                "tags": ["Videos"],
+                "summary": "Uploads a video to YouTube.",
+                "operationId": "youtube.videos.insert",
+                "parameters": [
+                    {
+                        "name": "part",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": ["snippet", "status", "player"]
+                            }
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Video"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Video uploaded successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Video"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Oauth2": [
+                            "https://www.googleapis.com/auth/youtube.upload",
+                            "https://www.googleapis.com/auth/youtube.force-ssl"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "VideoListResponse": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "type": "string",
+                        "default": "youtube#videoListResponse"
+                    },
+                    "etag": {
+                        "type": "string"
+                    },
+                    "nextPageToken": {
+                        "type": "string"
+                    },
+                    "prevPageToken": {
+                        "type": "string"
+                    },
+                    "pageInfo": {
+                        "$ref": "#/components/schemas/PageInfo"
+                    },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Video"
+                        }
+                    }
+                }
+            },
+            "PageInfo": {
+                "type": "object",
+                "properties": {
+                    "totalResults": {
+                        "type": "integer"
+                    },
+                    "resultsPerPage": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "Video": {
+                "type": "object",
+                "description": "A video resource represents a YouTube video.",
+                "properties": {
+                    "kind": {
+                        "type": "string",
+                        "default": "youtube#video"
+                    },
+                    "etag": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "snippet": {
+                        "$ref": "#/components/schemas/VideoSnippet"
+                    },
+                    "contentDetails": {
+                        "$ref": "#/components/schemas/VideoContentDetails"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/VideoStatus"
+                    },
+                    "statistics": {
+                        "$ref": "#/components/schemas/VideoStatistics"
+                    },
+                    "player": {
+                        "$ref": "#/components/schemas/VideoPlayer"
+                    }
+                }
+            },
+            "VideoSnippet": {
+                "type": "object",
+                "properties": {
+                    "publishedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "channelId": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "thumbnails": {
+                        "$ref": "#/components/schemas/ThumbnailDetails"
+                    },
+                    "channelTitle": {
+                        "type": "string"
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "categoryId": {
+                        "type": "string"
+                    },
+                    "liveBroadcastContent": {
+                        "type": "string",
+                        "enum": ["none", "upcoming", "live", "completed"]
+                    },
+                    "localized": {
+                        "$ref": "#/components/schemas/VideoLocalization"
+                    }
+                }
+            },
+            "ThumbnailDetails": {
+                "type": "object",
+                "properties": {
+                    "default": {
+                        "$ref": "#/components/schemas/Thumbnail"
+                    },
+                    "medium": {
+                        "$ref": "#/components/schemas/Thumbnail"
+                    },
+                    "high": {
+                        "$ref": "#/components/schemas/Thumbnail"
+                    },
+                    "standard": {
+                        "$ref": "#/components/schemas/Thumbnail"
+                    },
+                    "maxres": {
+                        "$ref": "#/components/schemas/Thumbnail"
+                    }
+                }
+            },
+            "Thumbnail": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "height": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "VideoStatus": {
+                "type": "object",
+                "properties": {
+                    "uploadStatus": {
+                        "type": "string",
+                        "enum": [
+                            "deleted",
+                            "failed",
+                            "processed",
+                            "rejected",
+                            "uploaded"
+                        ]
+                    },
+                    "failureReason": {
+                        "type": "string",
+                        "enum": [
+                            "codec",
+                            "conversion",
+                            "emptyFile",
+                            "invalidFile",
+                            "tooSmall",
+                            "uploadAborted"
+                        ]
+                    },
+                    "rejectionReason": {
+                        "type": "string",
+                        "enum": [
+                            "claim",
+                            "copyright",
+                            "duplicate",
+                            "inappropriate",
+                            "legal",
+                            "length",
+                            "termsOfUse",
+                            "trademark",
+                            "uploaderAccountClosed",
+                            "uploaderAccountSuspended"
+                        ]
+                    },
+                    "privacyStatus": {
+                        "type": "string",
+                        "enum": ["private", "public", "unlisted"]
+                    },
+                    "license": {
+                        "type": "string",
+                        "enum": ["creativeCommon", "youtube"]
+                    },
+                    "embeddable": {
+                        "type": "boolean"
+                    },
+                    "publicStatsViewable": {
+                        "type": "boolean"
+                    },
+                    "madeForKids": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "VideoStatistics": {
+                "type": "object",
+                "properties": {
+                    "viewCount": {
+                        "type": "string",
+                        "description": "Type is string because view counts can exceed 2^32."
+                    },
+                    "likeCount": {
+                        "type": "string"
+                    },
+                    "dislikeCount": {
+                        "type": "string"
+                    },
+                    "favoriteCount": {
+                        "type": "string"
+                    },
+                    "commentCount": {
+                        "type": "string"
+                    }
+                }
+            },
+            "VideoPlayer": {
+                "type": "object",
+                "properties": {
+                    "embedHtml": {
+                        "type": "string"
+                    },
+                    "embedHeight": {
+                        "type": "integer"
+                    },
+                    "embedWidth": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "VideoContentDetails": {
+                "type": "object",
+                "properties": {
+                    "duration": {
+                        "type": "string",
+                        "pattern": "^PT[0-9]+[M|H|S]$"
+                    },
+                    "dimension": {
+                        "type": "string"
+                    },
+                    "definition": {
+                        "type": "string",
+                        "enum": ["hd", "sd"]
+                    },
+                    "caption": {
+                        "type": "string",
+                        "enum": ["false", "true"]
+                    },
+                    "licensedContent": {
+                        "type": "boolean"
+                    },
+                    "regionRestriction": {
+                        "type": "object",
+                        "properties": {
+                            "allowed": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "blocked": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "VideoLocalization": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    }
+                }
+            },
+            "ErrorResponse": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "object",
+                        "properties": {
+                            "code": {
+                                "type": "integer"
+                            },
+                            "message": {
+                                "type": "string"
+                            },
+                            "errors": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "domain": {
+                                            "type": "string"
+                                        },
+                                        "reason": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "Oauth2": {
+                "type": "oauth2",
+                "flows": {
+                    "authorizationCode": {
+                        "authorizationUrl": "https://accounts.google.com/o/oauth2/auth",
+                        "tokenUrl": "https://accounts.google.com/o/oauth2/token",
+                        "scopes": {
+                            "https://www.googleapis.com/auth/youtube": "Manage your YouTube account",
+                            "https://www.googleapis.com/auth/youtube.readonly": "View your YouTube account",
+                            "https://www.googleapis.com/auth/youtube.upload": "Manage your YouTube videos",
+                            "https://www.googleapis.com/auth/youtubepartner-channel-audit": "View private information of your channel relevant during the audit process with a YouTube partner"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

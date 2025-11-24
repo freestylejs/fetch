@@ -1,0 +1,73 @@
+---
+title: OpenAPI Generator
+description: Generate type-safe API clients from OpenAPI specifications.
+---
+
+import { Card, Cards } from 'fumadocs-ui/components/card'
+import { TerminalIcon, FileCodeIcon, ZapIcon, ShieldCheckIcon } from 'lucide-react'
+
+## What is OpenAPI Generator?
+
+**OpenAPI Generator** is a CLI tool that transforms OpenAPI specifications into fully type-safe TypeScript API clients powered by the `@freestylejs/fetch` library.
+
+It eliminates manual API client code and keeps your client in sync with your API specification. The generated code uses Zod for runtime validation and provides complete type inference for requests and responses.
+
+## Key Features
+
+<Cards>
+    <Card
+        icon={<TerminalIcon />}
+        title="Simple CLI"
+        description="Generate clients with a single command. No configuration required."
+        href="/en/docs/openapi-generator/cli-reference"
+    />
+    <Card
+        icon={<FileCodeIcon />}
+        title="Type-Safe Output"
+        description="Generates TypeScript code with full type inference for all API operations."
+        href="/en/docs/openapi-generator/generated-code"
+    />
+    <Card
+        icon={<ZapIcon />}
+        title="Zod Validation"
+        description="Automatic runtime validation using Zod schemas for request and response data."
+        href="/en/docs/openapi-generator/validation"
+    />
+    <Card
+        icon={<ShieldCheckIcon />}
+        title="Fetch Integration"
+        description="Generated clients use the @freestylejs/fetch fluent builder API."
+        href="/en/docs/fetch"
+    />
+</Cards>
+
+## Quick Example
+
+Generate a fully typed API client from your OpenAPI specification:
+
+```bash
+npx create-freestyle-fetch generate \
+  --input ./api-spec.json \
+  --output ./src/api
+```
+
+Use the generated client in your code:
+
+```typescript
+import { api } from './api'
+
+// Fully typed request and response
+const user = await api.users.$userId.GET({
+  params: { userId: '123' }
+})
+
+// TypeScript knows the shape of `user`
+console.log(user.name, user.email)
+```
+
+## What is Next?
+
+<Cards>
+    <Card title="Getting Started" href="/en/docs/openapi-generator/getting-started" />
+    <Card title="CLI Reference" href="/en/docs/openapi-generator/cli-reference" />
+</Cards>

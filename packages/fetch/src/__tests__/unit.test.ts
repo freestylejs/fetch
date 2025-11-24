@@ -1,8 +1,8 @@
-import { Infer, t } from '@metal-box/type'
 import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
-import { TypeEqual, expectType } from 'ts-expect'
+import { expectType, type TypeEqual } from 'ts-expect'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { z } from 'zod'
 import { f } from '..'
 import { FetchPathParamsError, FetchResponseError } from '../core/error'
 import { FetchUnit, type InferFetchUnit } from '../core/fetcher/unit'
@@ -236,10 +236,10 @@ describe('FetchUnit', () => {
 
     it(label.case('should DEFINE search params shape'), () => {
         const fetchUnit = f.builder()
-        const SearchParams = t
+        const SearchParams = z
             .object({
-                name: t.string,
-                category: t.string,
+                name: z.string(),
+                category: z.string(),
             })
             .transform((e) => ({
                 name: e.name,
@@ -252,7 +252,7 @@ describe('FetchUnit', () => {
         type InjectedFetchUnit = FetchUnit<
             string,
             unknown,
-            Infer<typeof SearchParams>,
+            z.Infer<typeof SearchParams>,
             unknown,
             unknown,
             {
@@ -266,10 +266,10 @@ describe('FetchUnit', () => {
 
     it(label.case('should DEFINE body shape'), () => {
         const fetchUnit = f.builder()
-        const BookRequest = t.object({
-            name: t.string,
-            category: t.string,
-            price: t.number,
+        const BookRequest = z.object({
+            name: z.string(),
+            category: z.string(),
+            price: z.number(),
         })
 
         const result = fetchUnit.def_body(BookRequest.parse).build()
@@ -278,7 +278,7 @@ describe('FetchUnit', () => {
             string,
             unknown,
             unknown,
-            Infer<typeof BookRequest>,
+            z.Infer<typeof BookRequest>,
             unknown,
             {
                 isJsonMode: false
@@ -290,19 +290,19 @@ describe('FetchUnit', () => {
     })
 
     it(label.case('should DEFINE search params'), async () => {
-        const SearchParams = t.object({
-            name: t.string,
-            price: t.number,
+        const SearchParams = z.object({
+            name: z.string(),
+            price: z.number(),
         })
 
-        const BookResponse = t
+        const BookResponse = z
             .object({
-                data: t.object({
-                    name: t.string,
-                    price: t.string,
-                    id: t.string,
+                data: z.object({
+                    name: z.string(),
+                    price: z.string(),
+                    id: z.string(),
                 }),
-                status: t.literal('success'),
+                status: z.literal('success'),
             })
             .transform((e) => ({
                 ...e,
@@ -352,9 +352,9 @@ describe('FetchUnit', () => {
         () => {
             const fetchUnit = f.builder().def_json()
 
-            const Product = t.object({
-                name: t.string,
-                price: t.number,
+            const Product = z.object({
+                name: z.string(),
+                price: z.number(),
             })
             const result = fetchUnit
                 .def_response(({ json }) => Product.parse(json))
@@ -365,7 +365,7 @@ describe('FetchUnit', () => {
                 unknown,
                 unknown,
                 unknown,
-                Infer<typeof Product>,
+                z.Infer<typeof Product>,
                 {
                     isJsonMode: true
                     isSafeMode: false
@@ -382,9 +382,9 @@ describe('FetchUnit', () => {
         async () => {
             const fetchUnit = f.builder().def_json()
 
-            const Product = t.object({
-                name: t.string,
-                price: t.number,
+            const Product = z.object({
+                name: z.string(),
+                price: z.number(),
             })
             const result = fetchUnit
                 .def_response(async ({ json }) => {
@@ -399,7 +399,7 @@ describe('FetchUnit', () => {
                 unknown,
                 unknown,
                 unknown,
-                Infer<typeof Product>,
+                z.Infer<typeof Product>,
                 {
                     isJsonMode: true
                     isSafeMode: false
@@ -412,15 +412,15 @@ describe('FetchUnit', () => {
     )
 
     it(label.case('should QUERY json with [strict mode]'), async () => {
-        const Body = t.object({
-            name: t.string,
-            category: t.string,
-            price: t.number,
+        const Body = z.object({
+            name: z.string(),
+            category: z.string(),
+            price: z.number(),
         })
-        const ApiResponse = t.object({
+        const ApiResponse = z.object({
             data: Body,
-            status: t.union(t.literal('success'), t.literal('error')),
-            'message?': t.string,
+            status: z.union([z.literal('success'), z.literal('error')]),
+            message: z.string().optional(),
         })
         const postUnit = f
             .builder()
@@ -437,8 +437,8 @@ describe('FetchUnit', () => {
             'POST',
             unknown,
             unknown,
-            Infer<typeof Body>,
-            Infer<typeof ApiResponse>,
+            z.Infer<typeof Body>,
+            z.Infer<typeof ApiResponse>,
             {
                 isJsonMode: true
                 isSafeMode: false
@@ -452,8 +452,8 @@ describe('FetchUnit', () => {
                 {
                     method: 'POST'
                     url: 'https://unit-api/v2/books'
-                    body: Infer<typeof Body>
-                    response: Infer<typeof ApiResponse>
+                    body: z.Infer<typeof Body>
+                    response: z.Infer<typeof ApiResponse>
                     mode: {
                         isJson: true
                         isSafeFetch: false
@@ -477,13 +477,10 @@ describe('FetchUnit', () => {
     })
 
     it(label.case('should QUERY formData with [strict mode]'), async () => {
-        const BlobShape = t.custom<'Blob', Blob>(
-            'Blob',
-            (e) => e instanceof Blob
-        )
+        const BlobShape = z.custom<Blob>((e) => e instanceof Blob)
 
         const toJson = async (e: FormData) => {
-            const title = t.string.parse(e.get('name'))
+            const title = z.string().parse(e.get('name'))
             const file = e.get('file')
             const text = await BlobShape.parse(file).text()
             return {
@@ -492,11 +489,8 @@ describe('FetchUnit', () => {
             }
         }
 
-        const FormDataShape = t
-            .custom<
-                'FormData',
-                FormData
-            >('FormData', (e) => e instanceof FormData)
+        const FormDataShape = z
+            .custom<FormData>((e) => e instanceof FormData)
             .transform(toJson)
 
         const fetchUnit = f
@@ -507,7 +501,7 @@ describe('FetchUnit', () => {
             .def_url(`${BASE_URL}/books/images`)
             .def_body(BlobShape.parse)
             .def_response(async ({ response }) =>
-                FormDataShape.parse(await response.formData())
+                FormDataShape.parseAsync(await response.formData())
             )
             .build()
 

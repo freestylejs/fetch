@@ -1,0 +1,110 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Hell API",
+        "version": "6.6.6"
+    },
+    "paths": {},
+    "components": {
+        "schemas": {
+            "HellObject": {
+                "type": "object",
+                "required": ["required-key", "spaced key"],
+                "properties": {
+                    "required-key": {
+                        "type": "string"
+                    },
+                    "optional-key": {
+                        "type": "string"
+                    },
+                    "spaced key": {
+                        "type": "number"
+                    },
+                    "$special$": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "DeepNested": {
+                "type": "object",
+                "properties": {
+                    "level1": {
+                        "type": "object",
+                        "properties": {
+                            "level2": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "level3": {
+                                            "type": "string",
+                                            "enum": ["deep"]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "IntersectionHell": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HellObject"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "extra": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "UnionHell": {
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/OptionA"
+                    },
+                    {
+                        "$ref": "#/components/schemas/OptionB"
+                    }
+                ],
+                "discriminator": {
+                    "propertyName": "type",
+                    "mapping": {
+                        "A": "#/components/schemas/OptionA",
+                        "B": "#/components/schemas/OptionB"
+                    }
+                }
+            },
+            "OptionA": {
+                "type": "object",
+                "required": ["type"],
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": ["A"]
+                    },
+                    "a": {
+                        "type": "string"
+                    }
+                }
+            },
+            "OptionB": {
+                "type": "object",
+                "required": ["type"],
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": ["B"]
+                    },
+                    "b": {
+                        "type": "number"
+                    }
+                }
+            }
+        }
+    }
+}

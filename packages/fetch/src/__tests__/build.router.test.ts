@@ -1,10 +1,10 @@
 import { setupServer } from 'msw/node'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { api } from './__mocks__/client'
-import {
-    type BookModel,
-    type BookModelList,
-    type BookRequestModel,
+import type {
+    BookModel,
+    BookModelList,
+    BookRequestModel,
 } from './__mocks__/model'
 import { bookServer } from './__mocks__/server'
 import { label } from './utils/test.label'
