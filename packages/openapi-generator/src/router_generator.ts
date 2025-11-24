@@ -1,13 +1,9 @@
-import { camelCase, upperFirst } from 'lodash'
 import type { OpenAPIV3_1 } from 'openapi-types'
 import { SchemaGenerator } from './schema_generator'
+import { toPascalCase } from './utils'
 
 function isReferenceObject(obj: any): obj is OpenAPIV3_1.ReferenceObject {
     return obj && '$ref' in obj
-}
-
-function toPascalCase(str: string): string {
-    return upperFirst(camelCase(str))
 }
 
 function generateBuilder(
@@ -20,7 +16,7 @@ function generateBuilder(
     const allParameters = [...pathParams]
     if (operation.parameters) {
         const pathParamNames = new Set(
-            pathParams.map((p) => (!isReferenceObject(p) ? p.name : null))
+            pathParams.map((p) => (isReferenceObject(p) ? null : p.name))
         )
         operation.parameters.forEach((opParam) => {
             if (
@@ -141,7 +137,7 @@ export function generateRouter(
     const routerObject = `{\n${buildRouterObject(parsedPaths)}\n}`
     const baseUrl = spec.servers && spec.servers[0] ? spec.servers[0].url : ''
 
-    return `import { f } from '@metal-box/fetch';
+    return `import { f } from '@freestylejs/fetch';
 import { z } from 'zod';
 import * as Model from './models';
 
