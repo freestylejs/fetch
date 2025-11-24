@@ -1,4 +1,4 @@
 {
     "title": "Overview",
-    "pages": ["index", "fetch", "openapi-generator"]
+    "pages": ["index", "fetch", "create-freestyle-fetch"]
 }
