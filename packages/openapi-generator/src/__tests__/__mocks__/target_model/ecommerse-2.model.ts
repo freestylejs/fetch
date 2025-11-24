@@ -1,13 +1,13 @@
 import { z } from 'zod'
 
 export const User = z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     username: z.string().regex(/^[a-zA-Z0-9_-]{3,16}$/),
-    email: z.string().email(),
+    email: z.email(),
     profile: z
         .object({
             fullName: z.string().optional(),
-            joinDate: z.string().datetime().optional(),
+            joinDate: z.iso.datetime().optional(),
         })
         .optional(),
     legacyId: z.number().int().optional(),
@@ -25,8 +25,8 @@ export type ProductInputModel = z.infer<typeof ProductInput>
 
 export const Product = ProductInput.and(
     z.object({
-        id: z.string().uuid().optional(),
-        imageUrl: z.string().url().optional(),
+        id: z.uuid().optional(),
+        imageUrl: z.url().optional(),
         stock: z.number().int().optional(),
     })
 )
@@ -42,7 +42,12 @@ export const PaginatedResponse = z.object({
 
 export type PaginatedResponseModel = z.infer<typeof PaginatedResponse>
 
-export const PaginatedProductResponse = PaginatedResponse
+export const PaginatedProductResponse = z.object({
+    page: z.number().int().optional(),
+    pageSize: z.number().int().optional(),
+    total: z.number().int().optional(),
+    items: z.array(Product).optional(),
+})
 
 export type PaginatedProductResponseModel = z.infer<
     typeof PaginatedProductResponse
@@ -59,7 +64,7 @@ export type CreditCardModel = z.infer<typeof CreditCard>
 
 export const PayPal = z.object({
     methodType: z.enum(['paypal_account']),
-    email: z.string().email(),
+    email: z.email(),
 })
 
 export type PayPalModel = z.infer<typeof PayPal>
@@ -72,7 +77,7 @@ export const PaymentMethod = z.discriminatedUnion('methodType', [
 export type PaymentMethodModel = z.infer<typeof PaymentMethod>
 
 export const CallbackPayload = z.object({
-    orderId: z.string().uuid().optional(),
+    orderId: z.uuid().optional(),
     status: z.enum(['PROCESSED', 'FAILED']).optional(),
     detail: z.string().optional(),
 })
@@ -80,9 +85,9 @@ export const CallbackPayload = z.object({
 export type CallbackPayloadModel = z.infer<typeof CallbackPayload>
 
 export const InventoryUpdatePayload = z.object({
-    productId: z.string().uuid().optional(),
+    productId: z.uuid().optional(),
     newStockLevel: z.number().int().optional(),
-    timestamp: z.string().datetime().optional(),
+    timestamp: z.iso.datetime().optional(),
 })
 
 export type InventoryUpdatePayloadModel = z.infer<typeof InventoryUpdatePayload>

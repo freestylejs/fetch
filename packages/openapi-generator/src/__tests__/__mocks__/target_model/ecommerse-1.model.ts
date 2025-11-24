@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const Product = z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string(),
     productType: z.string(),
     price: z.number().min(0),
@@ -11,7 +11,7 @@ export type ProductModel = z.infer<typeof Product>
 
 export const ElectronicsProduct = Product.and(
     z.object({
-        specs: z.object({}).optional(),
+        specs: z.record(z.string(), z.any()).optional(),
     })
 )
 
@@ -27,7 +27,7 @@ export const ClothingProduct = Product.and(
 export type ClothingProductModel = z.infer<typeof ClothingProduct>
 
 export const Order = z.object({
-    id: z.string().uuid().optional(),
+    id: z.uuid().optional(),
     userId: z.string().optional(),
     products: z.array(Product).optional(),
     total: z.number().optional(),

@@ -1,0 +1,44 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Hell Vol 2 API",
+        "version": "1.0.0"
+    },
+    "paths": {},
+    "components": {
+        "schemas": {
+            "StringDictionary": {
+                "type": "object",
+                "additionalProperties": {
+                    "type": "string"
+                }
+            },
+            "ObjectWithCatchall": {
+                "type": "object",
+                "required": ["id"],
+                "properties": {
+                    "id": { "type": "string" }
+                },
+                "additionalProperties": {
+                    "type": "integer"
+                }
+            },
+            "SimpleUnion": {
+                "oneOf": [{ "type": "string" }, { "type": "boolean" }]
+            },
+            "AnyOfUnion": {
+                "anyOf": [
+                    { "$ref": "#/components/schemas/StringDictionary" },
+                    { "type": "number" }
+                ]
+            },
+            "ConstString": {
+                "type": "string",
+                "const": "FIXED_VALUE"
+            },
+            "NullableString": {
+                "type": ["string", "null"]
+            }
+        }
+    }
+}

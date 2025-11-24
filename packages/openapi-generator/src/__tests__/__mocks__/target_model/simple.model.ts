@@ -5,7 +5,7 @@ export const Book = z.object({
     name: z.string(),
     price: z.number(),
     category: z.string(),
-    publish_date: z.string().datetime(),
+    publish_date: z.iso.datetime(),
 })
 
 export type BookModel = z.infer<typeof Book>
