@@ -13,7 +13,7 @@ const Card = React.forwardRef<
     <div
         data-slot="card"
         className={cn(
-            'glass-1 group h-fit relative flex w-full flex-col gap-6 overflow-hidden rounded-xl border border-zinc-100 p-6 text-card-foreground transition-all duration-300 hover:border-zinc-200 hover:bg-transparent dark:border-zinc-900 hover:dark:border-zinc-600',
+            'glass-1 group relative flex h-fit w-full flex-col gap-6 overflow-hidden rounded-xl border border-zinc-100 p-6 text-card-foreground transition-all duration-300 hover:border-zinc-200 hover:bg-transparent dark:border-zinc-900 hover:dark:border-zinc-600',
             className
         )}
         ref={ref}

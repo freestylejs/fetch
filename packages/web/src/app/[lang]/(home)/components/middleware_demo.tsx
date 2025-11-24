@@ -1,4 +1,4 @@
-// biome-ignore format: manual indentation needed for code preview
+/** biome-ignore-all lint/style/useConsistentCurlyBraces: <component> */
 
 'use client'
 
@@ -27,7 +27,7 @@ export const MiddlewareDemo = () => {
     }
 
     return (
-        <div className="grid size-full grid-cols-1 gap-6 p-6 md:grid-cols-2 select-none">
+        <div className="grid size-full select-none grid-cols-1 gap-6 p-6 md:grid-cols-2">
             {/* Left: Pipeline Visual */}
             <div className="flex flex-col items-center justify-center gap-8">
                 <div className="relative flex items-center gap-4">
@@ -43,13 +43,13 @@ export const MiddlewareDemo = () => {
                         >
                             <div className="size-8 rounded-full bg-zinc-100 dark:bg-zinc-800" />
                         </div>
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                        <div className="font-bold text-[10px] text-zinc-400 uppercase tracking-wider">
                             Client
                         </div>
                     </div>
 
                     {/* Pipeline */}
-                    <div className="relative flex w-48 items-center justify-center gap-1 rounded-xl border border-dashed border-zinc-200 bg-zinc-50/50 p-2 dark:border-zinc-800 dark:bg-zinc-900/20">
+                    <div className="relative flex w-48 items-center justify-center gap-1 rounded-xl border border-zinc-200 border-dashed bg-zinc-50/50 p-2 dark:border-zinc-800 dark:bg-zinc-900/20">
                         {/* The traveling dot */}
                         <div
                             className={cn(
@@ -57,16 +57,16 @@ export const MiddlewareDemo = () => {
                                 stage === 0
                                     ? 'left-2 opacity-0'
                                     : stage === 1
-                                      ? 'left-[30%] bg-blue-500 shadow-blue-500/50 scale-125 opacity-100'
+                                      ? 'left-[30%] scale-125 bg-blue-500 opacity-100 shadow-blue-500/50'
                                       : stage === 2
-                                        ? 'left-[70%] bg-emerald-500 shadow-emerald-500/50 scale-125 opacity-100'
+                                        ? 'left-[70%] scale-125 bg-emerald-500 opacity-100 shadow-emerald-500/50'
                                         : stage === 3
                                           ? 'left-[95%] bg-zinc-500 opacity-0'
                                           : stage === 4
-                                            ? 'left-[70%] bg-emerald-500 shadow-emerald-500/50 scale-125 opacity-100'
+                                            ? 'left-[70%] scale-125 bg-emerald-500 opacity-100 shadow-emerald-500/50'
                                             : // Returning
                                               stage === 5
-                                              ? 'left-[30%] bg-blue-500 shadow-blue-500/50 scale-125 opacity-100'
+                                              ? 'left-[30%] scale-125 bg-blue-500 opacity-100 shadow-blue-500/50'
                                               : stage === 6
                                                 ? 'left-2 bg-zinc-500 opacity-0'
                                                 : // Disappear at client
@@ -78,13 +78,13 @@ export const MiddlewareDemo = () => {
                             className={cn(
                                 'z-10 flex h-12 w-12 flex-col items-center justify-center gap-1 rounded-lg border bg-white shadow-sm transition-all duration-300 dark:bg-zinc-900',
                                 stage === 1
-                                    ? 'border-blue-500 shadow-blue-500/20 scale-110'
+                                    ? 'scale-110 border-blue-500 shadow-blue-500/20'
                                     : stage === 5
-                                      ? 'border-blue-500 shadow-blue-500/20 scale-110'
+                                      ? 'scale-110 border-blue-500 shadow-blue-500/20'
                                       : 'border-zinc-200 dark:border-zinc-800'
                             )}
                         >
-                            <span className="text-[8px] font-bold text-zinc-500">
+                            <span className="font-bold text-[8px] text-zinc-500">
                                 AUTH
                             </span>
                         </div>
@@ -93,13 +93,13 @@ export const MiddlewareDemo = () => {
                             className={cn(
                                 'z-10 flex h-12 w-12 flex-col items-center justify-center gap-1 rounded-lg border bg-white shadow-sm transition-all duration-300 dark:bg-zinc-900',
                                 stage === 2
-                                    ? 'border-emerald-500 shadow-emerald-500/20 scale-110'
+                                    ? 'scale-110 border-emerald-500 shadow-emerald-500/20'
                                     : stage === 4
-                                      ? 'border-emerald-500 shadow-emerald-500/20 scale-110'
+                                      ? 'scale-110 border-emerald-500 shadow-emerald-500/20'
                                       : 'border-zinc-200 dark:border-zinc-800'
                             )}
                         >
-                            <span className="text-[8px] font-bold text-zinc-500">
+                            <span className="font-bold text-[8px] text-zinc-500">
                                 LOG
                             </span>
                         </div>
@@ -117,7 +117,7 @@ export const MiddlewareDemo = () => {
                         >
                             <div className="size-8 rounded bg-zinc-100 dark:bg-zinc-800" />
                         </div>
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                        <div className="font-bold text-[10px] text-zinc-400 uppercase tracking-wider">
                             Server
                         </div>
                     </div>
@@ -126,58 +126,58 @@ export const MiddlewareDemo = () => {
                 <div className="h-6">
                     <span
                         className={cn(
-                            'text-xs font-medium transition-all duration-300',
+                            'font-medium text-xs transition-all duration-300',
                             stage === 1
                                 ? 'text-blue-500 opacity-100'
-                                : 'opacity-0 absolute'
+                                : 'absolute opacity-0'
                         )}
                     >
                         → Request Phase: Add Headers
                     </span>
                     <span
                         className={cn(
-                            'text-xs font-medium transition-all duration-300',
+                            'font-medium text-xs transition-all duration-300',
                             stage === 2
                                 ? 'text-emerald-500 opacity-100'
-                                : 'opacity-0 absolute'
+                                : 'absolute opacity-0'
                         )}
                     >
                         → Request Phase: Log Start
                     </span>
                     <span
                         className={cn(
-                            'text-xs font-medium transition-all duration-300',
+                            'font-medium text-xs transition-all duration-300',
                             stage === 3
                                 ? 'text-amber-500 opacity-100'
-                                : 'opacity-0 absolute'
+                                : 'absolute opacity-0'
                         )}
                     >
                         Processing...
                     </span>
                     <span
                         className={cn(
-                            'text-xs font-medium transition-all duration-300',
+                            'font-medium text-xs transition-all duration-300',
                             stage === 4
                                 ? 'text-emerald-500 opacity-100'
-                                : 'opacity-0 absolute'
+                                : 'absolute opacity-0'
                         )}
                     >
                         ← Response Phase: Log End
                     </span>
                     <span
                         className={cn(
-                            'text-xs font-medium transition-all duration-300',
+                            'font-medium text-xs transition-all duration-300',
                             stage === 5
                                 ? 'text-blue-500 opacity-100'
-                                : 'opacity-0 absolute'
+                                : 'absolute opacity-0'
                         )}
                     >
                         ← Response Phase: Verify
                     </span>
                     <span
                         className={cn(
-                            'text-xs font-medium text-green-500 transition-all duration-300',
-                            stage === 6 ? 'opacity-100' : 'opacity-0 absolute'
+                            'font-medium text-green-500 text-xs transition-all duration-300',
+                            stage === 6 ? 'opacity-100' : 'absolute opacity-0'
                         )}
                     >
                         ✓ Request Complete
@@ -187,7 +187,7 @@ export const MiddlewareDemo = () => {
                 <button
                     onClick={run}
                     disabled={stage !== 0}
-                    className="rounded-full bg-zinc-900 px-6 py-2 text-xs font-bold text-white transition-all hover:scale-105 hover:bg-zinc-700 disabled:scale-100 disabled:opacity-50 dark:bg-zinc-100 dark:text-black"
+                    className="rounded-full bg-zinc-900 px-6 py-2 font-bold text-white text-xs transition-all hover:scale-105 hover:bg-zinc-700 disabled:scale-100 disabled:opacity-50 dark:bg-zinc-100 dark:text-black"
                 >
                     {stage === 0
                         ? 'Execute Request'
@@ -198,7 +198,7 @@ export const MiddlewareDemo = () => {
             </div>
 
             {/* Right: Code Sync Visual */}
-            <div className="flex flex-col justify-center gap-2 rounded-xl border border-zinc-200 bg-zinc-900 p-4 font-mono text-xs text-zinc-400 shadow-inner dark:border-zinc-800 no-scrollbar overflow-auto max-h-[320px] custom-scrollbar">
+            <div className="no-scrollbar custom-scrollbar flex max-h-[320px] flex-col justify-center gap-2 overflow-auto rounded-xl border border-zinc-200 bg-zinc-900 p-4 font-mono text-xs text-zinc-400 shadow-inner dark:border-zinc-800">
                 <div className="pt-10">
                     <span className="text-purple-400">const</span>{' '}
                     <span className="text-blue-400">middleware</span> ={' '}
@@ -212,7 +212,7 @@ export const MiddlewareDemo = () => {
                     className={cn(
                         'transition-opacity duration-300',
                         stage === 1 || stage === 5
-                            ? 'opacity-100 bg-blue-500/10 -mx-2 px-2 rounded'
+                            ? '-mx-2 rounded bg-blue-500/10 px-2 opacity-100'
                             : 'opacity-40'
                     )}
                 >
@@ -223,7 +223,7 @@ export const MiddlewareDemo = () => {
                     <div
                         className={cn(
                             'pl-4 transition-colors duration-300',
-                            stage === 1 && 'text-blue-300 font-bold'
+                            stage === 1 && 'font-bold text-blue-300'
                         )}
                     >
                         req.headers.set(...){' '}
@@ -236,7 +236,7 @@ export const MiddlewareDemo = () => {
                     <div
                         className={cn(
                             'pl-4 transition-colors duration-300',
-                            stage === 5 && 'text-blue-300 font-bold'
+                            stage === 5 && 'font-bold text-blue-300'
                         )}
                     >
                         <span className="text-purple-400">return</span> res{' '}
@@ -256,7 +256,7 @@ export const MiddlewareDemo = () => {
                     className={cn(
                         'transition-opacity duration-300',
                         stage === 2 || stage === 4
-                            ? 'opacity-100 bg-emerald-500/10 -mx-2 px-2 rounded'
+                            ? '-mx-2 rounded bg-emerald-500/10 px-2 opacity-100'
                             : 'opacity-40'
                     )}
                 >
@@ -267,7 +267,7 @@ export const MiddlewareDemo = () => {
                     <div
                         className={cn(
                             'pl-4 transition-colors duration-300',
-                            stage === 2 && 'text-emerald-300 font-bold'
+                            stage === 2 && 'font-bold text-emerald-300'
                         )}
                     >
                         console.log('Start'){' '}
@@ -280,7 +280,7 @@ export const MiddlewareDemo = () => {
                     <div
                         className={cn(
                             'pl-4 transition-colors duration-300',
-                            stage === 4 && 'text-emerald-300 font-bold'
+                            stage === 4 && 'font-bold text-emerald-300'
                         )}
                     >
                         console.log('End'){' '}
