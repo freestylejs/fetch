@@ -36,6 +36,7 @@ export const Order = z.object({
 
 export type OrderModel = z.infer<typeof Order>
 
+// biome-ignore lint/suspicious/noShadowRestrictedNames: <generated>
 export const Error = z.object({
     code: z.number().int().optional(),
     message: z.string().optional(),
