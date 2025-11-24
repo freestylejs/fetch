@@ -1,26 +1,25 @@
 {
     "$schema": "https://turbo.build/schema.json",
     "ui": "tui",
+    "concurrency": "10",
     "tasks": {
-        "build": {
-            "dependsOn": ["^build"],
-            "outputs": [".next/**", "!.next/cache/**", "dist/**"]
-        },
-        "test": {
-            "dependsOn": ["^build"],
-            "outputs": []
-        },
-        "lint": {
-            "outputs": []
-        },
         "dev": {
-            "cache": false
+            "cache": true,
+            "persistent": true
+        },
+        "build": {
+            "cache": false,
+            "persistent": false,
+            "dependsOn": ["^build"],
+            "outputs": ["dist/**"]
         },
         "start": {
-            "cache": false
+            "cache": true
         },
-        "clean": {
-            "cache": false
+
+        "ts:typecheck": {
+            "outputs": [],
+            "dependsOn": ["^ts:typecheck"]
         }
     }
 }
