@@ -3,7 +3,6 @@ name: Feature request
 about: Suggest an idea for this project
 title: '[feature-request] Write your features'
 labels: feature request
-assignees: danpacho
 ---
 
 <!---
@@ -17,20 +16,16 @@ Please read the following before submitting:
 
 Closes # <!-- Github issue # here -->
 
-## 📝 Description
+## 1. Feature description
 
-> Add a brief description
+> What does this feature do? (Fix/Feature/Bugfix/Refactor)
 
-## 💪 Current behavior
+## 2. Changes
 
-> Please describe the current behavior that you are modifying
+> What it changes were made?
 
-## 🦾 New behavior
-
-> Please describe the behavior or changes this PR adds
-
-## 💣 Breaking change (y/n):
+## 3. Breaking change (y/n):
 
 <!-- If Yes, please describe the impact and migration path for existing users. -->
 
-## 📝 Additional Information
+## 4. Additional Information(context, links, etc.)

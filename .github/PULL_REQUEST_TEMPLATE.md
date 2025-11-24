@@ -1,19 +1,27 @@
-## Description
+## 1. Description
 
-Please provide a meaningful description of what this change will do, or is for. Bonus points for including links to related issues, other PRs, or technical references.
+> What does this PR do? (Fix/Feature/Bugfix/Refactor)
 
-Note that by _not_ including a description, you are asking reviewers to do extra work to understand the context of this change, which may lead to your PR taking much longer to review, or result in it not being reviewed at all.
+## 2. Changes
 
-## Type of Change
+> What it changes were made?
+
+## 3. Breaking change (y/n):
+
+<!-- If Yes, please describe the impact and migration path for existing users. -->
+
+## 4. Additional Information(context, links, etc.)
+
+## 5. Type of Change
 
 -   [ ] Bug Fix
--   [ ] Enhancement
--   [ ] Breaking API Changes
 -   [ ] Refactor
+-   [ ] Enhancement
 -   [ ] Documentation
+-   [ ] Breaking API Changes
 -   [ ] Other (please describe)
 
-## Checklist
+## 6. Checklist
 
 -   [ ] I have verified this change is not present in other open pull requests
 -   [ ] Existing issues have been referenced (where applicable)

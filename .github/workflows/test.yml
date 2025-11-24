@@ -1,35 +1,35 @@
-name: Test code
+name: CI
 
 on:
-    push:
-        branches: ['**']
-    pull_request:
-        branches: ['**']
+  push:
+    branches: ["**"]
 
 jobs:
-    total-test:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v3
-              name: Checkout
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        name: Checkout
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 20
+      - uses: actions/setup-node@v3
+        name: Setup Node.js
+        with:
+          node-version: 22
 
-            - uses: pnpm/action-setup@v2
-              name: Install pnpm
-              id: pnpm-install
-              with:
-                  version: 9
-                  run_install: true
+      - uses: pnpm/action-setup@v4
+        name: Setup PNPM
+        with:
+          # Skip the default install so we can do our own
+          run_install: false
 
-            - name: Format checking
-              run: pnpm prettier && pnpm eslint
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
 
-            - name: Build testing for core
-              run: pnpm build
+      - name: Format checking
+        run: pnpm check
 
-            - name: Unit testing
-              run: pnpm test
+      - name: Build
+        run: pnpm build
+
+      - name: Test
+        run: pnpm test
