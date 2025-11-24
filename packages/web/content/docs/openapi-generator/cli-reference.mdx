@@ -1,0 +1,175 @@
+---
+title: CLI Reference
+description: Complete reference for the OpenAPI Generator command-line interface.
+---
+
+## Commands
+
+The OpenAPI Generator provides a single `generate` command for creating API clients.
+
+### `generate`
+
+Generate a type-safe API client from an OpenAPI specification.
+
+```bash
+openapi-generator generate [options]
+```
+
+## Options
+
+| Option | Alias | Type | Required | Description |
+| ------ | ----- | ---- | -------- | ----------- |
+| `--input <path>` | `-i` | string | Yes | Path to the OpenAPI specification file (JSON or YAML). The generator automatically detects the format based on the file extension. |
+
+| `--output <dir>` | `-o` | string | Yes | Directory where generated files will be saved |
+
+> **Note:** Both `.json` and `.yaml`/`.yml` files are supported. No additional flags are required.
+## Examples
+
+### Basic Generation
+
+Generate client files from a local specification:
+
+```bash
+openapi-generator generate \
+  --input ./api-spec.yaml \
+  --output ./src/api
+```
+
+### Using Relative Paths
+
+Paths are resolved relative to the current working directory:
+
+```bash
+openapi-generator generate \
+  -i ../specs/api.json \
+  -o ./generated
+```
+
+### With npx
+
+Run the generator without installation:
+
+```bash
+npx @freestylejs/openapi-generator generate \
+  --input ./openapi.json \
+  --output ./src/generated
+```
+
+## Output Files
+
+The `generate` command creates three files in the output directory:
+
+### `models.ts`
+
+Contains Zod schemas for all components defined in your OpenAPI specification:
+
+```typescript
+import { z } from 'zod'
+
+export const User = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.email()
+})
+
+export type UserModel = z.infer<typeof User>
+```
+
+### `api.ts`
+
+Contains the type-safe router with all API endpoints:
+
+```typescript
+import { f } from '@freestylejs/fetch'
+import { z } from 'zod'
+import * as Model from './models'
+
+export const api = f.router('https://api.example.com', {
+  users: {
+    $userId: {
+      GET: f.builder()
+        .def_json()
+        .def_response(async ({ json }) => Model.User.parse(await json()))
+    }
+  }
+})
+```
+
+### `index.ts`
+
+Re-exports all generated code for convenience:
+
+```typescript
+export * from './api'
+export * from './models'
+```
+
+## Error Handling
+
+The CLI provides clear error messages for common issues:
+
+### Invalid Specification
+
+If the OpenAPI file is invalid or cannot be parsed:
+
+```bash
+Error: Failed to parse OpenAPI specification
+  File: ./api-spec.yaml
+  Reason: Invalid YAML syntax at line 42
+```
+
+### Missing File
+
+If the input file does not exist:
+
+```bash
+Error: Input file not found
+  Path: ./api-spec.json
+```
+
+### Output Directory Issues
+
+The generator creates the output directory if it doesn't exist. Existing files are overwritten.
+
+## Best Practices
+
+### Version Control
+
+Add generated files to `.gitignore` and regenerate them during your build process:
+
+```bash
+# .gitignore
+src/generated/
+```
+
+```json
+{
+  "scripts": {
+    "generate": "openapi-generator generate -i ./spec.json -o ./src/generated",
+    "prebuild": "npm run generate"
+  }
+}
+```
+
+### CI/CD Integration
+
+Integrate generation into your CI/CD pipeline:
+
+```yaml
+# .github/workflows/build.yml
+steps:
+  - name: Generate API Client
+    run: |
+      npx @freestylejs/openapi-generator generate \
+        --input ./openapi.json \
+        --output ./src/generated
+  
+  - name: Build Application
+    run: npm run build
+```
+
+## Related
+
+- [Getting Started](/en/docs/openapi-generator/getting-started) - Installation and basic usage
+- [Generated Code](/en/docs/openapi-generator/generated-code) - Understanding the output
