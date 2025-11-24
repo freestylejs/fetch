@@ -1,5 +1,5 @@
 {
-    "openapi": "3.1.0",
+    "openapi": "3.0.0",
     "info": {
         "title": "Comprehensive Real-World E-Commerce API",
         "summary": "An advanced API for managing an online store, including products, orders, users, payments, and analytics.",
