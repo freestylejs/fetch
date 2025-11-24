@@ -1,38 +1,110 @@
-<!-- # How to Contribute 🧐
+# Contributing
 
-Thanks for your interest in contributing to tailwindest package :)! Here are a few general guidelines on contributing and
-reporting bugs that I ask you to review. Following these guidelines helps to communicate that you respect the time of the contributors managing and developing this open source project.
+Thanks for your interest in contributing to Metal-TS. We're happy to have you here.
 
-## Reporting Issues 🌎
+Please take a moment to review this document before submitting your first pull request. We also strongly recommend that you check for open issues and pull requests to see if someone else is working on something similar.
 
-Before reporting a new issue, please ensure that the issue was not already reported or fixed by searching through issues list
+If you need any help, feel free to reach out to us by opening an issue.
 
-When creating a new issue, please be sure to include a **title and clear description**, as much relevant information as
-possible, and, if possible, a test case.
+## About this repository
 
-## Sending Pull Requests 🔮
+This repository is a monorepo.
 
-Before sending a new pull request, take a look at existing pull requests and issues to see if the proposed change or fix has been discussed in the past, or if the change was already implemented but not yet released.
+- We use [pnpm](https://pnpm.io) and [`workspaces`](https://pnpm.io/workspaces) for development.
+- We use [Turborepo](https://turbo.build/repo) as our build system.
+- We use [changesets](https://github.com/changesets/changesets) for managing releases.
 
-We expect new pull requests to include `test` code for any affected behavior, and, as we follow semantic versioning, we may reserve breaking changes until the next major version release.
+## Structure
 
-### Setup the project before contributing 🥽
+This repository is structured as follows:
 
-#### Prerequisites
+```
+packages
+├── fetch
+├── openapi-generator
+└── web
+```
 
--   [Node.js](https://nodejs.org) >= `v18`
--   [pnpm](https://pnpm.io/)
+| Path | Description |
+| --- | --- |
+| `packages/fetch` | The core fetcher library. |
+| `packages/openapi-generator` | OpenAPI generator for the fetcher. |
+| `packages/web` | The `Next.js` application for the documentation website. |
 
-### Project Structure 📖
+## Development
 
-## Other Ways to Contribute 😎
+### Fork this repo
 
-We welcome anyone that wants to contribute to tailwindest to triage and reply to open issues to help troubleshoot and fix existing bugs.
-Here is what you can do:
+You can fork this repo by clicking the fork button in the top right corner of this page.
 
--   Help ensure that existing issues follow the recommendations from the _[Reporting Issues](#reporting-issues-🌎)_ section,
-    providing feedback to the issue's author on what might be missing, instructions and code samples.
--   Review existing pull requests, and testing patches against real existing applications that use Rainbow Sprinkles.
--   Write a test, or add a missing test case to an existing test.
+### Clone on your local machine
 
-Thanks again for your interest on contributing to tailwindest project 🦦! -->
+```bash
+git clone https://github.com/freestylejs/fetch.git
+```
+
+### Navigate to project directory
+
+```bash
+cd fetch
+```
+
+### Create a new Branch
+
+```bash
+git checkout -b {new-branch}
+```
+
+### Install dependencies
+
+```bash
+pnpm install
+```
+
+### Start development
+
+```bash
+pnpm dev
+```
+
+#### Run a workspace
+
+You can use the `pnpm --filter=[WORKSPACE]` command to start the development process for a workspace.
+
+> Examples
+
+1. To run the documentation website:
+
+```bash
+pnpm --filter=@freestylejs/fetch-web dev
+```
+
+2. To work on the fetch package in watch mode:
+
+```bash
+pnpm --filter=@freestylejs/fetch dev
+```
+
+## Documentation
+
+The documentation for this project is located in the `web` workspace. You can run the documentation locally by running the following command:
+
+```bash
+pnpm --filter=@freestylejs/fetch-web dev
+```
+
+Documentation is written using [MDX](https://mdxjs.com). You can find the documentation files in the `packages/web/content/docs` directory.
+
+## Commit Convention
+
+Check [commit convention](./assets/commit.md).
+
+## Testing
+
+Tests are written using [Vitest](https://vitest.dev). You can run all the tests from the root of the repository.
+
+```bash
+pnpm test
+```
+
+Please ensure that the tests are passing when submitting a pull request. If you're adding new features, please include tests.
