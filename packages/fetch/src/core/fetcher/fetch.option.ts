@@ -1,3 +1,4 @@
+import type { Middleware } from '../../utils/middleware'
 import type {
     FetchHeader,
     FetchMethod,
@@ -17,6 +18,7 @@ export interface FetchCommonConfiguration {
     keepalive?: FetchOption['keepalive']
     window?: FetchOption['window']
     priority?: FetchOption['priority']
+    middleware?: Array<Middleware>
 }
 
 export class FetchOptionStore {
