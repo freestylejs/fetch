@@ -1,33 +1,33 @@
 ---
 title: Getting Started
-description: Install and use the OpenAPI Generator to create type-safe API clients.
+description: Install and use the CLI to create type-safe API clients.
 ---
 
 ## Installation
 
-Install the OpenAPI Generator package in your project:
+1. Install the `create-freestyle-fetch` package in your project:
 
-```bash
-npm install --save-dev create-freestyle-fetch
-```
+  ```bash
+  npm install --save-dev create-freestyle-fetch
+  ```
 
-Or use it directly with `npx` without installation:
+2. Or use it directly with `npx` **without installation**:
 
-```bash
-npx create-freestyle-fetch generate --input ./spec.yaml --output ./src/api
-```
+  ```bash
+  npx create-freestyle-fetch generate --input ./spec.yaml --output ./src/api
+  ```
 
 ## Prerequisites
 
 Before using the OpenAPI Generator, ensure you have:
 
-- **Node.js 18+** installed on your system
-- An **Open API 3.1 specification file** (JSON or YAML format)
+- **Node.js >= 18.0.0** installed on your system
+- An **Open API >= 3.0 specification file** (`JSON` or `YAML` format supported.)
 - The **@freestylejs/fetch** library installed in your project (added automatically as a dependency)
 
 ## Basic Usage
 
-### Generate Your First Client
+### A. Generate Your First Client
 
 Create an API client from your OpenAPI specification:
 
@@ -39,11 +39,11 @@ npx create-freestyle-fetch generate \
 
 This command generates three files in the output directory:
 
-- **`models.ts`** - Zod schemas for all data types
+- **`models.ts`** - **Zod** schemas for all data types
 - **`api.ts`** - Type-safe router with all API endpoints
 - **`index.ts`** - Re-exports for convenient imports
 
-### Use the Generated Client
+### B. Use the Generated Client
 
 Import and use the generated API client in your application:
 
@@ -77,7 +77,7 @@ const posts = await api.posts.GET({
 
 After generation, your project will have:
 
-```
+```bash
 your-project/
 ├── src/
 │   ├── generated/

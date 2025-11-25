@@ -1,15 +1,15 @@
 ---
 title: CLI Reference
-description: Complete reference for the OpenAPI Generator command-line interface.
+description: Complete reference for the create-freestyle-fetch command-line interface.
 ---
 
 ## Commands
 
-The OpenAPI Generator provides a single `generate` command for creating API clients.
+The `create-freestyle-fetch` provides a single `generate` command for creating API clients.
 
 ### `generate`
 
-Generate a type-safe API client from an OpenAPI specification.
+Generate a type-safe API client from an **OpenAPI** specification.
 
 ```bash
 create-freestyle-fetch generate [options]
@@ -24,9 +24,10 @@ create-freestyle-fetch generate [options]
 | `--output <dir>` | `-o` | string | Yes | Directory where generated files will be saved |
 
 > **Note:** Both `.json` and `.yaml`/`.yml` files are supported. No additional flags are required.
+
 ## Examples
 
-### Basic Generation
+### A. Basic Generation
 
 Generate client files from a local specification:
 
@@ -36,7 +37,7 @@ create-freestyle-fetch generate \
   --output ./src/api
 ```
 
-### Using Relative Paths
+### B. Using Relative Paths
 
 Paths are resolved relative to the current working directory:
 
@@ -46,7 +47,7 @@ create-freestyle-fetch generate \
   -o ./generated
 ```
 
-### With npx
+### C. With `npx`
 
 Run the generator without installation:
 
@@ -60,9 +61,9 @@ npx create-freestyle-fetch generate \
 
 The `generate` command creates three files in the output directory:
 
-### `models.ts`
+### A. `models.ts`
 
-Contains Zod schemas for all components defined in your OpenAPI specification:
+Contains **Zod schemas** for all components defined in your OpenAPI specification:
 
 ```typescript
 import { z } from 'zod'
@@ -76,9 +77,9 @@ export const User = z.object({
 export type UserModel = z.infer<typeof User>
 ```
 
-### `api.ts`
+### B. `api.ts`
 
-Contains the type-safe router with all API endpoints:
+Contains the **type-safe router** with all API endpoints:
 
 ```typescript
 import { f } from '@freestylejs/fetch'
@@ -96,7 +97,7 @@ export const api = f.router('https://api.example.com', {
 })
 ```
 
-### `index.ts`
+### C. `index.ts`
 
 Re-exports all generated code for convenience:
 
@@ -109,7 +110,7 @@ export * from './models'
 
 The CLI provides clear error messages for common issues:
 
-### Invalid Specification
+### A. Invalid Specification
 
 If the OpenAPI file is invalid or cannot be parsed:
 
@@ -119,7 +120,7 @@ Error: Failed to parse OpenAPI specification
   Reason: Invalid YAML syntax at line 42
 ```
 
-### Missing File
+### B. Missing File
 
 If the input file does not exist:
 
@@ -128,13 +129,13 @@ Error: Input file not found
   Path: ./api-spec.json
 ```
 
-### Output Directory Issues
+### C. Output Directory Issues
 
 The generator creates the output directory if it doesn't exist. Existing files are overwritten.
 
 ## Best Practices
 
-### Version Control
+### A. Version Control
 
 Add generated files to `.gitignore` and regenerate them during your build process:
 
@@ -152,7 +153,7 @@ src/generated/
 }
 ```
 
-### CI/CD Integration
+### B. CI/CD Integration
 
 Integrate generation into your CI/CD pipeline:
 
