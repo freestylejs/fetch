@@ -1,4 +1,5 @@
 import type { OpenAPIV3_1 } from 'openapi-types'
+import { OperationValidationError } from './errors'
 import { SchemaGenerator } from './schema_generator'
 import { toPascalCase } from './utils'
 
@@ -9,7 +10,9 @@ function isReferenceObject(obj: any): obj is OpenAPIV3_1.ReferenceObject {
 function generateBuilder(
     operation: OpenAPIV3_1.OperationObject,
     pathParams: (OpenAPIV3_1.ParameterObject | OpenAPIV3_1.ReferenceObject)[],
-    schemaGenerator: SchemaGenerator
+    schemaGenerator: SchemaGenerator,
+    method: string,
+    path: string
 ): string {
     let builder = 'f.builder().def_json()'
 
@@ -34,6 +37,15 @@ function generateBuilder(
     if (queryParameters.length > 0) {
         const queryParamsString = queryParameters
             .map((param) => {
+                if (!param.schema) {
+                    throw new OperationValidationError(
+                        `Missing schema for query parameter "${param.name}"`,
+                        operation.operationId,
+                        method,
+                        path,
+                        'Define a schema for the query parameter'
+                    )
+                }
                 const zodType = schemaGenerator.generateZodSchema(
                     param.schema as OpenAPIV3_1.SchemaObject,
                     param.name
@@ -113,7 +125,10 @@ export function generateRouter(
 
     const schemaGenerator = new SchemaGenerator(spec)
 
-    function buildRouterObject(pathNode: Record<string, any>): string {
+    function buildRouterObject(
+        pathNode: Record<string, any>,
+        currentPath = ''
+    ): string {
         const parts: string[] = []
         const pathLevelParams = pathNode.parameters || []
 
@@ -121,14 +136,23 @@ export function generateRouter(
             const value = pathNode[key]
             if (httpMethods.has(key.toLowerCase())) {
                 parts.push(
-                    `'${key.toUpperCase()}': ${generateBuilder(value, pathLevelParams, schemaGenerator)}`
+                    `'${key.toUpperCase()}': ${generateBuilder(
+                        value,
+                        pathLevelParams,
+                        schemaGenerator,
+                        key,
+                        currentPath
+                    )}`
                 )
             } else if (
                 typeof value === 'object' &&
                 value !== null &&
                 !openApiMetadataKeys.has(key)
             ) {
-                parts.push(`'${key}': {\n${buildRouterObject(value)}\n}`)
+                const nextPath = currentPath ? `${currentPath}/${key}` : key
+                parts.push(
+                    `'${key}': {\n${buildRouterObject(value, nextPath)}\n}`
+                )
             }
         }
         return parts.join(',\n')
