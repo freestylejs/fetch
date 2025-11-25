@@ -306,4 +306,29 @@ describe('Router Generator Comprehensive Tests', () => {
 
         expect(code).not.toContain('.def_searchparams')
     })
+
+    it('should throw OperationValidationError for query param without schema', () => {
+        const spec: OpenAPIV3_1.Document = {
+            ...baseSpec,
+            paths: {
+                '/users': {
+                    get: {
+                        parameters: [
+                            {
+                                name: 'page',
+                                in: 'query',
+                                // schema is missing
+                            } as any,
+                        ],
+                        responses: { '200': { description: 'OK' } },
+                    },
+                },
+            },
+        }
+        const parsedPaths = parsePaths(spec)
+
+        expect(() => generateRouter(parsedPaths, spec)).toThrow(
+            /Missing schema for query parameter "page"/
+        )
+    })
 })
