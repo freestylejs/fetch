@@ -38,12 +38,7 @@ export const PaginatedResponse = z.object({
 
 export type PaginatedResponseModel = z.infer<typeof PaginatedResponse>;
 
-export const PaginatedProductResponse = z.object({
-'page': z.number().int().optional(),
-'pageSize': z.number().int().optional(),
-'total': z.number().int().optional(),
-'items': z.array(Product).optional()
-});
+export const PaginatedProductResponse = PaginatedResponse;
 
 export type PaginatedProductResponseModel = z.infer<typeof PaginatedProductResponse>;
 
