@@ -17,17 +17,17 @@ describe('Generator', () => {
 
     testCases.forEach((caseName) => {
         const specFileName = `${caseName}.json`
-        const specPath = join(openapiDir, specFileName)
+        let specPath = join(openapiDir, specFileName)
 
         if (!existsSync(specPath)) {
-            console.warn(
-                `Skipping test case ${caseName}: Spec file ${specFileName} not found.`
-            )
-            return
+            specPath = join(openapiDir, `${caseName}.yaml`)
+            if (!existsSync(specPath)) {
+                return
+            }
         }
 
         describe(caseName, () => {
-            it('should generate the same models as the snapshot', async () => {
+            it(`should generate the same ${caseName}.models as the snapshot`, async () => {
                 const spec = await parseOpenApiSpec(specPath)
                 const modelGenerator = new SchemaGenerator(spec)
 
@@ -40,7 +40,7 @@ describe('Generator', () => {
                 expect(generatedModels).toEqual(snapshot)
             })
 
-            it('should generate the same api as the snapshot', async () => {
+            it(`should generate the same ${caseName}.api as the snapshot`, async () => {
                 const spec = await parseOpenApiSpec(specPath)
                 const parsedPaths = parsePaths(spec)
                 const generatedRouter = generateRouter(parsedPaths, spec)
@@ -52,7 +52,7 @@ describe('Generator', () => {
                 expect(generatedRouter).toEqual(snapshot)
             })
 
-            it('should generate the same auth as the snapshot', async () => {
+            it(`should generate the same ${caseName}.auth as the snapshot`, async () => {
                 const spec = await parseOpenApiSpec(specPath)
                 const authGenerator = new AuthGenerator(spec)
                 const generatedAuth = authGenerator.generateFileContent()
