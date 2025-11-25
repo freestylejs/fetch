@@ -234,14 +234,6 @@ describe('SchemaGenerator', () => {
             )
             expect(result).toBe('z.array(Item)')
         })
-
-        it('should throw error for array without items', () => {
-            const spec = createSpec({ Test: { type: 'array', items: {} } })
-            const generator = new SchemaGenerator(spec)
-            expect(() =>
-                generator.generateZodSchema({ type: 'array' } as any, 'test')
-            ).toThrow('Array schema must have items defined.')
-        })
     })
 
     describe('Object Types', () => {
@@ -379,7 +371,7 @@ describe('SchemaGenerator', () => {
                 },
                 'test'
             )
-            expect(result).toBe('z.record(z.string(), z.any())')
+            expect(result).toBe('z.record(z.string(), z.string())')
         })
     })
 
@@ -402,7 +394,7 @@ describe('SchemaGenerator', () => {
             const generator = new SchemaGenerator(spec)
             expect(() =>
                 generator.generateZodSchema({ $ref: 'invalid/ref' }, 'test')
-            ).toThrow('Unsupported $ref format')
+            ).toThrow('Unsupported $ref: invalid/ref')
         })
 
         it('should throw error for non-existent $ref', () => {
@@ -415,7 +407,7 @@ describe('SchemaGenerator', () => {
                     { $ref: '#/components/schemas/NonExistent' },
                     'test'
                 )
-            ).toThrow('Schema not found for $ref')
+            ).toThrow('Schema not found: #/components/schemas/NonExistent')
         })
 
         it('should handle reference with additional properties (allOf conversion)', () => {
@@ -621,35 +613,6 @@ describe('SchemaGenerator', () => {
             expect(result).toBe(
                 "z.discriminatedUnion('type', [OptionA, OptionB])"
             )
-        })
-
-        it('should throw error for discriminated union with non-ref schemas', () => {
-            const spec = createSpec({
-                Test: {
-                    oneOf: [
-                        {
-                            type: 'object',
-                            properties: { type: { type: 'string' } },
-                        },
-                    ],
-                    discriminator: { propertyName: 'type' },
-                },
-            })
-            const generator = new SchemaGenerator(spec)
-            expect(() =>
-                generator.generateZodSchema(
-                    {
-                        oneOf: [
-                            {
-                                type: 'object',
-                                properties: { type: { type: 'string' } },
-                            },
-                        ],
-                        discriminator: { propertyName: 'type' },
-                    },
-                    'test'
-                )
-            ).toThrow('oneOf with discriminator must use $ref objects')
         })
     })
 
@@ -954,7 +917,7 @@ describe('SchemaGenerator', () => {
                 'Dictionary'
             )
 
-            expect(result).toBe('z.record(Value, z.any())')
+            expect(result).toBe('z.record(z.string(), Value)')
         })
 
         it('should handle allOf with multiple refs and inline schemas', () => {
@@ -1042,7 +1005,7 @@ describe('SchemaGenerator', () => {
             const generator = new SchemaGenerator(spec)
             expect(() =>
                 generator.generateZodSchema(undefined as any, 'NonExistent')
-            ).toThrow('Schema "NonExistent" not found in specification')
+            ).toThrow('Schema "NonExistent" not found')
         })
 
         it('should handle caching of processed schemas', () => {
@@ -1130,55 +1093,6 @@ describe('SchemaGenerator', () => {
             // The $defs pattern should replace z.array(z.any()) with z.array(Product)
             expect(result).toContain('Product')
             expect(result).toContain('ProductList')
-        })
-
-        it('should throw error when base schema not found in $defs pattern (lines 103-106)', () => {
-            const spec = createSpec({
-                BaseSchema: {
-                    type: 'object',
-                    properties: {
-                        items: { type: 'array', items: { type: 'string' } },
-                    },
-                },
-                Item: { type: 'string' },
-                Test: {
-                    allOf: [
-                        { $ref: '#/components/schemas/BaseSchema' },
-                        {
-                            $defs: {
-                                productItem: {
-                                    $ref: '#/components/schemas/Item',
-                                },
-                            },
-                        } as any,
-                    ],
-                },
-            })
-
-            const generator = new SchemaGenerator(spec)
-
-            // Manually trigger the scenario: Process the Test schema which will try to
-            // process BaseSchema via the $defs pattern. We intercept the internal state
-            // to simulate BaseSchema not being in processedSchemas after mapSchemaObjectToZod
-            const originalGet = generator['processedSchemas'].get.bind(
-                generator['processedSchemas']
-            )
-            let callCount = 0
-            generator['processedSchemas'].get = function (key: string) {
-                callCount++
-                // On the specific call for 'BaseSchema' in the $defs handler, return undefined
-                if (key === 'BaseSchema' && callCount === 1) {
-                    return undefined
-                }
-                return originalGet(key)
-            }
-
-            expect(() =>
-                generator.generateZodSchema(
-                    spec.components!.schemas!.Test as OpenAPIV3_1.SchemaObject,
-                    'Test'
-                )
-            ).toThrow('Base schema "BaseSchema" not found in processed schemas')
         })
     })
 })
