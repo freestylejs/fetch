@@ -1,4 +1,4 @@
-import { Middleware, type MiddlewareFunction } from '../../utils/middleware'
+import { Middleware } from '../../utils/middleware'
 import { type Procedure, ProcedureSet } from '../../utils/procedure'
 import type { ConcreteBoolean, Json } from '../../utils/types'
 import {
@@ -22,6 +22,9 @@ import type {
 import { FetchOptionStore } from './fetch.option'
 import { FetchUnit } from './unit'
 
+/**
+ * Fetch builder, returns FetchUnit when `build`
+ */
 export class FetchBuilder<
     $Method extends FetchMethodString,
     $PathParams extends FetchPathParamsShape = unknown,
@@ -185,7 +188,17 @@ export class FetchBuilder<
         newBuilder.$store.defaultUrl = url
         return newBuilder
     }
-    public def_default_cache(cache: FetchOption['cache']) {
+    public def_default_cache(
+        cache: FetchOption['cache']
+    ): FetchBuilder<
+        $Method,
+        $PathParams,
+        $SearchParams,
+        $Body,
+        $Response,
+        $ModeOptions,
+        $BaseUrl
+    > {
         const newBuilder = this._clone<
             $Method,
             $PathParams,
@@ -198,7 +211,17 @@ export class FetchBuilder<
         newBuilder.$store.defaultCache = cache
         return newBuilder
     }
-    public def_default_mode(mode: FetchOption['mode']) {
+    public def_default_mode(
+        mode: FetchOption['mode']
+    ): FetchBuilder<
+        $Method,
+        $PathParams,
+        $SearchParams,
+        $Body,
+        $Response,
+        $ModeOptions,
+        $BaseUrl
+    > {
         const newBuilder = this._clone<
             $Method,
             $PathParams,
@@ -211,7 +234,17 @@ export class FetchBuilder<
         newBuilder.$store.defaultMode = mode
         return newBuilder
     }
-    public def_default_credentials(credentials: FetchOption['credentials']) {
+    public def_default_credentials(
+        credentials: FetchOption['credentials']
+    ): FetchBuilder<
+        $Method,
+        $PathParams,
+        $SearchParams,
+        $Body,
+        $Response,
+        $ModeOptions,
+        $BaseUrl
+    > {
         const newBuilder = this._clone<
             $Method,
             $PathParams,
@@ -224,7 +257,17 @@ export class FetchBuilder<
         newBuilder.$store.defaultCredentials = credentials
         return newBuilder
     }
-    public def_default_redirect(redirect: FetchOption['redirect']) {
+    public def_default_redirect(
+        redirect: FetchOption['redirect']
+    ): FetchBuilder<
+        $Method,
+        $PathParams,
+        $SearchParams,
+        $Body,
+        $Response,
+        $ModeOptions,
+        $BaseUrl
+    > {
         const newBuilder = this._clone<
             $Method,
             $PathParams,
@@ -237,7 +280,17 @@ export class FetchBuilder<
         newBuilder.$store.defaultRedirect = redirect
         return newBuilder
     }
-    public def_default_referrer(referrer: FetchOption['referrer']) {
+    public def_default_referrer(
+        referrer: FetchOption['referrer']
+    ): FetchBuilder<
+        $Method,
+        $PathParams,
+        $SearchParams,
+        $Body,
+        $Response,
+        $ModeOptions,
+        $BaseUrl
+    > {
         const newBuilder = this._clone<
             $Method,
             $PathParams,
@@ -252,7 +305,15 @@ export class FetchBuilder<
     }
     public def_default_referrer_policy(
         referrerPolicy: FetchOption['referrerPolicy']
-    ) {
+    ): FetchBuilder<
+        $Method,
+        $PathParams,
+        $SearchParams,
+        $Body,
+        $Response,
+        $ModeOptions,
+        $BaseUrl
+    > {
         const newBuilder = this._clone<
             $Method,
             $PathParams,
@@ -265,7 +326,17 @@ export class FetchBuilder<
         newBuilder.$store.defaultReferrerPolicy = referrerPolicy
         return newBuilder
     }
-    public def_default_integrity(integrity: FetchOption['integrity']) {
+    public def_default_integrity(
+        integrity: FetchOption['integrity']
+    ): FetchBuilder<
+        $Method,
+        $PathParams,
+        $SearchParams,
+        $Body,
+        $Response,
+        $ModeOptions,
+        $BaseUrl
+    > {
         const newBuilder = this._clone<
             $Method,
             $PathParams,
@@ -278,7 +349,17 @@ export class FetchBuilder<
         newBuilder.$store.defaultIntegrity = integrity
         return newBuilder
     }
-    public def_default_keepalive(keepalive: FetchOption['keepalive']) {
+    public def_default_keepalive(
+        keepalive: FetchOption['keepalive']
+    ): FetchBuilder<
+        $Method,
+        $PathParams,
+        $SearchParams,
+        $Body,
+        $Response,
+        $ModeOptions,
+        $BaseUrl
+    > {
         const newBuilder = this._clone<
             $Method,
             $PathParams,
@@ -291,7 +372,17 @@ export class FetchBuilder<
         newBuilder.$store.defaultKeepalive = keepalive
         return newBuilder
     }
-    public def_default_window(window: FetchOption['window']) {
+    public def_default_window(
+        window: FetchOption['window']
+    ): FetchBuilder<
+        $Method,
+        $PathParams,
+        $SearchParams,
+        $Body,
+        $Response,
+        $ModeOptions,
+        $BaseUrl
+    > {
         const newBuilder = this._clone<
             $Method,
             $PathParams,
@@ -304,7 +395,17 @@ export class FetchBuilder<
         newBuilder.$store.defaultWindow = window
         return newBuilder
     }
-    public def_default_priority(priority: FetchOption['priority']) {
+    public def_default_priority(
+        priority: FetchOption['priority']
+    ): FetchBuilder<
+        $Method,
+        $PathParams,
+        $SearchParams,
+        $Body,
+        $Response,
+        $ModeOptions,
+        $BaseUrl
+    > {
         const newBuilder = this._clone<
             $Method,
             $PathParams,
@@ -449,14 +550,7 @@ export class FetchBuilder<
      * import { z } from "zod"
      *
      * const BodyZod = z.object({ name: z.string() })
-     * const fetchUnit = f.builder().def_body(BodyZod.parse)
-     *
-     * // Example using metal-box/type
-     * import { t } from "@freestylejs/schema"
-     *
-     * const BodyMetal = t.object({ name: t.string })
-     * const fetchUnit2 = f.builder().def_body(BodyMetal.parse)
-     * ```
+     * const fetchUnit = f.builder().def_body(BodyZod.parse) // pass "parse" function.
      */
     public def_body<FetchBodyInjection extends $Body>(
         bodyValidator: (body: unknown) => FetchBodyInjection
@@ -567,7 +661,17 @@ export class FetchBuilder<
     }
 
     public middleware: Middleware = new Middleware()
-    public def_middleware(...middleware: Array<MiddlewareFunction>): this {
+    public def_middleware(
+        middlewareList: Array<Middleware>
+    ): FetchBuilder<
+        $Method,
+        $PathParams,
+        $SearchParams,
+        $Body,
+        $Response,
+        $ModeOptions,
+        $BaseUrl
+    > {
         const newBuilder = this._clone<
             $Method,
             $PathParams,
@@ -577,7 +681,9 @@ export class FetchBuilder<
             $ModeOptions,
             $BaseUrl
         >()
-        newBuilder.middleware.use(middleware)
+        for (const middleware of middlewareList) {
+            newBuilder.middleware.use(middleware.procedures)
+        }
         return newBuilder as this
     }
 
@@ -748,4 +854,7 @@ export type DefaultFetchBuilderShape = FetchBuilder<
     ''
 >
 
+/**
+ * Create fetch unit using builder.
+ */
 export const builder = FetchBuilder.new
