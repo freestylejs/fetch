@@ -236,7 +236,13 @@ describe('Router Generator Comprehensive Tests', () => {
         const parsedPaths = parsePaths(spec)
         const code = generateRouter(parsedPaths, spec)
 
-        expect(code).toContain("export const api = f.router('', {\n\n});")
+        expect(code).toContain(
+            'export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {}) => {'
+        )
+        expect(code).toContain('return f.router({')
+        expect(code).toContain("baseUrl: config.baseUrl || '',")
+        expect(code).toContain('middleware')
+        expect(code).toContain('}, {\n\n});')
     })
 
     it('should ignore metadata keys in path objects', () => {
