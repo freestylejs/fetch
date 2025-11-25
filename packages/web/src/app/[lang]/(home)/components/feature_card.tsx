@@ -103,7 +103,9 @@ export function FeatureCard({
                     <CodeBlock
                         code={code.trim()}
                         lang="tsx"
-                        wrapper={{ className: 'min-h-full' }}
+                        wrapper={{
+                            className: 'min-h-full transition-all duration-300',
+                        }}
                     />
                 </div>
             </div>
