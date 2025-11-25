@@ -1,0 +1,137 @@
+---
+title: Authentication
+description: Learn how to configure and use authentication with generated API clients.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+## Overview
+
+`create-freestyle-fetch` automatically generates type-safe authentication middleware based on the `securitySchemes` defined in your OpenAPI specification.
+
+The generated client supports:
+- **HTTP Bearer** (JWT, API Tokens)
+- **HTTP Basic** (Username/Password)
+- **API Keys** (Header, Query, Cookie)
+- **OAuth2** (Bearer Token)
+
+## Configuration
+
+When you initialize your client using `createClient`, you can provide an `auth` object. The shape of this object is strictly typed to match your API's security requirements.
+
+### 1. Bearer Authentication
+
+For APIs using `Authorization: Bearer <token>`.
+
+```typescript
+import { createClient } from './generated'
+
+const client = createClient({
+  auth: {
+    // The key name matches the security scheme in your OpenAPI spec
+    bearerAuth: {
+      token: 'your-access-token'
+    }
+  }
+})
+```
+
+### 2. Token Rotation (Async)
+
+You can provide an `async` function instead of a static string. This is perfect for handling token refresh logic or retrieving tokens from storage at runtime.
+
+```typescript
+const client = createClient({
+  auth: {
+    bearerAuth: {
+      // Called before every request
+      token: async () => {
+        const token = await getValidToken()
+        return token
+      }
+    }
+  }
+})
+```
+
+<Callout title="Performance Note">
+  The token function is awaited for every request. Ensure your `getValidToken` logic handles caching efficiently to avoid unnecessary overhead.
+</Callout>
+
+### 3. API Keys
+
+Supports API keys passed in headers, query parameters, or cookies. The generator handles the placement automatically.
+
+```typescript
+const client = createClient({
+  auth: {
+    apiKey: {
+      value: process.env.API_KEY
+    }
+  }
+})
+```
+
+### 4. Basic Authentication
+
+For APIs using `Authorization: Basic <base64>`.
+
+```typescript
+const client = createClient({
+  auth: {
+    basicAuth: {
+      username: 'admin',
+      password: 'password123'
+    }
+  }
+})
+```
+
+## Advanced Usage
+
+### Multiple Security Schemes
+
+If your API supports multiple security schemes (e.g., both API Key and Bearer Token), you can configure them simultaneously. The middleware will apply them based on your configuration.
+
+```typescript
+const client = createClient({
+  auth: {
+    apiKey: { value: '...' },
+    bearerAuth: { token: '...' }
+  }
+})
+```
+
+### Dynamic Re-configuration
+
+The client instance is immutable regarding its middleware pipeline. If you need to change the authentication strategy (e.g., user logs out and logs in as a different user), create a new client instance.
+
+```typescript
+let client = createClient({ auth: { ... } })
+
+function onLogin(newToken: string) {
+  // Re-create client with new token
+  client = createClient({
+    auth: {
+      bearerAuth: { token: newToken }
+    }
+  })
+}
+```
+
+## Troubleshooting
+
+### Missing Auth Header
+
+If your requests are failing with `401 Unauthorized`:
+
+1.  **Check the Spec**: Ensure your OpenAPI spec correctly defines the `security` requirement for the operation.
+2.  **Check the Config**: Verify you are passing the correct key (e.g., `bearerAuth` vs `api_key`) in the `createClient` config. TypeScript will warn you if the key is invalid.
+3.  **Inspect the Request**: Use the browser network tab or a proxy to verify the `Authorization` header is being sent.
+
+### Type Errors
+
+If you see TypeScript errors like `Property 'bearerAuth' does not exist`:
+
+- Your OpenAPI spec might not define that security scheme.
+- You might be using a different name than what is defined in `components/securitySchemes`. Check generated `auth.ts` interface.

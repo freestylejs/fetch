@@ -3,9 +3,10 @@
     "pages": [
         "index",
         "getting-started",
-        "cli-reference",
+        "authentication",
         "generated-code",
         "validation",
+        "cli-reference",
         "troubleshooting"
     ]
 }

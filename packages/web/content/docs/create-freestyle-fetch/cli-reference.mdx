@@ -58,7 +58,7 @@ npx create-freestyle-fetch generate \
 
 ## Output Files
 
-The `generate` command creates three files in the output directory:
+The `generate` command creates four files in the output directory:
 
 ### A. `models.ts`
 
@@ -78,31 +78,57 @@ export type UserModel = z.infer<typeof User>
 
 ### B. `api.ts`
 
-Contains the **type-safe router** with all API endpoints:
+Contains the **type-safe router factory** with all API endpoints:
 
 ```typescript
 import { f } from '@freestylejs/fetch'
 import { z } from 'zod'
 import * as Model from './models'
+import { createAuthMiddleware, AuthConfig } from './auth'
 
-export const api = f.router('https://api.example.com', {
-  users: {
-    $userId: {
-      GET: f.builder()
-        .def_json()
-        .def_response(async ({ json }) => Model.User.parse(await json()))
-    }
-  }
-})
+export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {}) => {
+    // ... middleware setup
+    return f.router({
+        baseUrl: config.baseUrl || 'https://api.example.com',
+        middleware
+    }, {
+        users: {
+            $userId: {
+                GET: f.builder()
+                    .def_json()
+                    .def_response(async ({ json }) => Model.User.parse(await json()))
+            }
+        }
+    })
+}
 ```
 
-### C. `index.ts`
+### C. `auth.ts`
+
+Contains authentication configuration types and middleware factory:
+
+```typescript
+import { f, type Middleware } from '@freestylejs/fetch'
+
+export interface AuthConfig {
+    bearerAuth?: {
+        token: string | (() => Promise<string>)
+    }
+}
+
+export const createAuthMiddleware = (config: AuthConfig) => {
+    // ... middleware implementation
+}
+```
+
+### D. `index.ts`
 
 Re-exports all generated code for convenience:
 
 ```typescript
 export * from './api'
 export * from './models'
+export * from './auth'
 ```
 
 ## Error Handling
@@ -190,4 +216,5 @@ steps:
 ## Related
 
 - [Getting Started](/en/docs/create-freestyle-fetch/getting-started) - Installation and basic usage
+- [Authentication](/en/docs/create-freestyle-fetch/authentication) - Configure auth credentials
 - [Generated Code](/en/docs/create-freestyle-fetch/generated-code) - Understanding the output

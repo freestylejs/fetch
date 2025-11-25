@@ -69,31 +69,89 @@ export const api = f.router('https://api.example.com', {
 })
 ```
 
-### C. index.ts
+### C. auth.ts
+
+Contains type-safe authentication configuration and middleware factory:
+
+- **AuthConfig** - Interface matching your OpenAPI security schemes
+- **Middleware Factory** - Creates authentication middleware based on config
+- **Supported Schemes** - Bearer, Basic, API Key, OAuth2
+
+Example generated auth:
+
+```typescript
+import { f, type Middleware } from '@freestylejs/fetch'
+
+export interface AuthConfig {
+    /** Bearer authentication */
+    bearerAuth?: {
+        token: string | (() => Promise<string>)
+    }
+    /** API Key authentication */
+    apiKey?: {
+        value: string | (() => Promise<string>)
+    }
+}
+
+export const createAuthMiddleware = (config: AuthConfig) => {
+    const middlewares: Middleware[] = []
+    // ... middleware implementation
+    return middlewares
+}
+```
+
+### D. index.ts
 
 Re-exports all generated code:
 
 ```typescript
 export * from './api'
 export * from './models'
+export * from './auth'
 ```
 
 ## Usage Patterns
 
-### A. Path Parameters
+### A. Client Initialization & Authentication
+
+The generated code exports a `createClient` factory function that allows you to configure the base URL and authentication credentials.
+
+```typescript
+import { createClient } from './api'
+
+// Initialize with auth configuration
+const client = createClient({
+  baseUrl: 'https://api.example.com', // Optional override
+  auth: {
+    // Type-safe config based on your OpenAPI security schemes
+    bearerAuth: {
+      token: 'my-secret-token'
+    },
+    apiKey: {
+      // Supports async functions for token rotation
+      value: async () => await getApiKey()
+    }
+  }
+})
+
+// Use the authenticated client
+const user = await client.users.me.GET()
+```
+
+### B. Path Parameters
 
 Dynamic path segments use the `$paramName` syntax:
 
 ```typescript
 // OpenAPI: /users/{userId}
-// Generated: api.users.$userId
+// Generated: client.users.$userId
 
-const user = await api.users.$userId.GET({
+const user = await client.users.$userId.GET({
   params: { userId: '123' }
 })
 ```
 
-### B. Query Parameters
+### C. Query Parameters
 
 Query parameters are validated with Zod schemas:
 
@@ -101,7 +159,7 @@ Query parameters are validated with Zod schemas:
 // OpenAPI: /users?page=1&limit=10
 // Generated with searchparams
 
-const users = await api.users.GET({
+const users = await client.users.GET({
   query: {
     page: 1,
     limit: 10
@@ -109,7 +167,7 @@ const users = await api.users.GET({
 })
 ```
 
-### C. Request Bodies
+### D. Request Bodies
 
 Request bodies are validated against Zod schemas:
 
@@ -117,7 +175,7 @@ Request bodies are validated against Zod schemas:
 // OpenAPI: POST /users with body
 // Generated with def_body
 
-const newUser = await api.users.POST({
+const newUser = await client.users.POST({
   body: {
     username: 'john',
     email: 'john@example.com'
@@ -125,13 +183,13 @@ const newUser = await api.users.POST({
 })
 ```
 
-### D. Response Validation
+### E. Response Validation
 
 Responses are automatically validated:
 
 ```typescript
 // Response is validated with zod at runtime
-const user = await api.users.$userId.GET({
+const user = await client.users.$userId.GET({
   params: { userId: '123' }
 })
 
@@ -148,7 +206,7 @@ The generated client provides complete type inference:
 
 ```typescript
 // TypeScript infers the shape of params, query, and body
-api.users.$userId.GET({
+client.users.$userId.GET({
   params: { userId: '123' },  // Type: { userId: string }
   query: { include: 'posts' } // Type: { include?: string }
 })
@@ -158,7 +216,7 @@ api.users.$userId.GET({
 
 ```typescript
 // Response type is inferred from the Zod schema
-const user = await api.users.$userId.GET({
+const user = await client.users.$userId.GET({
   params: { userId: '123' }
 })
 
@@ -199,7 +257,8 @@ Special characters like `$` are preserved:
 - `$special` → `$Special`
 
 ## Related
-
-- [Validation](/en/docs/create-freestyle-fetch/validation) - Runtime validation details
-- [CLI Reference](/en/docs/create-freestyle-fetch/cli-reference) - Generation options
-- [Fetch Builder](/en/docs/fetch/core-api/builder) - Understanding the builder API
+ 
+ - [Authentication](/en/docs/create-freestyle-fetch/authentication) - Configure auth credentials
+ - [Validation](/en/docs/create-freestyle-fetch/validation) - Runtime validation details
+ - [CLI Reference](/en/docs/create-freestyle-fetch/cli-reference) - Generation options
+ - [Fetch Builder](/en/docs/fetch/core-api/builder) - Understanding the builder API
