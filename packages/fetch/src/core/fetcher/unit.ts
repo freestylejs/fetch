@@ -405,7 +405,7 @@ export class FetchUnit<
 }
 
 /**
- * @description Fetch unit shape type
+ * Fetch unit shape type
  */
 export type FetchUnitShape = FetchUnit<
     FetchMethodString,
