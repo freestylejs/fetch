@@ -5,11 +5,13 @@ description: Runtime validation with Zod in generated API clients.
 
 ## Overview
 
-The OpenAPI Generator creates Zod schemas for all data types in your API specification. These schemas provide runtime validation for requests and responses, ensuring type safety at both compile-time and runtime.
+The `create-freestyle-fetch` creates [**Zod schemas**](https://zod.dev/) for all data types in your API specification.
+
+ These schemas provide runtime validation for requests and responses, ensuring type safety at both compile-time and runtime.
 
 ## Automatic Validation
 
-### Response Validation
+### A. Response Validation
 
 All responses are automatically validated before being returned:
 
@@ -28,7 +30,7 @@ The validation happens in the `.def_response()` method:
 .def_response(async ({ json }) => Model.User.parse(await json()))
 ```
 
-### Request Body Validation
+### B. Request Body Validation
 
 Request bodies are validated using the `.def_body()` method:
 
@@ -49,7 +51,7 @@ await api.users.POST({
 })
 ```
 
-### Query Parameter Validation
+### C. Query Parameter Validation
 
 Query parameters are validated with `.def_searchparams()`:
 
@@ -75,7 +77,7 @@ await api.users.GET({
 
 ## Handling Validation Errors
 
-### Zod Error Structure
+### A. Zod Error Structure
 
 When validation fails, Zod throws a `ZodError`:
 
@@ -94,7 +96,7 @@ try {
 }
 ```
 
-### Custom Error Handling
+### B. Custom Error Handling
 
 Use the fetch library's error handlers for more control:
 
@@ -118,7 +120,7 @@ const user = await api.users.$userId.GET({
 
 The generator translates OpenAPI constraints to Zod:
 
-### String Constraints
+### A. String Constraints
 
 ```typescript
 // OpenAPI
@@ -133,7 +135,7 @@ The generator translates OpenAPI constraints to Zod:
 z.string().min(3).max(50).regex(/^[a-zA-Z]+$/)
 ```
 
-### Number Constraints
+### B. Number Constraints
 
 ```typescript
 // OpenAPI
@@ -147,7 +149,7 @@ z.string().min(3).max(50).regex(/^[a-zA-Z]+$/)
 z.number().min(0).max(100)
 ```
 
-### Array Constraints
+### C. Array Constraints
 
 ```typescript
 // OpenAPI
@@ -162,7 +164,7 @@ z.number().min(0).max(100)
 z.array(z.string()).min(1).max(10)
 ```
 
-### Object Constraints
+### D. Object Constraints
 
 ```typescript
 // OpenAPI
@@ -186,7 +188,7 @@ z.object({
 
 ## Advanced Validation
 
-### Nullable Types (OAS 3.1)
+### A. Nullable Types (OAS 3.1)
 
 The generator supports OpenAPI 3.1 nullable types:
 
@@ -200,7 +202,7 @@ The generator supports OpenAPI 3.1 nullable types:
 z.string().nullable()
 ```
 
-### Enums
+### B. Enums
 
 Enums are converted to Zod enums:
 
@@ -215,7 +217,7 @@ Enums are converted to Zod enums:
 z.enum(['active', 'inactive', 'pending'])
 ```
 
-### Discriminated Unions
+### C. Discriminated Unions
 
 The generator creates discriminated unions for `oneOf` with discriminators:
 
@@ -235,7 +237,7 @@ The generator creates discriminated unions for `oneOf` with discriminators:
 z.discriminatedUnion('type', [Cat, Dog])
 ```
 
-### Intersection Types
+### D. Intersection Types
 
 `allOf` creates intersection types:
 
@@ -254,7 +256,7 @@ BaseEntity.and(Timestamped)
 
 ## Performance Considerations
 
-### Schema Caching
+### A. Schema Caching
 
 Zod schemas are created once and reused for all requests:
 
@@ -269,7 +271,7 @@ export const User = z.object({
 Model.User.parse(data) // No schema recreation
 ```
 
-### Lazy Validation
+### B. Lazy Validation
 
 Consider using `.safeParse()` for non-critical validations:
 

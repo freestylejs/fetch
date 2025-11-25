@@ -3,16 +3,18 @@ title: Middleware
 description: Intercept and modify requests and responses in the pipeline.
 ---
 
-Middleware provides a powerful mechanism to wrap request execution. It is ideal for cross-cutting concerns such as authentication, logging, global error handling, or response transformation.
+Middleware provides a powerful mechanism to wrap request execution. 
+
+It is ideal for cross-cutting concerns such as authentication, logging, global error handling, or response transformation.
 
 ### Creating Middleware
 
-The `Middleware` class manages a stack of interceptor functions.
+The `f.middleware()` creates `Middleware` instance that manages a stack of interceptor functions.
 
 ```typescript
 import { f } from '@freestylejs/fetch';
 
-const authMiddleware = new f.Middleware();
+const authMiddleware = f.middleware();
 
 // Define a middleware function
 authMiddleware.use(async (request, next) => {
@@ -43,7 +45,7 @@ authMiddleware.use(async (request, next) => {
 #### 1. Logging Middleware
 
 ```typescript
-const loggingMiddleware = new f.Middleware();
+const loggingMiddleware = f.middleware();
 
 loggingMiddleware.use(async (req, next) => {
     const start = Date.now();
@@ -67,8 +69,7 @@ You can apply middleware to any `FetchBuilder` using `.def_middleware()`.
 
 ```typescript
 const client = f.builder()
-    // Spread the procedures from your middleware instance
-    .def_middleware(...loggingMiddleware.procedures, ...authMiddleware.procedures)
+    .def_middleware([loggingMiddleware, authMiddleware])
     .def_url('https://api.example.com');
 ```
 
@@ -81,7 +82,7 @@ Middleware follows an "onion" or "stack" model (similar to Koa or Express).
 3.  **Response Phase**: Middleware functions resume execution in **reverse order** (after `await next()`).
 
 ```typescript
-const m = new f.Middleware();
+const m = f.middleware();
 
 m.use(async (req, next) => {
     console.log('1. Request');

@@ -9,13 +9,13 @@ The OpenAPI Generator creates three TypeScript files that work together to provi
 
 ## File Structure
 
-### models.ts
+### A. models.ts
 
 Contains all Zod schemas derived from your OpenAPI components:
 
 - **Schemas** - Converted from `components.schemas` definitions
-- **Type exports** - TypeScript types inferred from Zod schemas
-- **Validation** - Runtime validation using Zod
+- **Type exports** - TypeScript types inferred from **Zod** schemas
+- **Validation** - Runtime validation using **Zod**
 
 Example generated model:
 
@@ -32,7 +32,7 @@ export const User = z.object({
 export type UserModel = z.infer<typeof User>
 ```
 
-### api.ts
+### B. api.ts
 
 Contains the hierarchical router mapping all API endpoints:
 
@@ -69,7 +69,7 @@ export const api = f.router('https://api.example.com', {
 })
 ```
 
-### index.ts
+### C. index.ts
 
 Re-exports all generated code:
 
@@ -80,7 +80,7 @@ export * from './models'
 
 ## Usage Patterns
 
-### Path Parameters
+### A. Path Parameters
 
 Dynamic path segments use the `$paramName` syntax:
 
@@ -93,7 +93,7 @@ const user = await api.users.$userId.GET({
 })
 ```
 
-### Query Parameters
+### B. Query Parameters
 
 Query parameters are validated with Zod schemas:
 
@@ -109,7 +109,7 @@ const users = await api.users.GET({
 })
 ```
 
-### Request Bodies
+### C. Request Bodies
 
 Request bodies are validated against Zod schemas:
 
@@ -125,7 +125,7 @@ const newUser = await api.users.POST({
 })
 ```
 
-### Response Validation
+### D. Response Validation
 
 Responses are automatically validated:
 
@@ -144,7 +144,7 @@ user.email    // string
 
 The generated client provides complete type inference:
 
-### Request Types
+### A. Request Types
 
 ```typescript
 // TypeScript infers the shape of params, query, and body
@@ -154,7 +154,7 @@ api.users.$userId.GET({
 })
 ```
 
-### Response Types
+### B. Response Types
 
 ```typescript
 // Response type is inferred from the Zod schema
