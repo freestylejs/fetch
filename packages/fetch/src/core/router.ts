@@ -128,6 +128,9 @@ class Router<
                 if (commonConfig.window) {
                     newBuilder.def_default_window(commonConfig.window)
                 }
+                if (commonConfig.middleware) {
+                    newBuilder.def_middleware(commonConfig.middleware)
+                }
 
                 // 3. Build
                 result[key] = newBuilder.build()

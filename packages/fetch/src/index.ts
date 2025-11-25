@@ -15,4 +15,4 @@ export const f: {
     middleware,
 }
 
-export type { GetRouterConfig, FetchUnitShape, FetchBuilder }
+export type { GetRouterConfig, FetchUnitShape, FetchBuilder, Middleware }
