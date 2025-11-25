@@ -4,7 +4,7 @@ import { label } from './utils/test.label'
 
 describe(label.unit('middleware'), () => {
     it(label.case('should execute middleware in order'), async () => {
-        const middleware = new f.Middleware()
+        const middleware = f.middleware()
         const executionOrder: number[] = []
 
         middleware.use(async (req, next) => {
