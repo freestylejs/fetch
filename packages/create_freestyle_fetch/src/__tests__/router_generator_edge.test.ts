@@ -22,7 +22,7 @@ describe('router_generator edge cases', () => {
 
             // This should not throw, even with unusual ref
             const result = generateRouter({ users: spec.paths['/users'] }, spec)
-            expect(result).toContain('export const api')
+            expect(result).toContain('export const createClient')
         })
 
         it('should handle request body with malformed $ref', () => {
@@ -147,7 +147,7 @@ describe('router_generator edge cases', () => {
 
             const result = generateRouter({ users: spec.paths['/users'] }, spec)
             // Should process the pathParams correctly even when some are $ref
-            expect(result).toContain('export const api')
+            expect(result).toContain('export const createClient')
         })
 
         it('should handle operation parameters that duplicate path parameters', () => {
@@ -215,7 +215,7 @@ describe('router_generator edge cases', () => {
 
             const result = generateRouter(parsedPaths, spec)
             // Should handle all reference parameters
-            expect(result).toContain('export const api')
+            expect(result).toContain('export const createClient')
         })
     })
 })
