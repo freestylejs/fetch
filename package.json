@@ -39,7 +39,7 @@
         "@changesets/cli": "latest",
         "@freestylejs/config": "latest",
         "@types/node": "latest",
-        "@vitest/coverage-v8": "4.0.6",
+        "@vitest/coverage-v8": "latest",
         "husky": "latest",
         "lint-staged": "latest",
         "msw": "^2.12.3",
