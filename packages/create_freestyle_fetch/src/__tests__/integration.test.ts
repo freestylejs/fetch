@@ -9,7 +9,7 @@ import { SchemaGenerator } from '../schema_generator'
 describe('Generator', () => {
     const mocksDir = resolve(__dirname, '__mocks__')
     const genDir = join(mocksDir, '.gen')
-    const openapiDir = join(mocksDir, 'openapi')
+    const openapiDir = join(mocksDir, '.openapi')
 
     const testCases = readdirSync(genDir).filter((file) => {
         return statSync(join(genDir, file)).isDirectory()
