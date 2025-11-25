@@ -198,11 +198,11 @@ export const MiddlewareDemo = () => {
             </div>
 
             {/* Right: Code Sync Visual */}
-            <div className="no-scrollbar custom-scrollbar flex max-h-[320px] flex-col justify-center gap-2 overflow-auto rounded-xl border border-zinc-200 bg-zinc-900 p-4 font-mono text-xs text-zinc-400 shadow-inner dark:border-zinc-800">
+            <div className="no-scrollbar custom-scrollbar flex max-h-100 flex-col justify-center gap-2 overflow-auto rounded-xl border border-zinc-200 bg-zinc-900 p-4 font-mono text-xs text-zinc-400 shadow-inner dark:border-zinc-800">
                 <div className="pt-10">
                     <span className="text-purple-400">const</span>{' '}
                     <span className="text-blue-400">middleware</span> ={' '}
-                    <span className="text-zinc-100">new f.Middleware()</span>
+                    <span className="text-zinc-100">f.middleware()</span>
                 </div>
                 <br />
                 <div>
@@ -297,7 +297,7 @@ export const MiddlewareDemo = () => {
 }
 
 export const middlewareCode = `
-const mw = new f.Middleware()
+const mw = f.middleware()
 
 // 1. Auth
 mw.use(async (req, next) => {

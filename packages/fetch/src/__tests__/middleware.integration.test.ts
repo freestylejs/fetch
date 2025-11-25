@@ -4,7 +4,7 @@ import { f } from '..'
 describe('Middleware Integration', () => {
     it('should run middleware and modify request headers', async () => {
         const TOKEN = 'token'
-        const middleware = new f.Middleware()
+        const middleware = f.middleware()
 
         middleware.use(async (req, next) => {
             req.headers.set('Authorization', TOKEN)
@@ -15,7 +15,7 @@ describe('Middleware Integration', () => {
             .builder()
             .def_method('GET')
             .def_url('https://api.com')
-            .def_middleware(middleware.procedures[0]!)
+            .def_middleware([middleware])
 
         const fetchUnit = fetchBuilder.build()
 
@@ -37,7 +37,7 @@ describe('Middleware Integration', () => {
     })
 
     it('should run middleware and modify the response', async () => {
-        const middleware = new f.Middleware()
+        const middleware = f.middleware()
 
         middleware.use(async (req, next) => {
             const response = await next(req)
@@ -49,7 +49,7 @@ describe('Middleware Integration', () => {
             .builder()
             .def_method('GET')
             .def_url('https://api.com')
-            .def_middleware(middleware.procedures[0]!)
+            .def_middleware([middleware])
             .def_response(async ({ response }) => {
                 expect(response.headers.get('X-Middleware-Handled')).toBe(
                     'true'
