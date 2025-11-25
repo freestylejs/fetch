@@ -16,7 +16,8 @@
         "build:fast": "tsup --no-dts",
         "dev": "pnpm build --sourcemap --watch",
         "test": "vitest",
-        "ts:typecheck": "tsc --noEmit --skipLibCheck"
+        "ts:typecheck": "tsc --noEmit --skipLibCheck",
+        "sync:snapshot": "pnpm build && node scripts/sync_snapshot.mjs"
     },
     "dependencies": {
         "@freestylejs/fetch": "workspace:^",
@@ -24,6 +25,7 @@
         "fs-extra": "^11.3.2",
         "openapi-types": "^12.1.3",
         "swagger-parser": "^10.0.3",
+        "@apidevtools/swagger-parser": "^12.1.0",
         "zod": "^4.1.13",
         "chalk": "^5.6.2"
     },
