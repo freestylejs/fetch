@@ -17,7 +17,7 @@ export const CodeBlock = ({ code, lang, wrapper }: CodeBlockProps) => {
     useEffect(() => {
         const loadLang = async () => {
             const highlighter = await getHighlighter('js', {
-                langs: ['js', 'ts', 'jsx', 'tsx'],
+                langs: ['js', 'ts', 'jsx', 'tsx', 'bash', 'json'],
                 themes: ['catppuccin-macchiato', 'github-light'],
             })
             await highlighter.loadLanguage(lang as BundledLanguage)
