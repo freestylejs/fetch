@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'fs-extra'
 import { join, resolve } from 'path'
 import { describe, expect, it } from 'vitest'
+import { AuthGenerator } from '../auth_generator'
 import { parseOpenApiSpec, parsePaths } from '../path_parser'
 import { generateRouter } from '../router_generator'
 import { SchemaGenerator } from '../schema_generator'
@@ -49,6 +50,18 @@ describe('Generator', () => {
                     'utf-8'
                 )
                 expect(generatedRouter).toEqual(snapshot)
+            })
+
+            it('should generate the same auth as the snapshot', async () => {
+                const spec = await parseOpenApiSpec(specPath)
+                const authGenerator = new AuthGenerator(spec)
+                const generatedAuth = authGenerator.generateFileContent()
+
+                const authPath = join(genDir, caseName, 'auth.ts')
+                if (existsSync(authPath)) {
+                    const snapshot = readFileSync(authPath, 'utf-8')
+                    expect(generatedAuth).toEqual(snapshot)
+                }
             })
         })
     })
