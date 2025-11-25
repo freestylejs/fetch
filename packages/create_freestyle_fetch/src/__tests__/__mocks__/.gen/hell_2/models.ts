@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const StringDictionary = z.record(z.string(), z.any());
+export const StringDictionary = z.record(z.string(), z.string());
 
 export type StringDictionaryModel = z.infer<typeof StringDictionary>;
 

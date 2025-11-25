@@ -10,7 +10,7 @@ export const Product = z.object({
 export type ProductModel = z.infer<typeof Product>;
 
 export const ElectronicsProduct = Product.and(z.object({
-'specs': z.record(z.string(), z.any()).optional()
+'specs': z.record(z.string(), z.string()).optional()
 }));
 
 export type ElectronicsProductModel = z.infer<typeof ElectronicsProduct>;
