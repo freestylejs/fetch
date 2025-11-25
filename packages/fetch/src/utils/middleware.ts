@@ -38,3 +38,10 @@ export class Middleware {
         return chain(initialRequest)
     }
 }
+
+/**
+ * Create middleware
+ */
+export function middleware(): Middleware {
+    return new Middleware()
+}
