@@ -50,13 +50,7 @@ export class SpecValidator {
     }
 
     private checkUnusedSchemas() {
-        // This is a simplified check. A full check would require traversing the entire spec to find references.
-        // For now, we can check if schemas in components are referenced in paths.
-        // This might be too expensive or complex for a quick validation.
-        // Let's stick to operation IDs for now as it's high value.
-        // If we want to check unused schemas, we need to collect all $refs first.
-        // Let's skip unused schema check for this iteration to keep it lightweight
-        // unless we implement a full ref crawler.
+        // pass for now
     }
 
     public formatWarnings(): string {
