@@ -4,6 +4,7 @@ import { resolve } from 'node:path'
 import chalk from 'chalk'
 import { Command } from 'commander'
 import { outputFileSync } from 'fs-extra'
+import { AuthGenerator } from './auth_generator'
 import { GeneratorError } from './errors'
 import { parseOpenApiSpec, parsePaths } from './path_parser'
 import { generateRouter } from './router_generator'
@@ -49,6 +50,15 @@ program
                 modelsFileContent
             )
 
+            console.log(chalk.blue('ℹ') + ' Generating auth...')
+            const authGenerator = new AuthGenerator(spec)
+            const authFileContent = authGenerator.generateFileContent()
+
+            outputFileSync(
+                resolve(absoluteOutputPath, 'auth.ts'),
+                authFileContent
+            )
+
             console.log(chalk.blue('ℹ') + ' Generating router...')
             // Generate and write router
             const parsedPaths = parsePaths(spec)
@@ -62,7 +72,7 @@ program
             // Generate and write index
             outputFileSync(
                 resolve(absoluteOutputPath, 'index.ts'),
-                "export * from './api';\nexport * from './models';"
+                "export * from './api';\nexport * from './models';\nexport * from './auth';"
             )
 
             console.log(
