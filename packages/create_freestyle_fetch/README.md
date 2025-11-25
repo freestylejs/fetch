@@ -14,6 +14,30 @@ npm install -g create-freestyle-fetch
 create-freestyle-fetch generate -i ./openapi.json -o ./src/api
 ```
 
+## Generated Client Usage
+
+The generator creates a type-safe API client. You can initialize it with optional configuration, including authentication.
+
+```typescript
+import { createClient } from './src/api';
+
+const client = createClient({
+    baseUrl: 'https://api.example.com', // Optional, defaults to server URL in spec
+    auth: {
+        // Type-safe auth config based on security schemes in your spec
+        bearerAuth: {
+            token: 'my-token' // or async () => 'my-token'
+        },
+        apiKey: {
+            value: 'my-api-key'
+        }
+    }
+});
+
+// Use the client
+const response = await client.users.get({ search: { page: 1 } });
+```
+
 ## Common Errors
 
 ### `✗ Error parsing OpenAPI specification`
