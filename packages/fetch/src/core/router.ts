@@ -148,6 +148,11 @@ class Router<
     }
 }
 
+/**
+ * Create router
+ * @param baseUrl Base url.
+ * @param router Router structure.
+ */
 export function router<
     const RouterBaseUrl extends string,
     const RouterBuilderStructure extends BuilderStructure,
@@ -155,6 +160,11 @@ export function router<
     baseUrl: RouterBaseUrl,
     router: RouterBuilderStructure
 ): BuildRouterUrlFromStructure<RouterBuilderStructure, RouterBaseUrl>
+/**
+ * Create router
+ * @param config Common configuration.
+ * @param router Router structure.
+ */
 export function router<
     const CommonConfig extends FetchCommonConfiguration,
     const RouterBuilderStructure extends BuilderStructure,
@@ -229,6 +239,9 @@ type BuildRouterUrlFromStructure<
       }
     : never
 
+/**
+ * Extract router config
+ */
 export type GetRouterConfig<RouterStructure extends UnitStructure> = {
     [Key in keyof RouterStructure]: Key extends FetchMethod
         ? RouterStructure[Key] extends FetchUnitShape
