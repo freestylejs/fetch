@@ -1,6 +1,6 @@
 import type { OpenAPIV3_1 } from 'openapi-types'
-import { SchemaValidationError } from './errors'
-import { toPascalCase } from './utils'
+import { SchemaValidationError } from './errors' // Assumed existing
+import { toPascalCase } from './utils' // Assumed existing
 
 function isReferenceObject(obj: any): obj is OpenAPIV3_1.ReferenceObject {
     return obj && '$ref' in obj
@@ -8,10 +8,42 @@ function isReferenceObject(obj: any): obj is OpenAPIV3_1.ReferenceObject {
 
 export class SchemaGenerator {
     private spec: OpenAPIV3_1.Document
+
     private processedSchemas: Map<string, string> = new Map()
+    private processingStack: Set<string> = new Set()
+    private schemaReferences: Map<string, Set<string>> = new Map()
+    private cyclicSchemas: Set<string> = new Set()
+    private schemaNameMap: Map<string, string> = new Map()
 
     constructor(spec: OpenAPIV3_1.Document) {
         this.spec = spec
+    }
+
+    private initializeSchemaNames() {
+        if (!this.spec.components?.schemas) return
+
+        const usedNames = new Set<string>()
+        this.schemaNameMap.clear()
+
+        for (const key of Object.keys(this.spec.components.schemas)) {
+            let name = toPascalCase(key)
+
+            // If name already exists (collision), append a counter
+            // e.g., if "User" and "user" both exist, second becomes "User_1"
+            let attempt = 1
+            const originalName = name
+            while (usedNames.has(name)) {
+                name = `${originalName}_${attempt}`
+                attempt++
+            }
+
+            usedNames.add(name)
+            this.schemaNameMap.set(key, name)
+        }
+    }
+
+    private getSchemaName(key: string): string {
+        return this.schemaNameMap.get(key) || toPascalCase(key)
     }
 
     public generateZodSchema(
@@ -25,173 +57,299 @@ export class SchemaGenerator {
         if (!this.spec.components || !this.spec.components.schemas) {
             return ''
         }
-        const schemas = Object.entries(this.spec.components.schemas)
-        const modelStrings: string[] = [`import { z } from 'zod';`]
 
-        for (const [name] of schemas) {
+        this.initializeSchemaNames()
+
+        // 1. First pass: generate all schemas to populate dependency graph
+        for (const name of Object.keys(this.spec.components.schemas)) {
             this.mapSchemaObjectToZod(name)
         }
 
-        for (const [name, zodSchema] of this.processedSchemas.entries()) {
-            const pascalName = toPascalCase(name)
-            modelStrings.push(`export const ${pascalName} = ${zodSchema};`)
-            modelStrings.push(
-                `export type ${pascalName}Model = z.infer<typeof ${pascalName}>;`
-            )
+        // 2. Detect Cycles
+        this.cyclicSchemas = this.detectCycles()
+
+        // 3. Clear processed cache to regenerate with correct lazy/static strategies
+        this.processedSchemas.clear()
+        this.processingStack.clear()
+
+        const modelStrings: string[] = [`import { z } from 'zod';`]
+
+        // 4. Generate Types for Cyclic Schemas FIRST
+        // Use type
+        if (this.cyclicSchemas.size > 0) {
+            modelStrings.push('// Helper types for recursive schemas')
+            for (const name of this.cyclicSchemas) {
+                const pascalName = this.getSchemaName(name)
+                const typeDef = this.mapSchemaObjectToType(name)
+                modelStrings.push(
+                    `export type ${pascalName}Model = ${typeDef};`
+                )
+            }
+            modelStrings.push('')
         }
+
+        // 5. Sort schemas topologically
+        const sortedSchemaNames = this.sortSchemas()
+
+        // 6. Generate Zod Schemas
+        for (const name of sortedSchemaNames) {
+            const zodSchema =
+                this.processedSchemas.get(name) ||
+                this.mapSchemaObjectToZod(name)
+            const pascalName = this.getSchemaName(name)
+
+            if (this.cyclicSchemas.has(name)) {
+                // For cyclic schemas, use the explicitly generated type
+                modelStrings.push(
+                    `export const ${pascalName}: z.ZodType<${pascalName}Model> = ${zodSchema};`
+                )
+            } else {
+                // Standard generation
+                modelStrings.push(`export const ${pascalName} = ${zodSchema};`)
+                modelStrings.push(
+                    `export type ${pascalName}Model = z.infer<typeof ${pascalName}>;`
+                )
+            }
+        }
+
         return modelStrings.join('\n\n')
     }
 
-    private resolveRef(ref: string): {
-        name: string
-        schema: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject
-    } {
-        if (!ref.startsWith('#/components/schemas/')) {
-            throw new SchemaValidationError(
-                `Unsupported $ref format: ${ref}`,
-                'unknown',
-                ref,
-                'Use the format "#/components/schemas/SchemaName" for schema references'
-            )
-        }
-        const name = ref.split('/').pop()
-        if (!name) {
-            throw new SchemaValidationError(
-                `Invalid $ref path: ${ref}`,
-                'unknown',
-                ref,
-                'Ensure $ref follows "#/components/schemas/SchemaName" format'
-            )
-        }
-        const schema = this.spec.components?.schemas?.[name]
-        if (!schema) {
-            throw new SchemaValidationError(
-                `Schema not found for $ref: ${ref}`,
-                name,
-                ref,
-                `Check that the schema "${name}" is defined in components.schemas`
-            )
-        }
-        return { name, schema }
-    }
-
-    private mapSchemaObjectToZod(
+    private mapSchemaObjectToType(
         name: string,
         schemaObject?: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject
     ): string {
         const schema = schemaObject || this.spec.components?.schemas?.[name]
-        if (!schema) {
-            throw new SchemaValidationError(
-                `Schema "${name}" not found in specification`,
-                name,
-                `components.schemas.${name}`,
-                'Check that the schema is defined in the components.schemas section'
-            )
-        }
-
-        if (this.processedSchemas.has(name) && !schemaObject) {
-            return toPascalCase(name)
-        }
-
-        if (isReferenceObject(schema) && Object.keys(schema).length > 1) {
-            const { $ref, ...rest } = schema
-            const allOfSchema: OpenAPIV3_1.SchemaObject = {
-                allOf: [{ $ref }, rest as OpenAPIV3_1.SchemaObject],
-            }
-            return this.mapSchemaObjectToZod(name, allOfSchema)
-        }
+        if (!schema) return 'any'
 
         if (isReferenceObject(schema)) {
             const { name: refName } = this.resolveRef(schema.$ref)
-            this.mapSchemaObjectToZod(refName)
-            return toPascalCase(refName)
+            return `${this.getSchemaName(refName)}Model`
+        }
+
+        if (schema.oneOf || schema.anyOf) {
+            const items = schema.oneOf || schema.anyOf || []
+            const parts = items.map((i) => this.mapSchemaObjectToType(name, i))
+            return parts.join(' | ')
         }
 
         if (schema.allOf) {
-            const baseRef = schema.allOf[0]
-            const overrides = schema.allOf[1]
+            const parts = schema.allOf.map((i) =>
+                this.mapSchemaObjectToType(name, i)
+            )
+            return parts.join(' & ')
+        }
 
-            if (isReferenceObject(baseRef) && (overrides as any).$defs) {
-                const baseSchemaName = this.resolveRef(baseRef.$ref).name
-                this.mapSchemaObjectToZod(baseSchemaName)
-                const baseSchemaString =
-                    this.processedSchemas.get(baseSchemaName)
+        switch (schema.type) {
+            case 'string':
+                if (schema.enum)
+                    return schema.enum.map((e) => `'${e}'`).join(' | ')
+                return 'string'
+            case 'integer':
+            case 'number':
+                return 'number'
+            case 'boolean':
+                return 'boolean'
+            case 'array': {
+                if (!schema.items) return 'any[]'
+                const itemType = this.mapSchemaObjectToType(name, schema.items)
+                // Wrap in parens if union/intersection to ensure Array syntax validity
+                return itemType.includes('|') || itemType.includes('&')
+                    ? `Array<${itemType}>`
+                    : `${itemType}[]`
+            }
+            case 'object': {
+                // Check purely for properties vs dictionary
+                if (!schema.properties && !schema.additionalProperties)
+                    return '{}'
 
-                if (!baseSchemaString) {
-                    throw new SchemaValidationError(
-                        `Base schema "${baseSchemaName}" not found in processed schemas`,
-                        baseSchemaName,
-                        `allOf[0].$ref`,
-                        'Ensure the base schema is defined before using it in allOf'
+                const props: string[] = []
+                if (schema.properties) {
+                    Object.entries(schema.properties).forEach(
+                        ([key, value]) => {
+                            const isRequired = schema.required?.includes(key)
+                            const typeStr = this.mapSchemaObjectToType(
+                                key,
+                                value
+                            )
+                            props.push(
+                                `  '${key}'${isRequired ? '' : '?'}: ${typeStr};`
+                            )
+                        }
                     )
                 }
 
-                const itemRef = (overrides as any).$defs.productItem.$ref
-                const itemSchemaName = this.resolveRef(itemRef).name
-                const itemSchemaString =
-                    this.mapSchemaObjectToZod(itemSchemaName)
+                if (schema.additionalProperties) {
+                    const addlType =
+                        typeof schema.additionalProperties === 'object'
+                            ? this.mapSchemaObjectToType(
+                                  name,
+                                  schema.additionalProperties
+                              )
+                            : 'any'
+                    props.push(`  [key: string]: ${addlType};`)
+                }
+                return `{\n${props.join('\n')}\n}`
+            }
+            default:
+                return 'any'
+        }
+    }
 
-                const zodSchema = baseSchemaString.replace(
-                    'z.array(z.any())',
-                    `z.array(${itemSchemaString})`
-                )
-                this.processedSchemas.set(name, zodSchema)
-                return zodSchema
+    private sortSchemas(): string[] {
+        const visited = new Set<string>()
+        const sorted: string[] = []
+        const recursionStack = new Set<string>()
+
+        const visit = (name: string) => {
+            if (recursionStack.has(name)) return
+            if (visited.has(name)) return
+
+            recursionStack.add(name)
+
+            const refs = this.schemaReferences.get(name) || new Set()
+            for (const ref of refs) {
+                visit(ref)
             }
 
+            recursionStack.delete(name)
+            visited.add(name)
+            sorted.push(name)
+        }
+
+        if (this.spec.components?.schemas) {
+            for (const name of Object.keys(this.spec.components.schemas)) {
+                visit(name)
+            }
+        }
+
+        return sorted
+    }
+
+    private mapSchemaObjectToZod(
+        name: string,
+        schemaObject?: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
+        currentSchema?: string
+    ): string {
+        const schema = schemaObject || this.spec.components?.schemas?.[name]
+        if (!schema) {
+            throw new SchemaValidationError(
+                `Schema "${name}" not found`,
+                name,
+                `components.schemas.${name}`
+            )
+        }
+
+        // Used cached string if fully processed
+        if (this.processedSchemas.has(name) && !schemaObject) {
+            // IMPORTANT: Use the unique name
+            return this.getSchemaName(name)
+        }
+
+        // Lazy Loading for Cycles
+        if (!schemaObject && this.processingStack.has(name)) {
+            const from = currentSchema || name
+            this.trackReference(from, name)
+            return `z.lazy(() => ${this.getSchemaName(name)})`
+        }
+
+        if (!schemaObject) {
+            this.processingStack.add(name)
+        }
+
+        // Handle References
+        if (isReferenceObject(schema)) {
+            const { name: refName } = this.resolveRef(schema.$ref)
+
+            // Track dependency
+            if (this.processingStack.size > 0) {
+                const stackArray = Array.from(this.processingStack)
+                const currentlyProcessing = stackArray[stackArray.length - 1]!
+                this.trackReference(currentlyProcessing, refName)
+            }
+
+            // Lazy load if cyclic or recursion detected
+            const isCyclic = this.cyclicSchemas.has(refName)
+            const isRecursive = this.processingStack.has(refName)
+            const isForwardRef =
+                !this.processedSchemas.has(refName) &&
+                !this.processingStack.has(refName) &&
+                !schemaObject
+
+            if (isCyclic || isRecursive || isForwardRef) {
+                if (
+                    !this.processedSchemas.has(refName) &&
+                    !this.processingStack.has(refName)
+                ) {
+                    this.mapSchemaObjectToZod(refName, undefined, name)
+                }
+                const result = `z.lazy(() => ${this.getSchemaName(refName)})`
+
+                if (!schemaObject) {
+                    this.processingStack.delete(name)
+                    this.processedSchemas.set(name, result)
+                }
+                return result
+            }
+
+            // Standard Reference
+            this.mapSchemaObjectToZod(refName, undefined, name)
+            const result = this.getSchemaName(refName)
+
+            if (!schemaObject) {
+                this.processingStack.delete(name)
+                this.processedSchemas.set(name, result)
+            }
+            return result
+        }
+
+        // Handle allOf, oneOf, anyOf, and Types
+        if (schema.allOf) {
             const allOfSchemas = schema.allOf
                 .map((s) => this.mapSchemaObjectToZod(name, s))
                 .join('.and(')
             const zodSchema = allOfSchemas + ')'.repeat(schema.allOf.length - 1)
-            if (!schemaObject) this.processedSchemas.set(name, zodSchema)
+            if (!schemaObject) {
+                this.processedSchemas.set(name, zodSchema)
+                this.processingStack.delete(name)
+            }
             return zodSchema
         }
 
-        // Expanded Union Handling: oneOf (discriminated & simple) and anyOf
         if (schema.oneOf || schema.anyOf) {
             const items = schema.oneOf || schema.anyOf || []
+            const options = items.map((s) => this.mapSchemaObjectToZod(name, s))
+
+            let zodSchema: string
             if (schema.oneOf && schema.discriminator) {
-                const discriminator = schema.discriminator.propertyName
-                const options = items.map((s) => {
-                    if (!isReferenceObject(s)) {
-                        throw new SchemaValidationError(
-                            'oneOf with discriminator must use $ref objects',
-                            name,
-                            'oneOf',
-                            'Move inline schemas to components.schemas and reference them with $ref'
-                        )
-                    }
-                    return this.mapSchemaObjectToZod(name, s)
-                })
-                const zodSchema = `z.discriminatedUnion('${discriminator}', [${options.join(', ')}])`
-                if (!schemaObject) this.processedSchemas.set(name, zodSchema)
-                return zodSchema
+                zodSchema = `z.discriminatedUnion('${schema.discriminator.propertyName}', [${options.join(', ')}])`
             } else {
-                const options = items.map((s) =>
-                    this.mapSchemaObjectToZod(name, s)
-                )
-                const zodSchema = `z.union([${options.join(', ')}])`
-                if (!schemaObject) this.processedSchemas.set(name, zodSchema)
-                return zodSchema
+                zodSchema = `z.union([${options.join(', ')}])`
             }
+
+            if (!schemaObject) {
+                this.processedSchemas.set(name, zodSchema)
+                this.processingStack.delete(name)
+            }
+            return zodSchema
         }
 
+        // Standard Types
         let zodString = 'z.any()'
 
-        // Handle simple types defined as arrays (e.g. type: ["string", "null"]) for OAS 3.1 nullability
+        // Handle nullable types
         if (Array.isArray(schema.type)) {
-            if (schema.type.length === 2 && schema.type.includes('null')) {
-                const nonNullType = schema.type.find((t) => t !== 'null')
-                if (nonNullType) {
-                    // Create a temporary schema object to recurse
+            if (schema.type.includes('null')) {
+                const nonNullTypes = schema.type.filter((t) => t !== 'null')
+                if (nonNullTypes.length === 1) {
                     const innerSchema = {
                         ...schema,
-                        type: nonNullType,
+                        type: nonNullTypes[0],
                     } as OpenAPIV3_1.SchemaObject
-                    // We must remove 'null' from the type array to avoid infinite recursion if we passed schema.type back,
-                    // but here we are constructing a new single-type object.
-                    // Note: We lose other constraints if they were specific to one type, but standard OAS constraints apply to the instance.
                     zodString = `${this.mapSchemaObjectToZod(name, innerSchema)}.nullable()`
+                } else {
+                    // Complex union nullable
+                    zodString = 'z.any()' // Simplification for complex union arrays
                 }
             }
         } else {
@@ -199,31 +357,29 @@ export class SchemaGenerator {
                 case 'string':
                     if (schema.const) {
                         zodString = `z.literal('${schema.const}')`
+                    } else if (schema.enum) {
+                        zodString = `z.enum([${schema.enum.map((e) => `'${e}'`).join(', ')}])`
                     } else {
                         zodString = 'z.string()'
-                        if (schema.enum) {
-                            zodString = `z.enum([${schema.enum.map((e) => `'${e}'`).join(', ')}])`
-                        }
                         if (schema.format === 'date-time')
-                            zodString = 'z.iso.datetime()'
+                            zodString = 'z.iso.datetime()' // Zod 3.20+
                         else if (schema.format === 'email')
                             zodString = 'z.email()'
                         else if (schema.format === 'uri') zodString = 'z.url()'
                         else if (schema.format === 'uuid')
-                            zodString = 'z.uuid()' // use z.uuid() (not z.string().uuid())
-                        if (schema.pattern)
-                            zodString += `.regex(/${schema.pattern}/)`
+                            zodString = 'z.uuid()'
+                        if (schema.pattern) {
+                            const escapedPattern = schema.pattern
+                                .replace(/\\/g, '\\\\')
+                                .replace(/\//g, '\\/')
+                            zodString += `.regex(/${escapedPattern}/)`
+                        }
                     }
                     break
                 case 'number':
-                    zodString = 'z.number()'
-                    if (schema.minimum !== undefined)
-                        zodString += `.min(${schema.minimum})`
-                    if (schema.maximum !== undefined)
-                        zodString += `.max(${schema.maximum})`
-                    break
                 case 'integer':
-                    zodString = 'z.number().int()'
+                    zodString = 'z.number()'
+                    if (schema.type === 'integer') zodString += '.int()'
                     if (schema.minimum !== undefined)
                         zodString += `.min(${schema.minimum})`
                     if (schema.maximum !== undefined)
@@ -233,13 +389,15 @@ export class SchemaGenerator {
                     zodString = 'z.boolean()'
                     break
                 case 'array': {
-                    if (!schema.items)
-                        throw new Error('Array schema must have items defined.')
-                    const itemSchema = this.mapSchemaObjectToZod(
-                        name,
-                        schema.items
-                    )
-                    zodString = `z.array(${itemSchema})`
+                    if (schema.items) {
+                        const itemSchema = this.mapSchemaObjectToZod(
+                            name,
+                            schema.items
+                        )
+                        zodString = `z.array(${itemSchema})`
+                    } else {
+                        zodString = 'z.array(z.any())'
+                    }
                     break
                 }
                 case 'object':
@@ -252,20 +410,14 @@ export class SchemaGenerator {
                                     key,
                                     value
                                 )
-                                const finalType = isRequired
-                                    ? zodType
-                                    : `${zodType}.optional()`
-                                return `'${key}': ${finalType}`
+                                return `'${key}': ${isRequired ? zodType : `${zodType}.optional()`}`
                             })
                             .join(',\n')
-                        zodString = `z.object({
-${properties}
-})`
+                        zodString = `z.object({\n${properties}\n})`
                     } else {
                         zodString = `z.object({})`
                     }
 
-                    // Handle additionalProperties
                     if (schema.additionalProperties) {
                         if (schema.additionalProperties === true) {
                             zodString += `.catchall(z.any())`
@@ -276,23 +428,86 @@ ${properties}
                                 name,
                                 schema.additionalProperties
                             )
+                            // If it's a record (no properties defined), use z.record
                             if (schema.properties) {
                                 zodString += `.catchall(${additionalSchema})`
                             } else {
-                                // If no properties, it is a Record
-                                zodString = `z.record(${additionalSchema}, z.any())`
+                                zodString = `z.record(z.string(), ${additionalSchema})`
                             }
                         }
                     }
                     break
                 default:
+                    zodString = 'z.any()'
                     break
             }
         }
 
         if (!schemaObject) {
             this.processedSchemas.set(name, zodString)
+            this.processingStack.delete(name)
         }
         return zodString
+    }
+
+    private resolveRef(ref: string): {
+        name: string
+        schema: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject
+    } {
+        if (!ref.startsWith('#/components/schemas/')) {
+            throw new SchemaValidationError(
+                `Unsupported $ref: ${ref}`,
+                'unknown',
+                ref
+            )
+        }
+        const name = ref.split('/').pop()!
+        const schema = this.spec.components?.schemas?.[name]
+        if (!schema) {
+            throw new SchemaValidationError(
+                `Schema not found: ${ref}`,
+                name,
+                ref
+            )
+        }
+        return { name, schema }
+    }
+
+    private trackReference(from: string, to: string): void {
+        if (!this.schemaReferences.has(from)) {
+            this.schemaReferences.set(from, new Set())
+        }
+        this.schemaReferences.get(from)!.add(to)
+    }
+
+    private detectCycles(): Set<string> {
+        const cyclicSchemas = new Set<string>()
+        const visited = new Set<string>()
+        const recursionStack = new Set<string>()
+
+        const dfs = (schema: string): boolean => {
+            if (recursionStack.has(schema)) {
+                cyclicSchemas.add(schema)
+                return true
+            }
+            if (visited.has(schema)) return false
+
+            visited.add(schema)
+            recursionStack.add(schema)
+
+            const refs = this.schemaReferences.get(schema) || new Set()
+            for (const ref of refs) {
+                if (dfs(ref)) cyclicSchemas.add(schema)
+            }
+
+            recursionStack.delete(schema)
+            return cyclicSchemas.has(schema)
+        }
+
+        for (const schema of this.schemaReferences.keys()) {
+            if (!visited.has(schema)) dfs(schema)
+        }
+
+        return cyclicSchemas
     }
 }
