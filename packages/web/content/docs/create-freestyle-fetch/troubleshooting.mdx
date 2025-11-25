@@ -1,0 +1,79 @@
+---
+title: Troubleshooting
+description: Common errors and solutions when using Create Freestyle Fetch
+---
+
+# Troubleshooting
+
+This guide covers common errors you might encounter when using `create-freestyle-fetch` and how to resolve them.
+
+## Common Errors
+
+### 1. Spec Parsing Errors
+
+> **Error:** `✗ Error parsing OpenAPI specification`
+
+This occurs when the input file is not a valid OpenAPI document or cannot be read.
+
+**Common Causes:**
+- File does not exist at the specified path.
+- Invalid YAML or JSON syntax (e.g., indentation issues, missing commas).
+- Missing required OpenAPI fields like `openapi` version or `info` object.
+- Broken `$ref` pointers to external files.
+
+**Solution:**
+- Check the file path and permissions.
+- Validate your spec using an online validator or editor extension.
+- Ensure you are using OpenAPI 3.0 or 3.1.
+
+### 2. Schema Validation Errors
+
+> **Error:** `✗ Invalid Schema`
+
+This happens when a schema definition in your spec cannot be converted to a Zod schema.
+
+**Common Causes:**
+- Missing `type` field in a schema.
+- Using unsupported features or formats.
+- Invalid `$ref` paths within schemas.
+
+**Solution:**
+- Follow the suggestion provided in the error message.
+- Ensure all schemas have a valid `type` (e.g., `string`, `object`).
+- Check that referenced schemas exist in `components/schemas`.
+
+### 3. Operation Validation Errors
+
+> **Error:** `✗ Invalid Operation`
+
+This indicates an issue with an API operation definition (path, method, parameters).
+
+**Common Causes:**
+- Query parameters defined without a schema.
+- Missing `operationId` (though this usually results in a warning).
+- Duplicate parameters.
+
+**Solution:**
+- Ensure all parameters have a `schema` defined.
+- Add unique `operationId`s to all operations for better generated code.
+
+### 4. Validation Warnings
+
+> **Warning:** `⚠ Validation Warnings`
+
+These are non-critical issues that don't stop generation but might affect the quality of the generated code.
+
+**Common Warnings:**
+- **Missing Operation ID:** The generator will create an ID based on the method and path, but it's recommended to provide explicit IDs.
+
+## Debugging
+
+If you're still having trouble, you can try:
+
+1.  **Simplify the Spec:** Try generating from a minimal valid spec to rule out environment issues.
+2.  **Check Version:** Ensure you are using the latest version of `create-freestyle-fetch`.
+3.  **Verbose Output:** (Future feature) Run with `--verbose` for more details.
+
+## Getting Help
+
+If you encounter a bug or an error not listed here, please [open an issue](https://github.com/freestylejs/fetch/issues) on GitHub with your OpenAPI spec (or a minimal reproduction) and the error output.

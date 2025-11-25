@@ -20,7 +20,6 @@ create-freestyle-fetch generate [options]
 | Option | Alias | Type | Required | Description |
 | ------ | ----- | ---- | -------- | ----------- |
 | `--input <path>` | `-i` | string | Yes | Path to the OpenAPI specification file (JSON or YAML). The generator automatically detects the format based on the file extension. |
-
 | `--output <dir>` | `-o` | string | Yes | Directory where generated files will be saved |
 
 > **Note:** Both `.json` and `.yaml`/`.yml` files are supported. No additional flags are required.
@@ -115,9 +114,12 @@ The CLI provides clear error messages for common issues:
 If the OpenAPI file is invalid or cannot be parsed:
 
 ```bash
-Error: Failed to parse OpenAPI specification
-  File: ./api-spec.yaml
-  Reason: Invalid YAML syntax at line 42
+✗ Error parsing OpenAPI specification
+
+  File: ./api-spec.yaml:42
+  Issue: bad indentation of a mapping entry
+
+  💡 Suggestion: YAML requires consistent indentation (use spaces, not tabs)
 ```
 
 ### B. Missing File
@@ -125,11 +127,26 @@ Error: Failed to parse OpenAPI specification
 If the input file does not exist:
 
 ```bash
-Error: Input file not found
-  Path: ./api-spec.json
+✗ Error parsing OpenAPI specification
+
+  File: ./api-spec.json
+  Issue: ENOENT: no such file or directory
+
+  💡 Suggestion: File not found. Check that "./api-spec.json" exists and is accessible
 ```
 
-### C. Output Directory Issues
+### C. Validation Warnings
+
+The CLI may output warnings for non-critical issues:
+
+```bash
+⚠ Validation Warnings:
+
+  • Missing operationId for GET operation. A generated ID will be used.
+    Path: GET /users
+```
+
+### D. Output Directory Issues
 
 The generator creates the output directory if it doesn't exist. Existing files are overwritten.
 
