@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 
 import { resolve } from 'node:path'
+import chalk from 'chalk'
 import { Command } from 'commander'
 import { outputFileSync } from 'fs-extra'
+import { GeneratorError } from './errors'
 import { parseOpenApiSpec, parsePaths } from './path_parser'
 import { generateRouter } from './router_generator'
 import { SchemaGenerator } from './schema_generator'
+import { SpecValidator } from './validator'
 
 const program = new Command()
 
@@ -20,36 +23,70 @@ program
         'Directory to output the generated client'
     )
     .action(async (options) => {
-        const absoluteInputPath = resolve(process.cwd(), options.input)
-        const absoluteOutputPath = resolve(process.cwd(), options.output)
+        try {
+            const absoluteInputPath = resolve(process.cwd(), options.input)
+            const absoluteOutputPath = resolve(process.cwd(), options.output)
 
-        const spec = await parseOpenApiSpec(absoluteInputPath)
+            console.log(chalk.blue('ℹ') + ' Parsing OpenAPI specification...')
+            const spec = await parseOpenApiSpec(absoluteInputPath)
 
-        const schemaGenerator = new SchemaGenerator(spec)
+            // Validate spec and show warnings
+            const validator = new SpecValidator(spec)
+            validator.validate()
+            const warnings = validator.formatWarnings()
+            if (warnings) {
+                console.log(warnings)
+            }
 
-        // Generate and write models
-        const modelsFileContent = schemaGenerator.generateModels()
+            console.log(chalk.blue('ℹ') + ' Generating models...')
+            const schemaGenerator = new SchemaGenerator(spec)
 
-        outputFileSync(
-            resolve(absoluteOutputPath, 'models.ts'),
-            modelsFileContent
-        )
+            // Generate and write models
+            const modelsFileContent = schemaGenerator.generateModels()
 
-        // Generate and write router
-        const parsedPaths = parsePaths(spec)
-        const routerFileContent = generateRouter(parsedPaths, spec)
+            outputFileSync(
+                resolve(absoluteOutputPath, 'models.ts'),
+                modelsFileContent
+            )
 
-        outputFileSync(resolve(absoluteOutputPath, 'api.ts'), routerFileContent)
+            console.log(chalk.blue('ℹ') + ' Generating router...')
+            // Generate and write router
+            const parsedPaths = parsePaths(spec)
+            const routerFileContent = generateRouter(parsedPaths, spec)
 
-        // Generate and write index
-        outputFileSync(
-            resolve(absoluteOutputPath, 'index.ts'),
-            "export * from './api';\nexport * from './models';"
-        )
+            outputFileSync(
+                resolve(absoluteOutputPath, 'api.ts'),
+                routerFileContent
+            )
 
-        console.log(
-            `API client generated successfully at ${absoluteOutputPath}`
-        )
+            // Generate and write index
+            outputFileSync(
+                resolve(absoluteOutputPath, 'index.ts'),
+                "export * from './api';\nexport * from './models';"
+            )
+
+            console.log(
+                `\n${chalk.green('✔')} API client generated successfully at ${chalk.bold(absoluteOutputPath)}`
+            )
+        } catch (error) {
+            if (error instanceof GeneratorError) {
+                console.error(error.format())
+                process.exit(1)
+            } else {
+                console.error(
+                    `\n${chalk.red('✗')} ${chalk.bold('Unexpected Error')}\n`
+                )
+                if (error instanceof Error) {
+                    console.error(`  ${chalk.dim('Message:')} ${error.message}`)
+                    if (error.stack) {
+                        console.error(`\n${chalk.dim(error.stack)}`)
+                    }
+                } else {
+                    console.error(`  ${String(error)}`)
+                }
+                process.exit(1)
+            }
+        }
     })
 
 program.parse(process.argv)
