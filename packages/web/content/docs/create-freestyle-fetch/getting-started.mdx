@@ -41,37 +41,46 @@ This command generates three files in the output directory:
 
 - **`models.ts`** - **Zod** schemas for all data types
 - **`api.ts`** - Type-safe router with all API endpoints
+- **`auth.ts`** - Authentication configuration and middleware
 - **`index.ts`** - Re-exports for convenient imports
 
 ### B. Use the Generated Client
-
-Import and use the generated API client in your application:
-
-```typescript
-import { api } from './generated'
-
-// GET request with path parameters
-const user = await api.users.$userId.GET({
-  params: { userId: '123' }
-})
-
-// POST request with request body
-const newPost = await api.posts.POST({
-  body: {
-    title: 'Hello World',
-    content: 'This is my first post'
-  }
-})
-
-// GET request with query parameters
-const posts = await api.posts.GET({
-  query: {
-    page: 1,
-    limit: 10,
-    sort: 'created_at'
-  }
-})
-```
+ 
+ Import and use the generated API client in your application. The generated code exports a `createClient` function that you can use to initialize the client with your base URL and authentication.
+ 
+ ```typescript
+ import { createClient } from './generated'
+ 
+ // Initialize the client
+ const client = createClient({
+   baseUrl: 'https://api.example.com',
+   auth: {
+     bearerAuth: { token: 'my-token' }
+   }
+ })
+ 
+ // GET request with path parameters
+ const user = await client.users.$userId.GET({
+   params: { userId: '123' }
+ })
+ 
+ // POST request with request body
+ const newPost = await client.posts.POST({
+   body: {
+     title: 'Hello World',
+     content: 'This is my first post'
+   }
+ })
+ 
+ // GET request with query parameters
+ const posts = await client.posts.GET({
+   query: {
+     page: 1,
+     limit: 10,
+     sort: 'created_at'
+   }
+ })
+ ```
 
 ## Project Structure
 
@@ -83,6 +92,7 @@ your-project/
 │   ├── generated/
 │   │   ├── models.ts      # Zod schemas
 │   │   ├── api.ts         # API router
+│   │   ├── auth.ts        # Auth middleware
 │   │   └── index.ts       # Exports
 │   └── your-code.ts       # Your application
 └── openapi.yaml           # API specification

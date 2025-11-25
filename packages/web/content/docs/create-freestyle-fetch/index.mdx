@@ -37,6 +37,12 @@ The generated code uses [**Zod `v4`**](https://zod.dev/) for runtime validation 
     />
     <Card
         icon={<ShieldCheckIcon />}
+        title="Authentication"
+        description="Built-in support for Bearer, Basic, and API Key authentication schemes."
+        href="/en/docs/create-freestyle-fetch/authentication"
+    />
+    <Card
+        icon={<ZapIcon />}
         title="Fetch Integration"
         description="Generated clients use the @freestylejs/fetch fluent builder API."
         href="/en/docs/fetch"
@@ -56,10 +62,15 @@ npx create-freestyle-fetch generate \
 Use the generated client in your code:
 
 ```typescript
-import { api } from './api'
+import { createClient } from './api'
+
+// Initialize the client
+const client = createClient({
+  baseUrl: 'https://api.example.com'
+})
 
 // Fully typed request and response
-const user = await api.users.$userId.GET({
+const user = await client.users.$userId.GET({
   params: { userId: '123' }
 })
 
