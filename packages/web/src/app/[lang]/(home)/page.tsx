@@ -3,6 +3,8 @@ import { CONFIG } from '@/constant/config'
 import {
     BodyValidationDemo,
     bodyValidationCode,
+    CreateFreestyleFetchDemo,
+    createFreestyleFetchCode,
     ErrorHandlingDemo,
     errorHandlingCode,
     FeatureCard,
@@ -81,6 +83,15 @@ export default function HomePage() {
                     code={errorHandlingCode}
                 >
                     <ErrorHandlingDemo />
+                </FeatureCard>
+
+                <FeatureCard
+                    title="OpenAPI Generator"
+                    description="Bridge the gap between your backend and frontend. Generate production-ready, type-safe clients in seconds."
+                    code={createFreestyleFetchCode}
+                    link="/docs/create-freestyle-fetch"
+                >
+                    <CreateFreestyleFetchDemo />
                 </FeatureCard>
             </div>
         </main>

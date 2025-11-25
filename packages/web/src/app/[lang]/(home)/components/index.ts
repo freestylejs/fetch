@@ -1,4 +1,5 @@
 export * from './body_validation_demo'
+export * from './create_freestyle_fetch_demo'
 export * from './error_handling_demo'
 export * from './feature_card'
 export * from './fetch_builder_demo'
