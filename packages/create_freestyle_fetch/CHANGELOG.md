@@ -1,5 +1,11 @@
 # create-freestyle-fetch
 
+## 1.2.0
+
+### Minor Changes
+
+- Add cyclic schema reference resolve process using topological sort, Fix namespace possible collision, Support recursive schema, any type into static explicit type using type generation
+
 ## 1.1.0
 
 ### Minor Changes
