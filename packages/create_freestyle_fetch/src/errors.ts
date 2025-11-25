@@ -112,3 +112,28 @@ ${this.suggestion ? `\n  ${chalk.yellow('💡 Suggestion:')} ${this.suggestion}`
     `.trim()
     }
 }
+/**
+ * Error for invalid operation definitions
+ */
+export class OperationValidationError extends GeneratorError {
+    constructor(
+        message: string,
+        public operationId: string | undefined,
+        public method: string,
+        public path: string,
+        public suggestion?: string
+    ) {
+        super(message)
+    }
+
+    format(): string {
+        return `
+${chalk.red('✗')} ${chalk.bold('Invalid Operation')}
+
+  ${chalk.dim('Path:')} ${this.method.toUpperCase()} ${this.path}
+${this.operationId ? `  ${chalk.dim('Operation ID:')} ${this.operationId}` : ''}
+  ${chalk.dim('Issue:')} ${this.message}
+${this.suggestion ? `\n  ${chalk.yellow('💡 Suggestion:')} ${this.suggestion}` : ''}
+    `.trim()
+    }
+}
