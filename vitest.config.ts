@@ -10,6 +10,10 @@ export default defineConfig({
             reporter: ['html', 'text'],
             provider: 'v8',
         },
+        typecheck: {
+            enabled: true,
+            checker: 'tsc',
+            include: ['**/*.{test,spec}-d.ts'],
+        }
     },
-    resolve: {},
 })

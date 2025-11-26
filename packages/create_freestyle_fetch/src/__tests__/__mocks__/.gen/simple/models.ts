@@ -1,6 +1,24 @@
 import { z } from 'zod';
 
-export const Book = z.object({
+// Helper types for schemas
+
+export type BookModel = {
+  'uuid': string;
+  'name': string;
+  'price': number;
+  'category': string;
+  'publish_date': string;
+};
+
+export type BookRequestModel = {
+  'name': string;
+  'price': number;
+  'category': string;
+};
+
+
+
+export const Book: z.ZodType<BookModel> = z.object({
 'uuid': z.string(),
 'name': z.string(),
 'price': z.number(),
@@ -8,12 +26,8 @@ export const Book = z.object({
 'publish_date': z.iso.datetime()
 });
 
-export type BookModel = z.infer<typeof Book>;
-
-export const BookRequest = z.object({
+export const BookRequest: z.ZodType<BookRequestModel> = z.object({
 'name': z.string(),
 'price': z.number(),
 'category': z.string()
 });
-
-export type BookRequestModel = z.infer<typeof BookRequest>;

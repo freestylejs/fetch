@@ -690,8 +690,14 @@ describe('SchemaGenerator', () => {
             })
             const generator = new SchemaGenerator(spec)
             const result = generator.generateModels()
-            expect(result).toContain('export const UserProfile =')
-            expect(result).toContain('export type UserProfileModel =')
+            expect(result).toContain(
+                'export const UserProfile: z.ZodType<UserProfileModel> = z.object({'
+            )
+            expect(result).toContain("'name': z.string().optional()")
+            expect(result).toContain('});')
+            expect(result).toContain(
+                "export type UserProfileModel = {\n  'name'?: string | undefined;\n};"
+            )
         })
 
         it('should generate imports and exports', () => {
@@ -701,10 +707,10 @@ describe('SchemaGenerator', () => {
             const generator = new SchemaGenerator(spec)
             const result = generator.generateModels()
             expect(result).toContain("import { z } from 'zod';")
-            expect(result).toContain('export const User = z.string();')
             expect(result).toContain(
-                'export type UserModel = z.infer<typeof User>;'
+                'export const User: z.ZodType<UserModel> = z.string();'
             )
+            expect(result).toContain('export type UserModel = string;')
         })
 
         it('should handle multiple schemas', () => {
@@ -854,7 +860,7 @@ describe('SchemaGenerator', () => {
             const models = generator.generateModels()
 
             expect(models).toContain(
-                "export const UnionHell = z.discriminatedUnion('type', [OptionA, OptionB]);"
+                "export const UnionHell: z.ZodType<UnionHellModel> = z.discriminatedUnion('type', [OptionA, OptionB]);"
             )
         })
 
