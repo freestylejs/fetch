@@ -12,9 +12,18 @@ export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {
         middleware
     }, {
 'books': {
+/**
+ * Get a list of books
+ */
 'GET': f.builder().def_json().def_response(async ({ json }) => z.array(Model.Book).parse(await json())),
+/**
+ * Create a new book
+ */
 'POST': f.builder().def_json().def_body(Model.BookRequest.parse).def_response(async ({ json }) => Model.Book.parse(await json())),
 '$id': {
+/**
+ * Get a book by ID
+ */
 'GET': f.builder().def_json().def_response(async ({ json }) => Model.Book.parse(await json()))
 }
 }
