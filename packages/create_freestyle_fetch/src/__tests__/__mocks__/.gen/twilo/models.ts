@@ -1,6 +1,163 @@
 import { z } from 'zod';
 
-export const EventWebhookRequest = z.object({
+// Helper types for schemas
+
+export type EventWebhookRequestModel = {
+  'enabled'?: boolean | undefined;
+  'url': string;
+  'group_resubscribe'?: boolean | undefined;
+  'delivered'?: boolean | undefined;
+  'group_unsubscribe'?: boolean | undefined;
+  'spam_report'?: boolean | undefined;
+  'bounce'?: boolean | undefined;
+  'deferred'?: boolean | undefined;
+  'unsubscribe'?: boolean | undefined;
+  'processed'?: boolean | undefined;
+  'open'?: boolean | undefined;
+  'click'?: boolean | undefined;
+  'dropped'?: boolean | undefined;
+  'friendly_name'?: string | undefined;
+  'oauth_client_id'?: string | undefined;
+  'oauth_client_secret'?: string | undefined;
+  'oauth_token_url'?: string | undefined;
+};
+
+export type EventWebhookTestRequestModel = {
+  'id'?: string | undefined;
+  'url': string;
+  'oauth_client_id'?: string | undefined;
+  'oauth_client_secret'?: string | undefined;
+  'oauth_token_url'?: string | undefined;
+};
+
+export type EventWebhookBaseResponsePropsModel = {
+  'enabled'?: boolean | undefined;
+  'url'?: string | undefined;
+  'account_status_change'?: boolean | undefined;
+  'group_resubscribe'?: boolean | undefined;
+  'delivered'?: boolean | undefined;
+  'group_unsubscribe'?: boolean | undefined;
+  'spam_report'?: boolean | undefined;
+  'bounce'?: boolean | undefined;
+  'deferred'?: boolean | undefined;
+  'unsubscribe'?: boolean | undefined;
+  'processed'?: boolean | undefined;
+  'open'?: boolean | undefined;
+  'click'?: boolean | undefined;
+  'dropped'?: boolean | undefined;
+  'friendly_name'?: string | undefined;
+  'id'?: string | undefined;
+};
+
+export type EventWebhookDateResponsePropsModel = {
+  'created_date'?: string | undefined;
+  'updated_date'?: string | undefined;
+};
+
+export type EventWebhookOauthResponsePropsModel = {
+  'oauth_client_id'?: string | undefined;
+  'oauth_token_url'?: string | undefined;
+};
+
+export type EventWebhookSignedResponsePropModel = {
+  'public_key'?: string | undefined;
+};
+
+export type EventWebhookUnsignedResponseModel = {
+  'enabled'?: boolean | undefined;
+  'url'?: string | undefined;
+  'account_status_change'?: boolean | undefined;
+  'group_resubscribe'?: boolean | undefined;
+  'delivered'?: boolean | undefined;
+  'group_unsubscribe'?: boolean | undefined;
+  'spam_report'?: boolean | undefined;
+  'bounce'?: boolean | undefined;
+  'deferred'?: boolean | undefined;
+  'unsubscribe'?: boolean | undefined;
+  'processed'?: boolean | undefined;
+  'open'?: boolean | undefined;
+  'click'?: boolean | undefined;
+  'dropped'?: boolean | undefined;
+  'friendly_name'?: string | undefined;
+  'id'?: string | undefined;
+  'created_date'?: string | undefined;
+  'updated_date'?: string | undefined;
+  'oauth_client_id'?: string | undefined;
+  'oauth_token_url'?: string | undefined;
+};
+
+export type EventWebhookSignedResponseModel = {
+  'enabled'?: boolean | undefined;
+  'url'?: string | undefined;
+  'account_status_change'?: boolean | undefined;
+  'group_resubscribe'?: boolean | undefined;
+  'delivered'?: boolean | undefined;
+  'group_unsubscribe'?: boolean | undefined;
+  'spam_report'?: boolean | undefined;
+  'bounce'?: boolean | undefined;
+  'deferred'?: boolean | undefined;
+  'unsubscribe'?: boolean | undefined;
+  'processed'?: boolean | undefined;
+  'open'?: boolean | undefined;
+  'click'?: boolean | undefined;
+  'dropped'?: boolean | undefined;
+  'friendly_name'?: string | undefined;
+  'id'?: string | undefined;
+  'created_date'?: string | undefined;
+  'updated_date'?: string | undefined;
+  'oauth_client_id'?: string | undefined;
+  'oauth_token_url'?: string | undefined;
+  'public_key'?: string | undefined;
+};
+
+export type EventWebhookNoDatesResponseModel = {
+  'enabled'?: boolean | undefined;
+  'url'?: string | undefined;
+  'account_status_change'?: boolean | undefined;
+  'group_resubscribe'?: boolean | undefined;
+  'delivered'?: boolean | undefined;
+  'group_unsubscribe'?: boolean | undefined;
+  'spam_report'?: boolean | undefined;
+  'bounce'?: boolean | undefined;
+  'deferred'?: boolean | undefined;
+  'unsubscribe'?: boolean | undefined;
+  'processed'?: boolean | undefined;
+  'open'?: boolean | undefined;
+  'click'?: boolean | undefined;
+  'dropped'?: boolean | undefined;
+  'friendly_name'?: string | undefined;
+  'id'?: string | undefined;
+  'oauth_client_id'?: string | undefined;
+  'oauth_token_url'?: string | undefined;
+  'public_key'?: string | undefined;
+};
+
+export type EventWebhookAllResponseModel = {
+  'max_allowed'?: number | undefined;
+  'webhooks'?: EventWebhookSignedResponseModel[] | undefined;
+};
+
+export type ParseSettingModel = {
+  'url'?: string | undefined;
+  'hostname'?: string | undefined;
+  'spam_check'?: boolean | undefined;
+  'send_raw'?: boolean | undefined;
+};
+
+export type ErrorResponseModel = {
+  'errors'?: Array<{
+  'message'?: string | undefined;
+  'field'?: string | undefined;
+  'help'?: {} | undefined;
+}> | undefined;
+  'id'?: string | undefined;
+};
+
+export type AggregatedByModel = 'day' | 'week' | 'month';
+
+
+
+export const EventWebhookRequest: z.ZodType<EventWebhookRequestModel> = z.object({
 'enabled': z.boolean().optional(),
 'url': z.string(),
 'group_resubscribe': z.boolean().optional(),
@@ -20,9 +177,7 @@ export const EventWebhookRequest = z.object({
 'oauth_token_url': z.string().optional()
 });
 
-export type EventWebhookRequestModel = z.infer<typeof EventWebhookRequest>;
-
-export const EventWebhookTestRequest = z.object({
+export const EventWebhookTestRequest: z.ZodType<EventWebhookTestRequestModel> = z.object({
 'id': z.string().optional(),
 'url': z.string(),
 'oauth_client_id': z.string().optional(),
@@ -30,9 +185,7 @@ export const EventWebhookTestRequest = z.object({
 'oauth_token_url': z.string().optional()
 });
 
-export type EventWebhookTestRequestModel = z.infer<typeof EventWebhookTestRequest>;
-
-export const EventWebhookBaseResponseProps = z.object({
+export const EventWebhookBaseResponseProps: z.ZodType<EventWebhookBaseResponsePropsModel> = z.object({
 'enabled': z.boolean().optional(),
 'url': z.string().optional(),
 'account_status_change': z.boolean().optional(),
@@ -51,29 +204,21 @@ export const EventWebhookBaseResponseProps = z.object({
 'id': z.string().optional()
 });
 
-export type EventWebhookBaseResponsePropsModel = z.infer<typeof EventWebhookBaseResponseProps>;
-
-export const EventWebhookDateResponseProps = z.object({
+export const EventWebhookDateResponseProps: z.ZodType<EventWebhookDateResponsePropsModel> = z.object({
 'created_date': z.iso.datetime().optional(),
 'updated_date': z.iso.datetime().optional()
 });
 
-export type EventWebhookDateResponsePropsModel = z.infer<typeof EventWebhookDateResponseProps>;
-
-export const EventWebhookOauthResponseProps = z.object({
+export const EventWebhookOauthResponseProps: z.ZodType<EventWebhookOauthResponsePropsModel> = z.object({
 'oauth_client_id': z.string().optional(),
 'oauth_token_url': z.string().optional()
 });
 
-export type EventWebhookOauthResponsePropsModel = z.infer<typeof EventWebhookOauthResponseProps>;
-
-export const EventWebhookSignedResponseProp = z.object({
+export const EventWebhookSignedResponseProp: z.ZodType<EventWebhookSignedResponsePropModel> = z.object({
 'public_key': z.string().optional()
 });
 
-export type EventWebhookSignedResponsePropModel = z.infer<typeof EventWebhookSignedResponseProp>;
-
-export const EventWebhookUnsignedResponse = z.object({
+export const EventWebhookUnsignedResponse: z.ZodType<EventWebhookUnsignedResponseModel> = z.object({
 'enabled': z.boolean().optional(),
 'url': z.string().optional(),
 'account_status_change': z.boolean().optional(),
@@ -96,9 +241,7 @@ export const EventWebhookUnsignedResponse = z.object({
 'oauth_token_url': z.string().optional()
 });
 
-export type EventWebhookUnsignedResponseModel = z.infer<typeof EventWebhookUnsignedResponse>;
-
-export const EventWebhookSignedResponse = z.object({
+export const EventWebhookSignedResponse: z.ZodType<EventWebhookSignedResponseModel> = z.object({
 'enabled': z.boolean().optional(),
 'url': z.string().optional(),
 'account_status_change': z.boolean().optional(),
@@ -122,9 +265,7 @@ export const EventWebhookSignedResponse = z.object({
 'public_key': z.string().optional()
 });
 
-export type EventWebhookSignedResponseModel = z.infer<typeof EventWebhookSignedResponse>;
-
-export const EventWebhookNoDatesResponse = z.object({
+export const EventWebhookNoDatesResponse: z.ZodType<EventWebhookNoDatesResponseModel> = z.object({
 'enabled': z.boolean().optional(),
 'url': z.string().optional(),
 'account_status_change': z.boolean().optional(),
@@ -146,25 +287,19 @@ export const EventWebhookNoDatesResponse = z.object({
 'public_key': z.string().optional()
 });
 
-export type EventWebhookNoDatesResponseModel = z.infer<typeof EventWebhookNoDatesResponse>;
-
-export const EventWebhookAllResponse = z.object({
+export const EventWebhookAllResponse: z.ZodType<EventWebhookAllResponseModel> = z.object({
 'max_allowed': z.number().optional(),
 'webhooks': z.array(EventWebhookSignedResponse).optional()
 });
 
-export type EventWebhookAllResponseModel = z.infer<typeof EventWebhookAllResponse>;
-
-export const ParseSetting = z.object({
+export const ParseSetting: z.ZodType<ParseSettingModel> = z.object({
 'url': z.string().optional(),
 'hostname': z.string().optional(),
 'spam_check': z.boolean().optional(),
 'send_raw': z.boolean().optional()
 });
 
-export type ParseSettingModel = z.infer<typeof ParseSetting>;
-
-export const ErrorResponse = z.object({
+export const ErrorResponse: z.ZodType<ErrorResponseModel> = z.object({
 'errors': z.array(z.object({
 'message': z.string().optional(),
 'field': z.string().optional(),
@@ -173,8 +308,4 @@ export const ErrorResponse = z.object({
 'id': z.string().optional()
 });
 
-export type ErrorResponseModel = z.infer<typeof ErrorResponse>;
-
-export const AggregatedBy = z.enum(['day', 'week', 'month']);
-
-export type AggregatedByModel = z.infer<typeof AggregatedBy>;
+export const AggregatedBy: z.ZodType<AggregatedByModel> = z.enum(['day', 'week', 'month']);

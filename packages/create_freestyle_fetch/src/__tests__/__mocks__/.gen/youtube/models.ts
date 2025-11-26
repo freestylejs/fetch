@@ -1,21 +1,127 @@
 import { z } from 'zod';
 
-export const PageInfo = z.object({
+// Helper types for schemas
+
+export type PageInfoModel = {
+  'totalResults'?: number | undefined;
+  'resultsPerPage'?: number | undefined;
+};
+
+export type ThumbnailModel = {
+  'url'?: string | undefined;
+  'width'?: number | undefined;
+  'height'?: number | undefined;
+};
+
+export type ThumbnailDetailsModel = {
+  'default'?: ThumbnailModel | undefined;
+  'medium'?: ThumbnailModel | undefined;
+  'high'?: ThumbnailModel | undefined;
+  'standard'?: ThumbnailModel | undefined;
+  'maxres'?: ThumbnailModel | undefined;
+};
+
+export type VideoLocalizationModel = {
+  'title'?: string | undefined;
+  'description'?: string | undefined;
+};
+
+export type VideoSnippetModel = {
+  'publishedAt'?: string | undefined;
+  'channelId'?: string | undefined;
+  'title'?: string | undefined;
+  'description'?: string | undefined;
+  'thumbnails'?: ThumbnailDetailsModel | undefined;
+  'channelTitle'?: string | undefined;
+  'tags'?: string[] | undefined;
+  'categoryId'?: string | undefined;
+  'liveBroadcastContent'?: 'none' | 'upcoming' | 'live' | 'completed' | undefined;
+  'localized'?: VideoLocalizationModel | undefined;
+};
+
+export type VideoContentDetailsModel = {
+  'duration'?: string | undefined;
+  'dimension'?: string | undefined;
+  'definition'?: 'hd' | 'sd' | undefined;
+  'caption'?: 'false' | 'true' | undefined;
+  'licensedContent'?: boolean | undefined;
+  'regionRestriction'?: {
+  'allowed'?: string[] | undefined;
+  'blocked'?: string[] | undefined;
+} | undefined;
+};
+
+export type VideoStatusModel = {
+  'uploadStatus'?: 'deleted' | 'failed' | 'processed' | 'rejected' | 'uploaded' | undefined;
+  'failureReason'?: 'codec' | 'conversion' | 'emptyFile' | 'invalidFile' | 'tooSmall' | 'uploadAborted' | undefined;
+  'rejectionReason'?: 'claim' | 'copyright' | 'duplicate' | 'inappropriate' | 'legal' | 'length' | 'termsOfUse' | 'trademark' | 'uploaderAccountClosed' | 'uploaderAccountSuspended' | undefined;
+  'privacyStatus'?: 'private' | 'public' | 'unlisted' | undefined;
+  'license'?: 'creativeCommon' | 'youtube' | undefined;
+  'embeddable'?: boolean | undefined;
+  'publicStatsViewable'?: boolean | undefined;
+  'madeForKids'?: boolean | undefined;
+};
+
+export type VideoStatisticsModel = {
+  'viewCount'?: string | undefined;
+  'likeCount'?: string | undefined;
+  'dislikeCount'?: string | undefined;
+  'favoriteCount'?: string | undefined;
+  'commentCount'?: string | undefined;
+};
+
+export type VideoPlayerModel = {
+  'embedHtml'?: string | undefined;
+  'embedHeight'?: number | undefined;
+  'embedWidth'?: number | undefined;
+};
+
+export type VideoModel = {
+  'kind'?: string | undefined;
+  'etag'?: string | undefined;
+  'id'?: string | undefined;
+  'snippet'?: VideoSnippetModel | undefined;
+  'contentDetails'?: VideoContentDetailsModel | undefined;
+  'status'?: VideoStatusModel | undefined;
+  'statistics'?: VideoStatisticsModel | undefined;
+  'player'?: VideoPlayerModel | undefined;
+};
+
+export type VideoListResponseModel = {
+  'kind'?: string | undefined;
+  'etag'?: string | undefined;
+  'nextPageToken'?: string | undefined;
+  'prevPageToken'?: string | undefined;
+  'pageInfo'?: PageInfoModel | undefined;
+  'items'?: VideoModel[] | undefined;
+};
+
+export type ErrorResponseModel = {
+  'error'?: {
+  'code'?: number | undefined;
+  'message'?: string | undefined;
+  'errors'?: Array<{
+  'domain'?: string | undefined;
+  'reason'?: string | undefined;
+  'message'?: string | undefined;
+}> | undefined;
+} | undefined;
+};
+
+
+
+export const PageInfo: z.ZodType<PageInfoModel> = z.object({
 'totalResults': z.number().int().optional(),
 'resultsPerPage': z.number().int().optional()
 });
 
-export type PageInfoModel = z.infer<typeof PageInfo>;
-
-export const Thumbnail = z.object({
+export const Thumbnail: z.ZodType<ThumbnailModel> = z.object({
 'url': z.string().optional(),
 'width': z.number().int().optional(),
 'height': z.number().int().optional()
 });
 
-export type ThumbnailModel = z.infer<typeof Thumbnail>;
-
-export const ThumbnailDetails = z.object({
+export const ThumbnailDetails: z.ZodType<ThumbnailDetailsModel> = z.object({
 'default': Thumbnail.optional(),
 'medium': Thumbnail.optional(),
 'high': Thumbnail.optional(),
@@ -23,16 +129,12 @@ export const ThumbnailDetails = z.object({
 'maxres': Thumbnail.optional()
 });
 
-export type ThumbnailDetailsModel = z.infer<typeof ThumbnailDetails>;
-
-export const VideoLocalization = z.object({
+export const VideoLocalization: z.ZodType<VideoLocalizationModel> = z.object({
 'title': z.string().optional(),
 'description': z.string().optional()
 });
 
-export type VideoLocalizationModel = z.infer<typeof VideoLocalization>;
-
-export const VideoSnippet = z.object({
+export const VideoSnippet: z.ZodType<VideoSnippetModel> = z.object({
 'publishedAt': z.iso.datetime().optional(),
 'channelId': z.string().optional(),
 'title': z.string().optional(),
@@ -45,9 +147,7 @@ export const VideoSnippet = z.object({
 'localized': VideoLocalization.optional()
 });
 
-export type VideoSnippetModel = z.infer<typeof VideoSnippet>;
-
-export const VideoContentDetails = z.object({
+export const VideoContentDetails: z.ZodType<VideoContentDetailsModel> = z.object({
 'duration': z.string().regex(/^PT[0-9]+[M|H|S]$/).optional(),
 'dimension': z.string().optional(),
 'definition': z.enum(['hd', 'sd']).optional(),
@@ -59,9 +159,7 @@ export const VideoContentDetails = z.object({
 }).optional()
 });
 
-export type VideoContentDetailsModel = z.infer<typeof VideoContentDetails>;
-
-export const VideoStatus = z.object({
+export const VideoStatus: z.ZodType<VideoStatusModel> = z.object({
 'uploadStatus': z.enum(['deleted', 'failed', 'processed', 'rejected', 'uploaded']).optional(),
 'failureReason': z.enum(['codec', 'conversion', 'emptyFile', 'invalidFile', 'tooSmall', 'uploadAborted']).optional(),
 'rejectionReason': z.enum(['claim', 'copyright', 'duplicate', 'inappropriate', 'legal', 'length', 'termsOfUse', 'trademark', 'uploaderAccountClosed', 'uploaderAccountSuspended']).optional(),
@@ -72,9 +170,7 @@ export const VideoStatus = z.object({
 'madeForKids': z.boolean().optional()
 });
 
-export type VideoStatusModel = z.infer<typeof VideoStatus>;
-
-export const VideoStatistics = z.object({
+export const VideoStatistics: z.ZodType<VideoStatisticsModel> = z.object({
 'viewCount': z.string().optional(),
 'likeCount': z.string().optional(),
 'dislikeCount': z.string().optional(),
@@ -82,17 +178,13 @@ export const VideoStatistics = z.object({
 'commentCount': z.string().optional()
 });
 
-export type VideoStatisticsModel = z.infer<typeof VideoStatistics>;
-
-export const VideoPlayer = z.object({
+export const VideoPlayer: z.ZodType<VideoPlayerModel> = z.object({
 'embedHtml': z.string().optional(),
 'embedHeight': z.number().int().optional(),
 'embedWidth': z.number().int().optional()
 });
 
-export type VideoPlayerModel = z.infer<typeof VideoPlayer>;
-
-export const Video = z.object({
+export const Video: z.ZodType<VideoModel> = z.object({
 'kind': z.string().optional(),
 'etag': z.string().optional(),
 'id': z.string().optional(),
@@ -103,9 +195,7 @@ export const Video = z.object({
 'player': VideoPlayer.optional()
 });
 
-export type VideoModel = z.infer<typeof Video>;
-
-export const VideoListResponse = z.object({
+export const VideoListResponse: z.ZodType<VideoListResponseModel> = z.object({
 'kind': z.string().optional(),
 'etag': z.string().optional(),
 'nextPageToken': z.string().optional(),
@@ -114,9 +204,7 @@ export const VideoListResponse = z.object({
 'items': z.array(Video).optional()
 });
 
-export type VideoListResponseModel = z.infer<typeof VideoListResponse>;
-
-export const ErrorResponse = z.object({
+export const ErrorResponse: z.ZodType<ErrorResponseModel> = z.object({
 'error': z.object({
 'code': z.number().int().optional(),
 'message': z.string().optional(),
@@ -127,5 +215,3 @@ export const ErrorResponse = z.object({
 })).optional()
 }).optional()
 });
-
-export type ErrorResponseModel = z.infer<typeof ErrorResponse>;
