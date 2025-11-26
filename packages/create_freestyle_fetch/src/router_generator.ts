@@ -1,7 +1,7 @@
 import type { OpenAPIV3_1 } from 'openapi-types'
 import { OperationValidationError } from './errors'
 import { SchemaGenerator } from './schema_generator'
-import { toPascalCase } from './utils'
+import { createJSDocComment, toPascalCase } from './utils'
 
 function isReferenceObject(obj: any): obj is OpenAPIV3_1.ReferenceObject {
     return obj && '$ref' in obj
@@ -135,8 +135,12 @@ export function generateRouter(
         for (const key in pathNode) {
             const value = pathNode[key]
             if (httpMethods.has(key.toLowerCase())) {
+                const jsDoc = createJSDocComment(
+                    value.summary,
+                    value.description
+                )
                 parts.push(
-                    `'${key.toUpperCase()}': ${generateBuilder(
+                    `${jsDoc}'${key.toUpperCase()}': ${generateBuilder(
                         value,
                         pathLevelParams,
                         schemaGenerator,
@@ -150,8 +154,12 @@ export function generateRouter(
                 !openApiMetadataKeys.has(key)
             ) {
                 const nextPath = currentPath ? `${currentPath}/${key}` : key
+                const jsDoc = createJSDocComment(
+                    value.summary,
+                    value.description
+                )
                 parts.push(
-                    `'${key}': {\n${buildRouterObject(value, nextPath)}\n}`
+                    `${jsDoc}'${key}': {\n${buildRouterObject(value, nextPath)}\n}`
                 )
             }
         }
