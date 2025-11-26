@@ -1,10 +1,14 @@
 {
     "name": "create-freestyle-fetch",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "Generate freestylejs fetch client from OpenAPI spec",
     "author": "danpacho",
     "license": "MIT",
-    "keywords": ["openapi", "generator", "fetch"],
+    "keywords": [
+        "openapi",
+        "generator",
+        "fetch"
+    ],
     "publishConfig": {
         "access": "public"
     },
