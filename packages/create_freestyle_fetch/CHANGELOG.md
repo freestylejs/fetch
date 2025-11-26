@@ -1,5 +1,11 @@
 # create-freestyle-fetch
 
+## 1.3.0
+
+### Minor Changes
+
+- Improve type-inference performance for generated code, add JSDoc documentation for router/model.
+
 ## 1.2.1
 
 ### Patch Changes
