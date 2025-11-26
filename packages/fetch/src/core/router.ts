@@ -200,47 +200,45 @@ type BuildRouterUrlFromStructure<
     RouterBuilderStructure,
     BaseUrl extends string = '',
     PathParamsList extends ReadonlyArray<string> = [],
-> = RouterBuilderStructure extends BuilderStructure
-    ? {
-          [Key in keyof RouterBuilderStructure]: Key extends FetchMethod
-              ? RouterBuilderStructure[Key] extends FetchBuilder<
-                    string,
-                    unknown,
-                    infer SearchParams,
-                    infer Body,
-                    infer Response,
-                    infer IsJsonMode,
-                    string
+> = {
+    [Key in keyof RouterBuilderStructure]: Key extends FetchMethod
+        ? RouterBuilderStructure[Key] extends FetchBuilder<
+              string,
+              unknown,
+              infer SearchParams,
+              infer Body,
+              infer Response,
+              infer IsJsonMode,
+              string
+          >
+            ? FetchUnit<
+                  Key,
+                  PathParamsList[number] extends []
+                      ? unknown
+                      : {
+                            [CollectedPathParamsList in PathParamsList[number]]: Param
+                        },
+                  SearchParams,
+                  Body,
+                  Response,
+                  IsJsonMode,
+                  BaseUrl
+              >
+            : never
+        : Key extends string
+          ? IsDynamicPath<Key> extends true
+              ? BuildRouterUrlFromStructure<
+                    RouterBuilderStructure[Key],
+                    `${BaseUrl}/${string}`,
+                    readonly [...PathParamsList, GetDynamicPath<Key>]
                 >
-                  ? FetchUnit<
-                        Key,
-                        PathParamsList[number] extends []
-                            ? unknown
-                            : {
-                                  [CollectedPathParamsList in PathParamsList[number]]: Param
-                              },
-                        SearchParams,
-                        Body,
-                        Response,
-                        IsJsonMode,
-                        BaseUrl
-                    >
-                  : never
-              : Key extends string
-                ? IsDynamicPath<Key> extends true
-                    ? BuildRouterUrlFromStructure<
-                          RouterBuilderStructure[Key],
-                          `${BaseUrl}/${string}`,
-                          readonly [...PathParamsList, GetDynamicPath<Key>]
-                      >
-                    : BuildRouterUrlFromStructure<
-                          RouterBuilderStructure[Key],
-                          `${BaseUrl}/${Key}`,
-                          PathParamsList
-                      >
-                : never
-      }
-    : never
+              : BuildRouterUrlFromStructure<
+                    RouterBuilderStructure[Key],
+                    `${BaseUrl}/${Key}`,
+                    PathParamsList
+                >
+          : never
+}
 
 /**
  * Extract router config
