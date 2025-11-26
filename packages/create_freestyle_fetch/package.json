@@ -4,11 +4,7 @@
     "description": "Generate freestylejs fetch client from OpenAPI spec",
     "author": "danpacho",
     "license": "MIT",
-    "keywords": [
-        "openapi",
-        "generator",
-        "fetch"
-    ],
+    "keywords": ["openapi", "generator", "fetch"],
     "publishConfig": {
         "access": "public"
     },
