@@ -1101,4 +1101,51 @@ describe('SchemaGenerator', () => {
             expect(result).toContain('ProductList')
         })
     })
+
+    describe('JSDoc Generation', () => {
+        it('should generate JSDoc for models', () => {
+            const spec = createSpec({
+                User: {
+                    type: 'object',
+                    description: 'A user object',
+                    properties: {
+                        name: {
+                            type: 'string',
+                            description: 'The user name',
+                        },
+                    },
+                },
+            })
+            const generator = new SchemaGenerator(spec)
+            const result = generator.generateModels()
+
+            expect(result).toContain('/**\n * A user object\n */')
+            expect(result).toContain('/**\n   * The user name\n   */')
+        })
+
+        it('should generate JSDoc for properties', () => {
+            const spec = createSpec({
+                User: {
+                    type: 'object',
+                    properties: {
+                        name: {
+                            type: 'string',
+                            description: 'The user name',
+                        },
+                        age: {
+                            type: 'number',
+                            description: 'The user age\nMust be positive',
+                        },
+                    },
+                },
+            })
+            const generator = new SchemaGenerator(spec)
+            const result = generator.generateModels()
+
+            expect(result).toContain('/**\n   * The user name\n   */')
+            expect(result).toContain(
+                '/**\n   * The user age\n   * Must be positive\n   */'
+            )
+        })
+    })
 })

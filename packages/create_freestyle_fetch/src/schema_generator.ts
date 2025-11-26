@@ -1,6 +1,6 @@
 import type { OpenAPIV3_1 } from 'openapi-types'
 import { SchemaValidationError } from './errors' // Assumed existing
-import { toPascalCase } from './utils' // Assumed existing
+import { createJSDocComment, toPascalCase } from './utils' // Assumed existing
 
 export class SchemaGenerator {
     private spec: OpenAPIV3_1.Document
@@ -81,8 +81,17 @@ export class SchemaGenerator {
         modelStrings.push('// Helper types for schemas')
         for (const name of sortedSchemaNames) {
             const pascalName = this.getSchemaName(name)
+            const schema = this.spec.components?.schemas?.[name]
+            const description =
+                schema && !this.isReferenceObject(schema)
+                    ? schema.description
+                    : undefined
+            const jsDoc = createJSDocComment(undefined, description)
+
             const typeDef = this.mapSchemaObjectToType(name)
-            modelStrings.push(`export type ${pascalName}Model = ${typeDef};`)
+            modelStrings.push(
+                `${jsDoc}export type ${pascalName}Model = ${typeDef};`
+            )
         }
         modelStrings.push('')
 
@@ -94,8 +103,15 @@ export class SchemaGenerator {
             const pascalName = this.getSchemaName(name)
 
             // Use explicit type for perf.
+            const schema = this.spec.components?.schemas?.[name]
+            const description =
+                schema && !this.isReferenceObject(schema)
+                    ? schema.description
+                    : undefined
+            const jsDoc = createJSDocComment(undefined, description)
+
             modelStrings.push(
-                `export const ${pascalName}: z.ZodType<${pascalName}Model> = ${zodSchema};`
+                `${jsDoc}export const ${pascalName}: z.ZodType<${pascalName}Model> = ${zodSchema};`
             )
         }
 
@@ -172,8 +188,17 @@ export class SchemaGenerator {
                                 key,
                                 value
                             )
+                            const description =
+                                'description' in value
+                                    ? (value.description as string)
+                                    : undefined
+                            const jsDoc = createJSDocComment(
+                                undefined,
+                                description,
+                                '  '
+                            )
                             props.push(
-                                `  '${key}'${isRequired ? '' : '?'}: ${typeStr}${isRequired ? '' : ' | undefined'};`
+                                `${jsDoc}  '${key}'${isRequired ? '' : '?'}: ${typeStr}${isRequired ? '' : ' | undefined'};`
                             )
                         }
                     )

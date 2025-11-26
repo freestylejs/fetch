@@ -63,6 +63,9 @@ export type VideoStatusModel = {
 };
 
 export type VideoStatisticsModel = {
+  /**
+   * Type is string because view counts can exceed 2^32.
+   */
   'viewCount'?: string | undefined;
   'likeCount'?: string | undefined;
   'dislikeCount'?: string | undefined;
@@ -76,6 +79,9 @@ export type VideoPlayerModel = {
   'embedWidth'?: number | undefined;
 };
 
+/**
+ * A video resource represents a YouTube video.
+ */
 export type VideoModel = {
   'kind'?: string | undefined;
   'etag'?: string | undefined;
@@ -184,6 +190,9 @@ export const VideoPlayer: z.ZodType<VideoPlayerModel> = z.object({
 'embedWidth': z.number().int().optional()
 });
 
+/**
+ * A video resource represents a YouTube video.
+ */
 export const Video: z.ZodType<VideoModel> = z.object({
 'kind': z.string().optional(),
 'etag': z.string().optional(),
