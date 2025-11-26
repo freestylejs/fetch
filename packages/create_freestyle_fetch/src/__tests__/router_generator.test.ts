@@ -259,8 +259,39 @@ describe('Router Generator Comprehensive Tests', () => {
         const parsedPaths = parsePaths(spec)
         const code = generateRouter(parsedPaths, spec)
 
-        expect(code).not.toContain('summary')
-        expect(code).not.toContain('description')
+        // Should not contain them as keys in the object
+        expect(code).not.toMatch(/'summary':/)
+        expect(code).not.toMatch(/'description':/)
+
+        // But should contain them as JSDoc
+        expect(code).toContain('/**')
+        expect(code).toContain('* User operations')
+        expect(code).toContain('* All user related things')
+        expect(code).toContain('*/')
+        expect(code).toContain("'GET': f.builder()")
+    })
+
+    it('should generate JSDoc for operations', () => {
+        const spec: OpenAPIV3_1.Document = {
+            ...baseSpec,
+            paths: {
+                '/users': {
+                    get: {
+                        summary: 'Get Users',
+                        description: 'Returns all users',
+                        responses: { '200': { description: 'OK' } },
+                    },
+                },
+            },
+        }
+        const parsedPaths = parsePaths(spec)
+        const code = generateRouter(parsedPaths, spec)
+
+        expect(code).toContain('/**')
+        expect(code).toContain('* Get Users')
+        expect(code).toContain('*')
+        expect(code).toContain('* Returns all users')
+        expect(code).toContain('*/')
         expect(code).toContain("'GET': f.builder()")
     })
 
