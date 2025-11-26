@@ -1,5 +1,11 @@
 # create-freestyle-fetch
 
+## 1.2.1
+
+### Patch Changes
+
+- Handle strictNullChecks option correctly for model generation, handles nullable unions.
+
 ## 1.2.0
 
 ### Minor Changes

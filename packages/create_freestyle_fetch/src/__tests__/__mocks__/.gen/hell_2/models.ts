@@ -1,27 +1,36 @@
 import { z } from 'zod';
 
-export const StringDictionary = z.record(z.string(), z.string());
+// Helper types for schemas
 
-export type StringDictionaryModel = z.infer<typeof StringDictionary>;
+export type StringDictionaryModel = {
+  [key: string]: string;
+};
 
-export const ObjectWithCatchall = z.object({
+export type ObjectWithCatchallModel = {
+  'id': string;
+  [key: string]: number;
+};
+
+export type SimpleUnionModel = string | boolean;
+
+export type AnyOfUnionModel = StringDictionaryModel | number;
+
+export type ConstStringModel = string;
+
+export type NullableStringModel = string | null;
+
+
+
+export const StringDictionary: z.ZodType<StringDictionaryModel> = z.record(z.string(), z.string());
+
+export const ObjectWithCatchall: z.ZodType<ObjectWithCatchallModel> = z.object({
 'id': z.string()
 }).catchall(z.number().int());
 
-export type ObjectWithCatchallModel = z.infer<typeof ObjectWithCatchall>;
+export const SimpleUnion: z.ZodType<SimpleUnionModel> = z.union([z.string(), z.boolean()]);
 
-export const SimpleUnion = z.union([z.string(), z.boolean()]);
+export const AnyOfUnion: z.ZodType<AnyOfUnionModel> = z.union([StringDictionary, z.number()]);
 
-export type SimpleUnionModel = z.infer<typeof SimpleUnion>;
+export const ConstString: z.ZodType<ConstStringModel> = z.literal('FIXED_VALUE');
 
-export const AnyOfUnion = z.union([StringDictionary, z.number()]);
-
-export type AnyOfUnionModel = z.infer<typeof AnyOfUnion>;
-
-export const ConstString = z.literal('FIXED_VALUE');
-
-export type ConstStringModel = z.infer<typeof ConstString>;
-
-export const NullableString = z.string().nullable();
-
-export type NullableStringModel = z.infer<typeof NullableString>;
+export const NullableString: z.ZodType<NullableStringModel> = z.string().nullable();

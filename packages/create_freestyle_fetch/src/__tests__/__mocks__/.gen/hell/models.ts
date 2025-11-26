@@ -1,15 +1,48 @@
 import { z } from 'zod';
 
-export const HellObject = z.object({
+// Helper types for schemas
+
+export type HellObjectModel = {
+  'required-key': string;
+  'optional-key'?: string | undefined;
+  'spaced key': number;
+  '$special$'?: boolean | undefined;
+};
+
+export type DeepNestedModel = {
+  'level1'?: {
+  'level2'?: Array<{
+  'level3'?: 'deep' | undefined;
+}> | undefined;
+} | undefined;
+};
+
+export type IntersectionHellModel = HellObjectModel & {
+  'extra'?: string | undefined;
+};
+
+export type OptionAModel = {
+  'type': 'A';
+  'a'?: string | undefined;
+};
+
+export type OptionBModel = {
+  'type': 'B';
+  'b'?: number | undefined;
+};
+
+export type UnionHellModel = OptionAModel | OptionBModel;
+
+
+
+export const HellObject: z.ZodType<HellObjectModel> = z.object({
 'required-key': z.string(),
 'optional-key': z.string().optional(),
 'spaced key': z.number(),
 '$special$': z.boolean().optional()
 });
 
-export type HellObjectModel = z.infer<typeof HellObject>;
-
-export const DeepNested = z.object({
+export const DeepNested: z.ZodType<DeepNestedModel> = z.object({
 'level1': z.object({
 'level2': z.array(z.object({
 'level3': z.enum(['deep']).optional()
@@ -17,28 +50,18 @@ export const DeepNested = z.object({
 }).optional()
 });
 
-export type DeepNestedModel = z.infer<typeof DeepNested>;
-
-export const IntersectionHell = HellObject.and(z.object({
+export const IntersectionHell: z.ZodType<IntersectionHellModel> = HellObject.and(z.object({
 'extra': z.string().optional()
 }));
 
-export type IntersectionHellModel = z.infer<typeof IntersectionHell>;
-
-export const OptionA = z.object({
+export const OptionA: z.ZodType<OptionAModel> = z.object({
 'type': z.enum(['A']),
 'a': z.string().optional()
 });
 
-export type OptionAModel = z.infer<typeof OptionA>;
-
-export const OptionB = z.object({
+export const OptionB: z.ZodType<OptionBModel> = z.object({
 'type': z.enum(['B']),
 'b': z.number().optional()
 });
 
-export type OptionBModel = z.infer<typeof OptionB>;
-
-export const UnionHell = z.discriminatedUnion('type', [OptionA, OptionB]);
-
-export type UnionHellModel = z.infer<typeof UnionHell>;
+export const UnionHell: z.ZodType<UnionHellModel> = z.discriminatedUnion('type', [OptionA, OptionB]);

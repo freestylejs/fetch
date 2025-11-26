@@ -1,6 +1,73 @@
 import { z } from 'zod';
 
-export const User = z.object({
+// Helper types for schemas
+
+export type UserModel = {
+  'id': string;
+  'username': string;
+  'email': string;
+  'profile'?: {
+  'fullName'?: string | undefined;
+  'joinDate'?: string | undefined;
+} | undefined;
+  'legacyId'?: number | undefined;
+};
+
+export type ProductInputModel = {
+  'name': string;
+  'description'?: string | undefined;
+  'price': number;
+};
+
+export type ProductModel = ProductInputModel & {
+  'id'?: string | undefined;
+  'imageUrl'?: string | undefined;
+  'stock'?: number | undefined;
+};
+
+export type PaginatedResponseModel = {
+  'page'?: number | undefined;
+  'pageSize'?: number | undefined;
+  'total'?: number | undefined;
+  'items'?: any[] | undefined;
+};
+
+export type PaginatedProductResponseModel = PaginatedResponseModel;
+
+export type CreditCardModel = {
+  'methodType': 'card';
+  'cardNumber': string;
+  'expiry'?: string | undefined;
+  'cvv'?: string | undefined;
+};
+
+export type PayPalModel = {
+  'methodType': 'paypal_account';
+  'email': string;
+};
+
+export type PaymentMethodModel = CreditCardModel | PayPalModel;
+
+export type CallbackPayloadModel = {
+  'orderId'?: string | undefined;
+  'status'?: 'PROCESSED' | 'FAILED' | undefined;
+  'detail'?: string | undefined;
+};
+
+export type InventoryUpdatePayloadModel = {
+  'productId'?: string | undefined;
+  'newStockLevel'?: number | undefined;
+  'timestamp'?: string | undefined;
+};
+
+export type ApiErrorModel = {
+  'errorCode'?: string | undefined;
+  'message'?: string | undefined;
+};
+
+
+
+export const User: z.ZodType<UserModel> = z.object({
 'id': z.uuid(),
 'username': z.string().regex(/^[a-zA-Z0-9_-]{3,16}$/),
 'email': z.email(),
@@ -11,76 +78,54 @@ export const User = z.object({
 'legacyId': z.number().int().optional()
 });
 
-export type UserModel = z.infer<typeof User>;
-
-export const ProductInput = z.object({
+export const ProductInput: z.ZodType<ProductInputModel> = z.object({
 'name': z.string(),
 'description': z.string().optional(),
 'price': z.number().min(0)
 });
 
-export type ProductInputModel = z.infer<typeof ProductInput>;
-
-export const Product = ProductInput.and(z.object({
+export const Product: z.ZodType<ProductModel> = ProductInput.and(z.object({
 'id': z.uuid().optional(),
 'imageUrl': z.url().optional(),
 'stock': z.number().int().optional()
 }));
 
-export type ProductModel = z.infer<typeof Product>;
-
-export const PaginatedResponse = z.object({
+export const PaginatedResponse: z.ZodType<PaginatedResponseModel> = z.object({
 'page': z.number().int().optional(),
 'pageSize': z.number().int().optional(),
 'total': z.number().int().optional(),
 'items': z.array(z.any()).optional()
 });
 
-export type PaginatedResponseModel = z.infer<typeof PaginatedResponse>;
+export const PaginatedProductResponse: z.ZodType<PaginatedProductResponseModel> = PaginatedResponse;
 
-export const PaginatedProductResponse = PaginatedResponse;
-
-export type PaginatedProductResponseModel = z.infer<typeof PaginatedProductResponse>;
-
-export const CreditCard = z.object({
+export const CreditCard: z.ZodType<CreditCardModel> = z.object({
 'methodType': z.enum(['card']),
 'cardNumber': z.string(),
 'expiry': z.string().optional(),
 'cvv': z.string().optional()
 });
 
-export type CreditCardModel = z.infer<typeof CreditCard>;
-
-export const PayPal = z.object({
+export const PayPal: z.ZodType<PayPalModel> = z.object({
 'methodType': z.enum(['paypal_account']),
 'email': z.email()
 });
 
-export type PayPalModel = z.infer<typeof PayPal>;
+export const PaymentMethod: z.ZodType<PaymentMethodModel> = z.discriminatedUnion('methodType', [CreditCard, PayPal]);
 
-export const PaymentMethod = z.discriminatedUnion('methodType', [CreditCard, PayPal]);
-
-export type PaymentMethodModel = z.infer<typeof PaymentMethod>;
-
-export const CallbackPayload = z.object({
+export const CallbackPayload: z.ZodType<CallbackPayloadModel> = z.object({
 'orderId': z.uuid().optional(),
 'status': z.enum(['PROCESSED', 'FAILED']).optional(),
 'detail': z.string().optional()
 });
 
-export type CallbackPayloadModel = z.infer<typeof CallbackPayload>;
-
-export const InventoryUpdatePayload = z.object({
+export const InventoryUpdatePayload: z.ZodType<InventoryUpdatePayloadModel> = z.object({
 'productId': z.uuid().optional(),
 'newStockLevel': z.number().int().optional(),
 'timestamp': z.iso.datetime().optional()
 });
 
-export type InventoryUpdatePayloadModel = z.infer<typeof InventoryUpdatePayload>;
-
-export const ApiError = z.object({
+export const ApiError: z.ZodType<ApiErrorModel> = z.object({
 'errorCode': z.string().optional(),
 'message': z.string().optional()
 });
-
-export type ApiErrorModel = z.infer<typeof ApiError>;
