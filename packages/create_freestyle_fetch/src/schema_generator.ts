@@ -2,10 +2,6 @@ import type { OpenAPIV3_1 } from 'openapi-types'
 import { SchemaValidationError } from './errors' // Assumed existing
 import { toPascalCase } from './utils' // Assumed existing
 
-function isReferenceObject(obj: any): obj is OpenAPIV3_1.ReferenceObject {
-    return obj && '$ref' in obj
-}
-
 export class SchemaGenerator {
     private spec: OpenAPIV3_1.Document
 
@@ -17,6 +13,10 @@ export class SchemaGenerator {
 
     constructor(spec: OpenAPIV3_1.Document) {
         this.spec = spec
+    }
+
+    private isReferenceObject(obj: any): obj is OpenAPIV3_1.ReferenceObject {
+        return obj && '$ref' in obj
     }
 
     private initializeSchemaNames() {
@@ -74,22 +74,17 @@ export class SchemaGenerator {
 
         const modelStrings: string[] = [`import { z } from 'zod';`]
 
-        // 4. Generate Types for Cyclic Schemas FIRST
-        // Use type
-        if (this.cyclicSchemas.size > 0) {
-            modelStrings.push('// Helper types for recursive schemas')
-            for (const name of this.cyclicSchemas) {
-                const pascalName = this.getSchemaName(name)
-                const typeDef = this.mapSchemaObjectToType(name)
-                modelStrings.push(
-                    `export type ${pascalName}Model = ${typeDef};`
-                )
-            }
-            modelStrings.push('')
-        }
-
-        // 5. Sort schemas topologically
+        // 4. Sort schemas topologically
         const sortedSchemaNames = this.sortSchemas()
+
+        // 5. Generate Types for ALL schemas for performance
+        modelStrings.push('// Helper types for schemas')
+        for (const name of sortedSchemaNames) {
+            const pascalName = this.getSchemaName(name)
+            const typeDef = this.mapSchemaObjectToType(name)
+            modelStrings.push(`export type ${pascalName}Model = ${typeDef};`)
+        }
+        modelStrings.push('')
 
         // 6. Generate Zod Schemas
         for (const name of sortedSchemaNames) {
@@ -98,18 +93,10 @@ export class SchemaGenerator {
                 this.mapSchemaObjectToZod(name)
             const pascalName = this.getSchemaName(name)
 
-            if (this.cyclicSchemas.has(name)) {
-                // For cyclic schemas, use the explicitly generated type
-                modelStrings.push(
-                    `export const ${pascalName}: z.ZodType<${pascalName}Model> = ${zodSchema};`
-                )
-            } else {
-                // Standard generation
-                modelStrings.push(`export const ${pascalName} = ${zodSchema};`)
-                modelStrings.push(
-                    `export type ${pascalName}Model = z.infer<typeof ${pascalName}>;`
-                )
-            }
+            // Use explicit type for perf.
+            modelStrings.push(
+                `export const ${pascalName}: z.ZodType<${pascalName}Model> = ${zodSchema};`
+            )
         }
 
         return modelStrings.join('\n\n')
@@ -122,7 +109,7 @@ export class SchemaGenerator {
         const schema = schemaObject || this.spec.components?.schemas?.[name]
         if (!schema) return 'any'
 
-        if (isReferenceObject(schema)) {
+        if (this.isReferenceObject(schema)) {
             const { name: refName } = this.resolveRef(schema.$ref)
             return `${this.getSchemaName(refName)}Model`
         }
@@ -193,14 +180,14 @@ export class SchemaGenerator {
                 }
 
                 if (schema.additionalProperties) {
-                    const addlType =
+                    const additionalTypes =
                         typeof schema.additionalProperties === 'object'
                             ? this.mapSchemaObjectToType(
                                   name,
                                   schema.additionalProperties
                               )
                             : 'any'
-                    props.push(`  [key: string]: ${addlType};`)
+                    props.push(`  [key: string]: ${additionalTypes};`)
                 }
                 return `{\n${props.join('\n')}\n}`
             }
@@ -271,7 +258,7 @@ export class SchemaGenerator {
         }
 
         // Handle References
-        if (isReferenceObject(schema)) {
+        if (this.isReferenceObject(schema)) {
             const { name: refName } = this.resolveRef(schema.$ref)
 
             // Track dependency
