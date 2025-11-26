@@ -12,7 +12,7 @@ export type FileModel = {
   'has_more': boolean;
   'object': 'list';
   'url': string;
-};
+} | undefined;
   'object': 'file';
   'purpose': 'account_requirement' | 'additional_verification' | 'business_icon' | 'business_logo' | 'customer_signature' | 'dispute_evidence' | 'document_provider_identity_document' | 'finance_report_run' | 'financial_account_statement' | 'identity_document' | 'identity_document_downloadable' | 'issuing_regulatory_reporting' | 'pci_document' | 'platform_terms_of_service' | 'selfie' | 'sigma_scheduled_query' | 'tax_document_user_upload' | 'terminal_android_apk' | 'terminal_reader_splashscreen';
   'size': number;
@@ -47,84 +47,84 @@ export type LegalEntityCompanyVerificationModel = {
 };
 
 export type LegalEntityCompanyModel = {
-  'address'?: AddressModel;
-  'address_kana'?: LegalEntityJapanAddressModel;
-  'address_kanji'?: LegalEntityJapanAddressModel;
-  'directors_provided'?: boolean;
-  'directorship_declaration'?: LegalEntityDirectorshipDeclarationModel;
-  'executives_provided'?: boolean;
-  'export_license_id'?: string;
-  'export_purpose_code'?: string;
-  'name'?: string;
-  'name_kana'?: string;
-  'name_kanji'?: string;
-  'owners_provided'?: boolean;
-  'ownership_declaration'?: LegalEntityUboDeclarationModel;
-  'ownership_exemption_reason'?: 'qualified_entity_exceeds_ownership_threshold' | 'qualifies_as_financial_institution';
-  'phone'?: string;
-  'registration_date'?: LegalEntityRegistrationDateModel;
-  'representative_declaration'?: LegalEntityRepresentativeDeclarationModel;
-  'structure'?: 'free_zone_establishment' | 'free_zone_llc' | 'government_instrumentality' | 'governmental_unit' | 'incorporated_non_profit' | 'incorporated_partnership' | 'limited_liability_partnership' | 'llc' | 'multi_member_llc' | 'private_company' | 'private_corporation' | 'private_partnership' | 'public_company' | 'public_corporation' | 'public_partnership' | 'registered_charity' | 'single_member_llc' | 'sole_establishment' | 'sole_proprietorship' | 'tax_exempt_government_instrumentality' | 'unincorporated_association' | 'unincorporated_non_profit' | 'unincorporated_partnership';
-  'tax_id_provided'?: boolean;
-  'tax_id_registrar'?: string;
-  'vat_id_provided'?: boolean;
-  'verification'?: LegalEntityCompanyVerificationModel;
+  'address'?: AddressModel | undefined;
+  'address_kana'?: LegalEntityJapanAddressModel | undefined;
+  'address_kanji'?: LegalEntityJapanAddressModel | undefined;
+  'directors_provided'?: boolean | undefined;
+  'directorship_declaration'?: LegalEntityDirectorshipDeclarationModel | undefined;
+  'executives_provided'?: boolean | undefined;
+  'export_license_id'?: string | undefined;
+  'export_purpose_code'?: string | undefined;
+  'name'?: string | undefined;
+  'name_kana'?: string | undefined;
+  'name_kanji'?: string | undefined;
+  'owners_provided'?: boolean | undefined;
+  'ownership_declaration'?: LegalEntityUboDeclarationModel | undefined;
+  'ownership_exemption_reason'?: 'qualified_entity_exceeds_ownership_threshold' | 'qualifies_as_financial_institution' | undefined;
+  'phone'?: string | undefined;
+  'registration_date'?: LegalEntityRegistrationDateModel | undefined;
+  'representative_declaration'?: LegalEntityRepresentativeDeclarationModel | undefined;
+  'structure'?: 'free_zone_establishment' | 'free_zone_llc' | 'government_instrumentality' | 'governmental_unit' | 'incorporated_non_profit' | 'incorporated_partnership' | 'limited_liability_partnership' | 'llc' | 'multi_member_llc' | 'private_company' | 'private_corporation' | 'private_partnership' | 'public_company' | 'public_corporation' | 'public_partnership' | 'registered_charity' | 'single_member_llc' | 'sole_establishment' | 'sole_proprietorship' | 'tax_exempt_government_instrumentality' | 'unincorporated_association' | 'unincorporated_non_profit' | 'unincorporated_partnership' | undefined;
+  'tax_id_provided'?: boolean | undefined;
+  'tax_id_registrar'?: string | undefined;
+  'vat_id_provided'?: boolean | undefined;
+  'verification'?: LegalEntityCompanyVerificationModel | undefined;
 };
 
 export type AccountModel = {
-  'business_profile'?: AccountBusinessProfileModel;
-  'business_type'?: 'company' | 'government_entity' | 'individual' | 'non_profit';
-  'capabilities'?: AccountCapabilitiesModel;
-  'charges_enabled'?: boolean;
-  'company'?: LegalEntityCompanyModel;
-  'controller'?: AccountUnificationAccountControllerModel;
-  'country'?: string;
-  'created'?: number;
-  'default_currency'?: string;
-  'details_submitted'?: boolean;
-  'email'?: string;
+  'business_profile'?: AccountBusinessProfileModel | undefined;
+  'business_type'?: 'company' | 'government_entity' | 'individual' | 'non_profit' | undefined;
+  'capabilities'?: AccountCapabilitiesModel | undefined;
+  'charges_enabled'?: boolean | undefined;
+  'company'?: LegalEntityCompanyModel | undefined;
+  'controller'?: AccountUnificationAccountControllerModel | undefined;
+  'country'?: string | undefined;
+  'created'?: number | undefined;
+  'default_currency'?: string | undefined;
+  'details_submitted'?: boolean | undefined;
+  'email'?: string | undefined;
   'external_accounts'?: {
   'data': ExternalAccountModel[];
   'has_more': boolean;
   'object': 'list';
   'url': string;
-};
-  'future_requirements'?: AccountFutureRequirementsModel;
-  'groups'?: AccountGroupMembershipModel;
+} | undefined;
+  'future_requirements'?: AccountFutureRequirementsModel | undefined;
+  'groups'?: AccountGroupMembershipModel | undefined;
   'id': string;
-  'individual'?: PersonModel;
+  'individual'?: PersonModel | undefined;
   'metadata'?: {
   [key: string]: string;
-};
+} | undefined;
   'object': 'account';
-  'payouts_enabled'?: boolean;
-  'requirements'?: AccountRequirementsModel;
-  'risk_controls'?: ConnectRiskAccountRiskControlsModel;
-  'settings'?: AccountSettingsModel;
-  'tos_acceptance'?: AccountTosAcceptanceModel;
-  'type'?: 'custom' | 'express' | 'none' | 'standard';
+  'payouts_enabled'?: boolean | undefined;
+  'requirements'?: AccountRequirementsModel | undefined;
+  'risk_controls'?: ConnectRiskAccountRiskControlsModel | undefined;
+  'settings'?: AccountSettingsModel | undefined;
+  'tos_acceptance'?: AccountTosAcceptanceModel | undefined;
+  'type'?: 'custom' | 'express' | 'none' | 'standard' | undefined;
 };
 
 export type BankAccountModel = {
-  'account'?: string | AccountModel;
+  'account'?: string | AccountModel | undefined;
   'account_holder_name': string;
   'account_holder_type': string;
   'account_type': string;
-  'available_payout_methods'?: Array<'instant' | 'standard'>;
+  'available_payout_methods'?: Array<'instant' | 'standard'> | undefined;
   'bank_name': string;
   'country': string;
   'currency': string;
-  'customer'?: string | CustomerModel | DeletedCustomerModel;
-  'default_for_currency'?: boolean;
+  'customer'?: string | CustomerModel | DeletedCustomerModel | undefined;
+  'default_for_currency'?: boolean | undefined;
   'fingerprint': string;
-  'future_requirements'?: ExternalAccountRequirementsModel;
+  'future_requirements'?: ExternalAccountRequirementsModel | undefined;
   'id': string;
   'last4': string;
   'metadata'?: {
   [key: string]: string;
-};
+} | undefined;
   'object': 'bank_account';
-  'requirements'?: ExternalAccountRequirementsModel;
+  'requirements'?: ExternalAccountRequirementsModel | undefined;
   'routing_number': string;
   'status': string;
 };
@@ -132,7 +132,7 @@ export type BankAccountModel = {
 export type PaymentSourceModel = AccountModel | BankAccountModel | CardModel | SourceModel;
 
 export type CardModel = {
-  'account'?: string | AccountModel;
+  'account'?: string | AccountModel | undefined;
   'address_city': string;
   'address_country': string;
   'address_line1': string;
@@ -141,93 +141,93 @@ export type CardModel = {
   'address_state': string;
   'address_zip': string;
   'address_zip_check': string;
-  'allow_redisplay'?: 'always' | 'limited' | 'unspecified';
-  'available_payout_methods'?: Array<'instant' | 'standard'>;
+  'allow_redisplay'?: 'always' | 'limited' | 'unspecified' | undefined;
+  'available_payout_methods'?: Array<'instant' | 'standard'> | undefined;
   'brand': string;
-  'brand_product'?: string;
+  'brand_product'?: string | undefined;
   'country': string;
-  'currency'?: string;
-  'customer'?: string | CustomerModel | DeletedCustomerModel;
+  'currency'?: string | undefined;
+  'customer'?: string | CustomerModel | DeletedCustomerModel | undefined;
   'cvc_check': string;
-  'default_for_currency'?: boolean;
-  'description'?: string;
+  'default_for_currency'?: boolean | undefined;
+  'description'?: string | undefined;
   'dynamic_last4': string;
   'exp_month': number;
   'exp_year': number;
-  'fingerprint'?: string;
+  'fingerprint'?: string | undefined;
   'funding': string;
   'id': string;
-  'iin'?: string;
-  'issuer'?: string;
+  'iin'?: string | undefined;
+  'issuer'?: string | undefined;
   'last4': string;
   'metadata': {
   [key: string]: string;
 };
   'name': string;
-  'networks'?: TokenCardNetworksModel;
+  'networks'?: TokenCardNetworksModel | undefined;
   'object': 'card';
   'regulated_status': 'regulated' | 'unregulated';
-  'status'?: string;
+  'status'?: string | undefined;
   'tokenization_method': string;
 };
 
 export type CustomerModel = {
-  'address'?: AddressModel;
-  'balance'?: number;
-  'business_name'?: string;
-  'cash_balance'?: CashBalanceModel;
+  'address'?: AddressModel | undefined;
+  'balance'?: number | undefined;
+  'business_name'?: string | undefined;
+  'cash_balance'?: CashBalanceModel | undefined;
   'created': number;
-  'currency'?: string;
-  'customer_account'?: string;
+  'currency'?: string | undefined;
+  'customer_account'?: string | undefined;
   'default_source': string | PaymentSourceModel;
-  'delinquent'?: boolean;
+  'delinquent'?: boolean | undefined;
   'description': string;
-  'discount'?: DiscountModel;
+  'discount'?: DiscountModel | undefined;
   'email': string;
   'id': string;
-  'individual_name'?: string;
+  'individual_name'?: string | undefined;
   'invoice_credit_balance'?: {
   [key: string]: number;
-};
-  'invoice_prefix'?: string;
-  'invoice_settings'?: InvoiceSettingCustomerSettingModel;
+} | undefined;
+  'invoice_prefix'?: string | undefined;
+  'invoice_settings'?: InvoiceSettingCustomerSettingModel | undefined;
   'livemode': boolean;
   'metadata'?: {
   [key: string]: string;
-};
-  'name'?: string;
-  'next_invoice_sequence'?: number;
+} | undefined;
+  'name'?: string | undefined;
+  'next_invoice_sequence'?: number | undefined;
   'object': 'customer';
-  'phone'?: string;
-  'preferred_locales'?: string[];
+  'phone'?: string | undefined;
+  'preferred_locales'?: string[] | undefined;
   'shipping': ShippingModel;
   'sources'?: {
   'data': PaymentSourceModel[];
   'has_more': boolean;
   'object': 'list';
   'url': string;
-};
+} | undefined;
   'subscriptions'?: {
   'data': SubscriptionModel[];
   'has_more': boolean;
   'object': 'list';
   'url': string;
-};
-  'tax'?: CustomerTaxModel;
-  'tax_exempt'?: 'exempt' | 'none' | 'reverse';
+} | undefined;
+  'tax'?: CustomerTaxModel | undefined;
+  'tax_exempt'?: 'exempt' | 'none' | 'reverse' | undefined;
   'tax_ids'?: {
   'data': TaxIdModel[];
   'has_more': boolean;
   'object': 'list';
   'url': string;
-};
-  'test_clock'?: string | TestHelpersTestClockModel;
+} | undefined;
+  'test_clock'?: string | TestHelpersTestClockModel | undefined;
 };
 
 export type DiscountModel = {
   'checkout_session': string;
   'customer': string | CustomerModel | DeletedCustomerModel;
-  'customer_account'?: string;
+  'customer_account'?: string | undefined;
   'end': number;
   'id': string;
   'invoice': string;
@@ -245,7 +245,7 @@ export type PromotionCodeModel = {
   'code': string;
   'created': number;
   'customer': string | CustomerModel | DeletedCustomerModel;
-  'customer_account'?: string;
+  'customer_account'?: string | undefined;
   'expires_at': number;
   'id': string;
   'livemode': boolean;
@@ -261,10 +261,10 @@ export type PromotionCodeModel = {
 
 export type SetupAttemptModel = {
   'application': string | ApplicationModel;
-  'attach_to_self'?: boolean;
+  'attach_to_self'?: boolean | undefined;
   'created': number;
   'customer': string | CustomerModel | DeletedCustomerModel;
-  'customer_account'?: string;
+  'customer_account'?: string | undefined;
   'flow_directions': Array<'inbound' | 'outbound'>;
   'id': string;
   'livemode': boolean;
@@ -279,80 +279,80 @@ export type SetupAttemptModel = {
 };
 
 export type PaymentMethodModel = {
-  'acss_debit'?: PaymentMethodAcssDebitModel;
-  'affirm'?: PaymentMethodAffirmModel;
-  'afterpay_clearpay'?: PaymentMethodAfterpayClearpayModel;
-  'alipay'?: PaymentFlowsPrivatePaymentMethodsAlipayModel;
-  'allow_redisplay'?: 'always' | 'limited' | 'unspecified';
-  'alma'?: PaymentMethodAlmaModel;
-  'amazon_pay'?: PaymentMethodAmazonPayModel;
-  'au_becs_debit'?: PaymentMethodAuBecsDebitModel;
-  'bacs_debit'?: PaymentMethodBacsDebitModel;
-  'bancontact'?: PaymentMethodBancontactModel;
-  'billie'?: PaymentMethodBillieModel;
+  'acss_debit'?: PaymentMethodAcssDebitModel | undefined;
+  'affirm'?: PaymentMethodAffirmModel | undefined;
+  'afterpay_clearpay'?: PaymentMethodAfterpayClearpayModel | undefined;
+  'alipay'?: PaymentFlowsPrivatePaymentMethodsAlipayModel | undefined;
+  'allow_redisplay'?: 'always' | 'limited' | 'unspecified' | undefined;
+  'alma'?: PaymentMethodAlmaModel | undefined;
+  'amazon_pay'?: PaymentMethodAmazonPayModel | undefined;
+  'au_becs_debit'?: PaymentMethodAuBecsDebitModel | undefined;
+  'bacs_debit'?: PaymentMethodBacsDebitModel | undefined;
+  'bancontact'?: PaymentMethodBancontactModel | undefined;
+  'billie'?: PaymentMethodBillieModel | undefined;
   'billing_details': BillingDetailsModel;
-  'blik'?: PaymentMethodBlikModel;
-  'boleto'?: PaymentMethodBoletoModel;
-  'card'?: PaymentMethodCardModel;
-  'card_present'?: PaymentMethodCardPresentModel;
-  'cashapp'?: PaymentMethodCashappModel;
+  'blik'?: PaymentMethodBlikModel | undefined;
+  'boleto'?: PaymentMethodBoletoModel | undefined;
+  'card'?: PaymentMethodCardModel | undefined;
+  'card_present'?: PaymentMethodCardPresentModel | undefined;
+  'cashapp'?: PaymentMethodCashappModel | undefined;
   'created': number;
-  'crypto'?: PaymentMethodCryptoModel;
-  'custom'?: PaymentMethodCustomModel;
+  'crypto'?: PaymentMethodCryptoModel | undefined;
+  'custom'?: PaymentMethodCustomModel | undefined;
   'customer': string | CustomerModel;
-  'customer_account'?: string;
-  'customer_balance'?: PaymentMethodCustomerBalanceModel;
-  'eps'?: PaymentMethodEpsModel;
-  'fpx'?: PaymentMethodFpxModel;
-  'giropay'?: PaymentMethodGiropayModel;
-  'gopay'?: PaymentMethodGopayModel;
-  'grabpay'?: PaymentMethodGrabpayModel;
+  'customer_account'?: string | undefined;
+  'customer_balance'?: PaymentMethodCustomerBalanceModel | undefined;
+  'eps'?: PaymentMethodEpsModel | undefined;
+  'fpx'?: PaymentMethodFpxModel | undefined;
+  'giropay'?: PaymentMethodGiropayModel | undefined;
+  'gopay'?: PaymentMethodGopayModel | undefined;
+  'grabpay'?: PaymentMethodGrabpayModel | undefined;
   'id': string;
-  'id_bank_transfer'?: PaymentMethodIdBankTransferModel;
-  'ideal'?: PaymentMethodIdealModel;
-  'interac_present'?: PaymentMethodInteracPresentModel;
-  'kakao_pay'?: PaymentMethodKakaoPayModel;
-  'klarna'?: PaymentMethodKlarnaModel;
-  'konbini'?: PaymentMethodKonbiniModel;
-  'kr_card'?: PaymentMethodKrCardModel;
-  'latest_active_mandate'?: MandateModel;
-  'link'?: PaymentMethodLinkModel;
+  'id_bank_transfer'?: PaymentMethodIdBankTransferModel | undefined;
+  'ideal'?: PaymentMethodIdealModel | undefined;
+  'interac_present'?: PaymentMethodInteracPresentModel | undefined;
+  'kakao_pay'?: PaymentMethodKakaoPayModel | undefined;
+  'klarna'?: PaymentMethodKlarnaModel | undefined;
+  'konbini'?: PaymentMethodKonbiniModel | undefined;
+  'kr_card'?: PaymentMethodKrCardModel | undefined;
+  'latest_active_mandate'?: MandateModel | undefined;
+  'link'?: PaymentMethodLinkModel | undefined;
   'livemode': boolean;
-  'mb_way'?: PaymentMethodMbWayModel;
+  'mb_way'?: PaymentMethodMbWayModel | undefined;
   'metadata': {
   [key: string]: string;
 };
-  'mobilepay'?: PaymentMethodMobilepayModel;
-  'multibanco'?: PaymentMethodMultibancoModel;
-  'naver_pay'?: PaymentMethodNaverPayModel;
-  'nz_bank_account'?: PaymentMethodNzBankAccountModel;
+  'mobilepay'?: PaymentMethodMobilepayModel | undefined;
+  'multibanco'?: PaymentMethodMultibancoModel | undefined;
+  'naver_pay'?: PaymentMethodNaverPayModel | undefined;
+  'nz_bank_account'?: PaymentMethodNzBankAccountModel | undefined;
   'object': 'payment_method';
-  'oxxo'?: PaymentMethodOxxoModel;
-  'p24'?: PaymentMethodP24Model;
-  'pay_by_bank'?: PaymentMethodPayByBankModel;
-  'payco'?: PaymentMethodPaycoModel;
-  'paynow'?: PaymentMethodPaynowModel;
-  'paypal'?: PaymentMethodPaypalModel;
-  'paypay'?: PaymentMethodPaypayModel;
-  'payto'?: PaymentMethodPaytoModel;
-  'pix'?: PaymentMethodPixModel;
-  'promptpay'?: PaymentMethodPromptpayModel;
-  'qris'?: PaymentMethodQrisModel;
-  'radar_options'?: RadarRadarOptionsModel;
-  'rechnung'?: PaymentMethodRechnungModel;
-  'revolut_pay'?: PaymentMethodRevolutPayModel;
-  'samsung_pay'?: PaymentMethodSamsungPayModel;
-  'satispay'?: PaymentMethodSatispayModel;
-  'sepa_debit'?: PaymentMethodSepaDebitModel;
-  'shopeepay'?: PaymentMethodShopeepayModel;
-  'sofort'?: PaymentMethodSofortModel;
-  'stripe_balance'?: PaymentMethodStripeBalanceModel;
-  'swish'?: PaymentMethodSwishModel;
-  'twint'?: PaymentMethodTwintModel;
+  'oxxo'?: PaymentMethodOxxoModel | undefined;
+  'p24'?: PaymentMethodP24Model | undefined;
+  'pay_by_bank'?: PaymentMethodPayByBankModel | undefined;
+  'payco'?: PaymentMethodPaycoModel | undefined;
+  'paynow'?: PaymentMethodPaynowModel | undefined;
+  'paypal'?: PaymentMethodPaypalModel | undefined;
+  'paypay'?: PaymentMethodPaypayModel | undefined;
+  'payto'?: PaymentMethodPaytoModel | undefined;
+  'pix'?: PaymentMethodPixModel | undefined;
+  'promptpay'?: PaymentMethodPromptpayModel | undefined;
+  'qris'?: PaymentMethodQrisModel | undefined;
+  'radar_options'?: RadarRadarOptionsModel | undefined;
+  'rechnung'?: PaymentMethodRechnungModel | undefined;
+  'revolut_pay'?: PaymentMethodRevolutPayModel | undefined;
+  'samsung_pay'?: PaymentMethodSamsungPayModel | undefined;
+  'satispay'?: PaymentMethodSatispayModel | undefined;
+  'sepa_debit'?: PaymentMethodSepaDebitModel | undefined;
+  'shopeepay'?: PaymentMethodShopeepayModel | undefined;
+  'sofort'?: PaymentMethodSofortModel | undefined;
+  'stripe_balance'?: PaymentMethodStripeBalanceModel | undefined;
+  'swish'?: PaymentMethodSwishModel | undefined;
+  'twint'?: PaymentMethodTwintModel | undefined;
   'type': 'acss_debit' | 'affirm' | 'afterpay_clearpay' | 'alipay' | 'alma' | 'amazon_pay' | 'au_becs_debit' | 'bacs_debit' | 'bancontact' | 'billie' | 'blik' | 'boleto' | 'card' | 'card_present' | 'cashapp' | 'crypto' | 'custom' | 'customer_balance' | 'eps' | 'fpx' | 'giropay' | 'gopay' | 'grabpay' | 'id_bank_transfer' | 'ideal' | 'interac_present' | 'kakao_pay' | 'klarna' | 'konbini' | 'kr_card' | 'link' | 'mb_way' | 'mobilepay' | 'multibanco' | 'naver_pay' | 'nz_bank_account' | 'oxxo' | 'p24' | 'pay_by_bank' | 'payco' | 'paynow' | 'paypal' | 'paypay' | 'payto' | 'pix' | 'promptpay' | 'qris' | 'rechnung' | 'revolut_pay' | 'samsung_pay' | 'satispay' | 'sepa_debit' | 'shopeepay' | 'sofort' | 'stripe_balance' | 'swish' | 'twint' | 'us_bank_account' | 'wechat_pay' | 'zip';
-  'us_bank_account'?: PaymentMethodUsBankAccountModel;
-  'wechat_pay'?: PaymentMethodWechatPayModel;
-  'zip'?: PaymentMethodZipModel;
+  'us_bank_account'?: PaymentMethodUsBankAccountModel | undefined;
+  'wechat_pay'?: PaymentMethodWechatPayModel | undefined;
+  'zip'?: PaymentMethodZipModel | undefined;
 };
 
 export type SetupAttemptPaymentMethodDetailsBancontactModel = {
@@ -370,43 +370,43 @@ export type MandateModel = {
   'customer_acceptance': CustomerAcceptanceModel;
   'id': string;
   'livemode': boolean;
-  'multi_use'?: MandateMultiUseModel;
+  'multi_use'?: MandateMultiUseModel | undefined;
   'object': 'mandate';
-  'on_behalf_of'?: string;
+  'on_behalf_of'?: string | undefined;
   'payment_method': string | PaymentMethodModel;
   'payment_method_details': MandatePaymentMethodDetailsModel;
-  'single_use'?: MandateSingleUseModel;
+  'single_use'?: MandateSingleUseModel | undefined;
   'status': 'active' | 'inactive' | 'pending';
   'type': 'multi_use' | 'single_use';
 };
 
 export type SetupAttemptPaymentMethodDetailsModel = {
-  'acss_debit'?: SetupAttemptPaymentMethodDetailsAcssDebitModel;
-  'amazon_pay'?: SetupAttemptPaymentMethodDetailsAmazonPayModel;
-  'au_becs_debit'?: SetupAttemptPaymentMethodDetailsAuBecsDebitModel;
-  'bacs_debit'?: SetupAttemptPaymentMethodDetailsBacsDebitModel;
-  'bancontact'?: SetupAttemptPaymentMethodDetailsBancontactModel;
-  'boleto'?: SetupAttemptPaymentMethodDetailsBoletoModel;
-  'card'?: SetupAttemptPaymentMethodDetailsCardModel;
-  'card_present'?: SetupAttemptPaymentMethodDetailsCardPresentModel;
-  'cashapp'?: SetupAttemptPaymentMethodDetailsCashappModel;
-  'id_bank_transfer'?: SetupAttemptPaymentMethodDetailsIdBankTransferModel;
-  'ideal'?: SetupAttemptPaymentMethodDetailsIdealModel;
-  'kakao_pay'?: SetupAttemptPaymentMethodDetailsKakaoPayModel;
-  'klarna'?: SetupAttemptPaymentMethodDetailsKlarnaModel;
-  'kr_card'?: SetupAttemptPaymentMethodDetailsKrCardModel;
-  'link'?: SetupAttemptPaymentMethodDetailsLinkModel;
-  'naver_pay'?: SetupAttemptPaymentMethodDetailsNaverPayModel;
-  'nz_bank_account'?: SetupAttemptPaymentMethodDetailsNzBankAccountModel;
-  'paypal'?: SetupAttemptPaymentMethodDetailsPaypalModel;
-  'payto'?: SetupAttemptPaymentMethodDetailsPaytoModel;
-  'pix'?: SetupAttemptPaymentMethodDetailsPixModel;
-  'revolut_pay'?: SetupAttemptPaymentMethodDetailsRevolutPayModel;
-  'sepa_debit'?: SetupAttemptPaymentMethodDetailsSepaDebitModel;
-  'sofort'?: SetupAttemptPaymentMethodDetailsSofortModel;
-  'stripe_balance'?: SetupAttemptPaymentMethodDetailsStripeBalanceModel;
+  'acss_debit'?: SetupAttemptPaymentMethodDetailsAcssDebitModel | undefined;
+  'amazon_pay'?: SetupAttemptPaymentMethodDetailsAmazonPayModel | undefined;
+  'au_becs_debit'?: SetupAttemptPaymentMethodDetailsAuBecsDebitModel | undefined;
+  'bacs_debit'?: SetupAttemptPaymentMethodDetailsBacsDebitModel | undefined;
+  'bancontact'?: SetupAttemptPaymentMethodDetailsBancontactModel | undefined;
+  'boleto'?: SetupAttemptPaymentMethodDetailsBoletoModel | undefined;
+  'card'?: SetupAttemptPaymentMethodDetailsCardModel | undefined;
+  'card_present'?: SetupAttemptPaymentMethodDetailsCardPresentModel | undefined;
+  'cashapp'?: SetupAttemptPaymentMethodDetailsCashappModel | undefined;
+  'id_bank_transfer'?: SetupAttemptPaymentMethodDetailsIdBankTransferModel | undefined;
+  'ideal'?: SetupAttemptPaymentMethodDetailsIdealModel | undefined;
+  'kakao_pay'?: SetupAttemptPaymentMethodDetailsKakaoPayModel | undefined;
+  'klarna'?: SetupAttemptPaymentMethodDetailsKlarnaModel | undefined;
+  'kr_card'?: SetupAttemptPaymentMethodDetailsKrCardModel | undefined;
+  'link'?: SetupAttemptPaymentMethodDetailsLinkModel | undefined;
+  'naver_pay'?: SetupAttemptPaymentMethodDetailsNaverPayModel | undefined;
+  'nz_bank_account'?: SetupAttemptPaymentMethodDetailsNzBankAccountModel | undefined;
+  'paypal'?: SetupAttemptPaymentMethodDetailsPaypalModel | undefined;
+  'payto'?: SetupAttemptPaymentMethodDetailsPaytoModel | undefined;
+  'pix'?: SetupAttemptPaymentMethodDetailsPixModel | undefined;
+  'revolut_pay'?: SetupAttemptPaymentMethodDetailsRevolutPayModel | undefined;
+  'sepa_debit'?: SetupAttemptPaymentMethodDetailsSepaDebitModel | undefined;
+  'sofort'?: SetupAttemptPaymentMethodDetailsSofortModel | undefined;
+  'stripe_balance'?: SetupAttemptPaymentMethodDetailsStripeBalanceModel | undefined;
   'type': string;
-  'us_bank_account'?: SetupAttemptPaymentMethodDetailsUsBankAccountModel;
+  'us_bank_account'?: SetupAttemptPaymentMethodDetailsUsBankAccountModel | undefined;
 };
 
 export type SetupAttemptPaymentMethodDetailsCardPresentModel = {
@@ -437,7 +437,7 @@ export type SetupAttemptPaymentMethodDetailsSofortModel = {
 export type PaymentIntentModel = {
   'amount': number;
   'amount_capturable': number;
-  'amount_details'?: PaymentFlowsAmountDetailsModel;
+  'amount_details'?: PaymentFlowsAmountDetailsModel | undefined;
   'amount_received': number;
   'application': string | ApplicationModel;
   'application_fee_amount': number;
@@ -450,11 +450,11 @@ export type PaymentIntentModel = {
   'created': number;
   'currency': string;
   'customer': string | CustomerModel | DeletedCustomerModel;
-  'customer_account'?: string;
+  'customer_account'?: string | undefined;
   'description': string;
   'excluded_payment_method_types': Array<'acss_debit' | 'affirm' | 'afterpay_clearpay' | 'alipay' | 'alma' | 'amazon_pay' | 'au_becs_debit' | 'bacs_debit' | 'bancontact' | 'billie' | 'blik' | 'boleto' | 'card' | 'cashapp' | 'crypto' | 'customer_balance' | 'eps' | 'fpx' | 'giropay' | 'gopay' | 'grabpay' | 'id_bank_transfer' | 'ideal' | 'kakao_pay' | 'klarna' | 'konbini' | 'kr_card' | 'mb_way' | 'mobilepay' | 'multibanco' | 'naver_pay' | 'nz_bank_account' | 'oxxo' | 'p24' | 'pay_by_bank' | 'payco' | 'paynow' | 'paypal' | 'paypay' | 'payto' | 'pix' | 'promptpay' | 'qris' | 'rechnung' | 'revolut_pay' | 'samsung_pay' | 'satispay' | 'sepa_debit' | 'shopeepay' | 'sofort' | 'stripe_balance' | 'swish' | 'twint' | 'us_bank_account' | 'wechat_pay' | 'zip'>;
-  'fx_quote'?: string;
-  'hooks'?: PaymentFlowsPaymentIntentAsyncWorkflowsModel;
+  'fx_quote'?: string | undefined;
+  'hooks'?: PaymentFlowsPaymentIntentAsyncWorkflowsModel | undefined;
   'id': string;
   'last_payment_error': ApiErrorsModel;
   'latest_charge': string | ChargeModel;
@@ -465,16 +465,16 @@ export type PaymentIntentModel = {
   'next_action': PaymentIntentNextActionModel;
   'object': 'payment_intent';
   'on_behalf_of': string | AccountModel;
-  'payment_details'?: PaymentFlowsPaymentDetailsModel;
+  'payment_details'?: PaymentFlowsPaymentDetailsModel | undefined;
   'payment_method': string | PaymentMethodModel;
   'payment_method_configuration_details': PaymentMethodConfigBizPaymentMethodConfigurationDetailsModel;
   'payment_method_options': PaymentIntentPaymentMethodOptionsModel;
   'payment_method_types': string[];
-  'presentment_details'?: PaymentFlowsPaymentIntentPresentmentDetailsModel;
+  'presentment_details'?: PaymentFlowsPaymentIntentPresentmentDetailsModel | undefined;
   'processing': PaymentIntentProcessing_1Model;
   'receipt_email': string;
   'review': string | ReviewModel;
-  'secret_key_confirmation'?: 'optional' | 'required';
+  'secret_key_confirmation'?: 'optional' | 'required' | undefined;
   'setup_future_usage': 'off_session' | 'on_session';
   'shipping': ShippingModel;
   'source': string | PaymentSourceModel | DeletedPaymentSourceModel;
@@ -486,21 +486,21 @@ export type PaymentIntentModel = {
 };
 
 export type ApiErrorsModel = {
-  'advice_code'?: string;
-  'charge'?: string;
-  'code'?: 'account_closed' | 'account_country_invalid_address' | 'account_error_country_change_requires_additional_steps' | 'account_information_mismatch' | 'account_invalid' | 'account_number_invalid' | 'acss_debit_session_incomplete' | 'alipay_upgrade_required' | 'amount_too_large' | 'amount_too_small' | 'api_key_expired' | 'application_fees_not_allowed' | 'authentication_required' | 'balance_insufficient' | 'balance_invalid_parameter' | 'bank_account_bad_routing_numbers' | 'bank_account_declined' | 'bank_account_exists' | 'bank_account_restricted' | 'bank_account_unusable' | 'bank_account_unverified' | 'bank_account_verification_failed' | 'billing_invalid_mandate' | 'bitcoin_upgrade_required' | 'capture_charge_authorization_expired' | 'capture_unauthorized_payment' | 'card_decline_rate_limit_exceeded' | 'card_declined' | 'cardholder_phone_number_required' | 'charge_already_captured' | 'charge_already_refunded' | 'charge_disputed' | 'charge_exceeds_source_limit' | 'charge_exceeds_transaction_limit' | 'charge_expired_for_capture' | 'charge_invalid_parameter' | 'charge_not_refundable' | 'clearing_code_unsupported' | 'country_code_invalid' | 'country_unsupported' | 'coupon_expired' | 'customer_max_payment_methods' | 'customer_max_subscriptions' | 'customer_session_expired' | 'customer_tax_location_invalid' | 'debit_not_authorized' | 'email_invalid' | 'expired_card' | 'financial_connections_account_inactive' | 'financial_connections_account_pending_account_numbers' | 'financial_connections_account_unavailable_account_numbers' | 'financial_connections_institution_unavailable' | 'financial_connections_no_successful_transaction_refresh' | 'forwarding_api_inactive' | 'forwarding_api_invalid_parameter' | 'forwarding_api_retryable_upstream_error' | 'forwarding_api_upstream_connection_error' | 'forwarding_api_upstream_connection_timeout' | 'forwarding_api_upstream_error' | 'idempotency_key_in_use' | 'incorrect_address' | 'incorrect_cvc' | 'incorrect_number' | 'incorrect_zip' | 'india_recurring_payment_mandate_canceled' | 'instant_payouts_config_disabled' | 'instant_payouts_currency_disabled' | 'instant_payouts_limit_exceeded' | 'instant_payouts_unsupported' | 'insufficient_funds' | 'intent_invalid_state' | 'intent_verification_method_missing' | 'invalid_card_type' | 'invalid_characters' | 'invalid_charge_amount' | 'invalid_cvc' | 'invalid_expiry_month' | 'invalid_expiry_year' | 'invalid_mandate_reference_prefix_format' | 'invalid_number' | 'invalid_source_usage' | 'invalid_tax_location' | 'invoice_no_customer_line_items' | 'invoice_no_payment_method_types' | 'invoice_no_subscription_line_items' | 'invoice_not_editable' | 'invoice_on_behalf_of_not_editable' | 'invoice_payment_intent_requires_action' | 'invoice_upcoming_none' | 'livemode_mismatch' | 'lock_timeout' | 'missing' | 'no_account' | 'not_allowed_on_standard_account' | 'out_of_inventory' | 'ownership_declaration_not_allowed' | 'parameter_invalid_empty' | 'parameter_invalid_integer' | 'parameter_invalid_string_blank' | 'parameter_invalid_string_empty' | 'parameter_missing' | 'parameter_unknown' | 'parameters_exclusive' | 'payment_intent_action_required' | 'payment_intent_authentication_failure' | 'payment_intent_incompatible_payment_method' | 'payment_intent_invalid_parameter' | 'payment_intent_konbini_rejected_confirmation_number' | 'payment_intent_mandate_invalid' | 'payment_intent_payment_attempt_expired' | 'payment_intent_payment_attempt_failed' | 'payment_intent_rate_limit_exceeded' | 'payment_intent_unexpected_state' | 'payment_method_bank_account_already_verified' | 'payment_method_bank_account_blocked' | 'payment_method_billing_details_address_missing' | 'payment_method_configuration_failures' | 'payment_method_currency_mismatch' | 'payment_method_customer_decline' | 'payment_method_invalid_parameter' | 'payment_method_invalid_parameter_testmode' | 'payment_method_microdeposit_failed' | 'payment_method_microdeposit_verification_amounts_invalid' | 'payment_method_microdeposit_verification_amounts_mismatch' | 'payment_method_microdeposit_verification_attempts_exceeded' | 'payment_method_microdeposit_verification_descriptor_code_mismatch' | 'payment_method_microdeposit_verification_timeout' | 'payment_method_not_available' | 'payment_method_provider_decline' | 'payment_method_provider_timeout' | 'payment_method_unactivated' | 'payment_method_unexpected_state' | 'payment_method_unsupported_type' | 'payout_reconciliation_not_ready' | 'payouts_limit_exceeded' | 'payouts_not_allowed' | 'platform_account_required' | 'platform_api_key_expired' | 'postal_code_invalid' | 'processing_error' | 'product_inactive' | 'progressive_onboarding_limit_exceeded' | 'rate_limit' | 'refer_to_customer' | 'refund_disputed_payment' | 'resource_already_exists' | 'resource_missing' | 'return_intent_already_processed' | 'routing_number_invalid' | 'secret_key_required' | 'sensitive_data_access_expired' | 'sepa_unsupported_account' | 'setup_attempt_failed' | 'setup_intent_authentication_failure' | 'setup_intent_invalid_parameter' | 'setup_intent_mandate_invalid' | 'setup_intent_mobile_wallet_unsupported' | 'setup_intent_setup_attempt_expired' | 'setup_intent_unexpected_state' | 'shipping_address_invalid' | 'shipping_calculation_failed' | 'sku_inactive' | 'state_unsupported' | 'status_transition_invalid' | 'stripe_tax_inactive' | 'tax_id_invalid' | 'tax_id_prohibited' | 'taxes_calculation_failed' | 'terminal_location_country_unsupported' | 'terminal_reader_busy' | 'terminal_reader_collected_data_invalid' | 'terminal_reader_hardware_fault' | 'terminal_reader_invalid_location_for_activation' | 'terminal_reader_invalid_location_for_payment' | 'terminal_reader_offline' | 'terminal_reader_timeout' | 'testmode_charges_only' | 'tls_version_unsupported' | 'token_already_used' | 'token_card_network_invalid' | 'token_in_use' | 'transfer_source_balance_parameters_mismatch' | 'transfers_not_allowed' | 'url_invalid' | 'v2_account_disconnection_unsupported' | 'v2_account_missing_configuration';
-  'decline_code'?: string;
-  'doc_url'?: string;
-  'message'?: string;
-  'network_advice_code'?: string;
-  'network_decline_code'?: string;
-  'param'?: string;
-  'payment_intent'?: PaymentIntentModel;
-  'payment_method'?: PaymentMethodModel;
-  'payment_method_type'?: string;
-  'request_log_url'?: string;
-  'setup_intent'?: SetupIntentModel;
-  'source'?: PaymentSourceModel;
+  'advice_code'?: string | undefined;
+  'charge'?: string | undefined;
+  'code'?: 'account_closed' | 'account_country_invalid_address' | 'account_error_country_change_requires_additional_steps' | 'account_information_mismatch' | 'account_invalid' | 'account_number_invalid' | 'acss_debit_session_incomplete' | 'alipay_upgrade_required' | 'amount_too_large' | 'amount_too_small' | 'api_key_expired' | 'application_fees_not_allowed' | 'authentication_required' | 'balance_insufficient' | 'balance_invalid_parameter' | 'bank_account_bad_routing_numbers' | 'bank_account_declined' | 'bank_account_exists' | 'bank_account_restricted' | 'bank_account_unusable' | 'bank_account_unverified' | 'bank_account_verification_failed' | 'billing_invalid_mandate' | 'bitcoin_upgrade_required' | 'capture_charge_authorization_expired' | 'capture_unauthorized_payment' | 'card_decline_rate_limit_exceeded' | 'card_declined' | 'cardholder_phone_number_required' | 'charge_already_captured' | 'charge_already_refunded' | 'charge_disputed' | 'charge_exceeds_source_limit' | 'charge_exceeds_transaction_limit' | 'charge_expired_for_capture' | 'charge_invalid_parameter' | 'charge_not_refundable' | 'clearing_code_unsupported' | 'country_code_invalid' | 'country_unsupported' | 'coupon_expired' | 'customer_max_payment_methods' | 'customer_max_subscriptions' | 'customer_session_expired' | 'customer_tax_location_invalid' | 'debit_not_authorized' | 'email_invalid' | 'expired_card' | 'financial_connections_account_inactive' | 'financial_connections_account_pending_account_numbers' | 'financial_connections_account_unavailable_account_numbers' | 'financial_connections_institution_unavailable' | 'financial_connections_no_successful_transaction_refresh' | 'forwarding_api_inactive' | 'forwarding_api_invalid_parameter' | 'forwarding_api_retryable_upstream_error' | 'forwarding_api_upstream_connection_error' | 'forwarding_api_upstream_connection_timeout' | 'forwarding_api_upstream_error' | 'idempotency_key_in_use' | 'incorrect_address' | 'incorrect_cvc' | 'incorrect_number' | 'incorrect_zip' | 'india_recurring_payment_mandate_canceled' | 'instant_payouts_config_disabled' | 'instant_payouts_currency_disabled' | 'instant_payouts_limit_exceeded' | 'instant_payouts_unsupported' | 'insufficient_funds' | 'intent_invalid_state' | 'intent_verification_method_missing' | 'invalid_card_type' | 'invalid_characters' | 'invalid_charge_amount' | 'invalid_cvc' | 'invalid_expiry_month' | 'invalid_expiry_year' | 'invalid_mandate_reference_prefix_format' | 'invalid_number' | 'invalid_source_usage' | 'invalid_tax_location' | 'invoice_no_customer_line_items' | 'invoice_no_payment_method_types' | 'invoice_no_subscription_line_items' | 'invoice_not_editable' | 'invoice_on_behalf_of_not_editable' | 'invoice_payment_intent_requires_action' | 'invoice_upcoming_none' | 'livemode_mismatch' | 'lock_timeout' | 'missing' | 'no_account' | 'not_allowed_on_standard_account' | 'out_of_inventory' | 'ownership_declaration_not_allowed' | 'parameter_invalid_empty' | 'parameter_invalid_integer' | 'parameter_invalid_string_blank' | 'parameter_invalid_string_empty' | 'parameter_missing' | 'parameter_unknown' | 'parameters_exclusive' | 'payment_intent_action_required' | 'payment_intent_authentication_failure' | 'payment_intent_incompatible_payment_method' | 'payment_intent_invalid_parameter' | 'payment_intent_konbini_rejected_confirmation_number' | 'payment_intent_mandate_invalid' | 'payment_intent_payment_attempt_expired' | 'payment_intent_payment_attempt_failed' | 'payment_intent_rate_limit_exceeded' | 'payment_intent_unexpected_state' | 'payment_method_bank_account_already_verified' | 'payment_method_bank_account_blocked' | 'payment_method_billing_details_address_missing' | 'payment_method_configuration_failures' | 'payment_method_currency_mismatch' | 'payment_method_customer_decline' | 'payment_method_invalid_parameter' | 'payment_method_invalid_parameter_testmode' | 'payment_method_microdeposit_failed' | 'payment_method_microdeposit_verification_amounts_invalid' | 'payment_method_microdeposit_verification_amounts_mismatch' | 'payment_method_microdeposit_verification_attempts_exceeded' | 'payment_method_microdeposit_verification_descriptor_code_mismatch' | 'payment_method_microdeposit_verification_timeout' | 'payment_method_not_available' | 'payment_method_provider_decline' | 'payment_method_provider_timeout' | 'payment_method_unactivated' | 'payment_method_unexpected_state' | 'payment_method_unsupported_type' | 'payout_reconciliation_not_ready' | 'payouts_limit_exceeded' | 'payouts_not_allowed' | 'platform_account_required' | 'platform_api_key_expired' | 'postal_code_invalid' | 'processing_error' | 'product_inactive' | 'progressive_onboarding_limit_exceeded' | 'rate_limit' | 'refer_to_customer' | 'refund_disputed_payment' | 'resource_already_exists' | 'resource_missing' | 'return_intent_already_processed' | 'routing_number_invalid' | 'secret_key_required' | 'sensitive_data_access_expired' | 'sepa_unsupported_account' | 'setup_attempt_failed' | 'setup_intent_authentication_failure' | 'setup_intent_invalid_parameter' | 'setup_intent_mandate_invalid' | 'setup_intent_mobile_wallet_unsupported' | 'setup_intent_setup_attempt_expired' | 'setup_intent_unexpected_state' | 'shipping_address_invalid' | 'shipping_calculation_failed' | 'sku_inactive' | 'state_unsupported' | 'status_transition_invalid' | 'stripe_tax_inactive' | 'tax_id_invalid' | 'tax_id_prohibited' | 'taxes_calculation_failed' | 'terminal_location_country_unsupported' | 'terminal_reader_busy' | 'terminal_reader_collected_data_invalid' | 'terminal_reader_hardware_fault' | 'terminal_reader_invalid_location_for_activation' | 'terminal_reader_invalid_location_for_payment' | 'terminal_reader_offline' | 'terminal_reader_timeout' | 'testmode_charges_only' | 'tls_version_unsupported' | 'token_already_used' | 'token_card_network_invalid' | 'token_in_use' | 'transfer_source_balance_parameters_mismatch' | 'transfers_not_allowed' | 'url_invalid' | 'v2_account_disconnection_unsupported' | 'v2_account_missing_configuration' | undefined;
+  'decline_code'?: string | undefined;
+  'doc_url'?: string | undefined;
+  'message'?: string | undefined;
+  'network_advice_code'?: string | undefined;
+  'network_decline_code'?: string | undefined;
+  'param'?: string | undefined;
+  'payment_intent'?: PaymentIntentModel | undefined;
+  'payment_method'?: PaymentMethodModel | undefined;
+  'payment_method_type'?: string | undefined;
+  'request_log_url'?: string | undefined;
+  'setup_intent'?: SetupIntentModel | undefined;
+  'source'?: PaymentSourceModel | undefined;
   'type': 'api_error' | 'card_error' | 'idempotency_error' | 'invalid_request_error';
 };
 
@@ -536,7 +536,7 @@ export type ChargeModel = {
   'application': string | ApplicationModel;
   'application_fee': string | ApplicationFeeModel;
   'application_fee_amount': number;
-  'authorization_code'?: string;
+  'authorization_code'?: string | undefined;
   'balance_transaction': string | BalanceTransactionModel;
   'billing_details': BillingDetailsModel;
   'calculated_statement_descriptor': string;
@@ -551,7 +551,7 @@ export type ChargeModel = {
   'failure_message': string;
   'fraud_details': ChargeFraudDetailsModel;
   'id': string;
-  'level3'?: Level3Model;
+  'level3'?: Level3Model | undefined;
   'livemode': boolean;
   'metadata': {
   [key: string]: string;
@@ -563,8 +563,8 @@ export type ChargeModel = {
   'payment_intent': string | PaymentIntentModel;
   'payment_method': string;
   'payment_method_details': PaymentMethodDetailsModel;
-  'presentment_details'?: PaymentFlowsPaymentIntentPresentmentDetailsModel;
-  'radar_options'?: RadarRadarOptionsModel;
+  'presentment_details'?: PaymentFlowsPaymentIntentPresentmentDetailsModel | undefined;
+  'radar_options'?: RadarRadarOptionsModel | undefined;
   'receipt_email': string;
   'receipt_number': string;
   'receipt_url': string;
@@ -574,7 +574,7 @@ export type ChargeModel = {
   'has_more': boolean;
   'object': 'list';
   'url': string;
-};
+} | undefined;
   'review': string | ReviewModel;
   'shipping': ShippingModel;
   'source': PaymentSourceModel;
@@ -582,7 +582,7 @@ export type ChargeModel = {
   'statement_descriptor': string;
   'statement_descriptor_suffix': string;
   'status': 'failed' | 'pending' | 'succeeded';
-  'transfer'?: string | TransferModel;
+  'transfer'?: string | TransferModel | undefined;
   'transfer_data': ChargeTransferDataModel;
   'transfer_group': string;
 };
@@ -599,7 +599,7 @@ export type ConnectCollectionTransferModel = {
 export type BalanceTransactionModel = {
   'amount': number;
   'available_on': number;
-  'balance_type'?: 'issuing' | 'payments' | 'refund_and_dispute_prefunding';
+  'balance_type'?: 'issuing' | 'payments' | 'refund_and_dispute_prefunding' | undefined;
   'created': number;
   'currency': string;
   'description': string;
@@ -621,22 +621,22 @@ export type CustomerBalanceResourceCashBalanceTransactionResourceAdjustedForOver
 };
 
 export type CustomerCashBalanceTransactionModel = {
-  'adjusted_for_overdraft'?: CustomerBalanceResourceCashBalanceTransactionResourceAdjustedForOverdraftModel;
-  'applied_to_payment'?: CustomerBalanceResourceCashBalanceTransactionResourceAppliedToPaymentTransactionModel;
+  'adjusted_for_overdraft'?: CustomerBalanceResourceCashBalanceTransactionResourceAdjustedForOverdraftModel | undefined;
+  'applied_to_payment'?: CustomerBalanceResourceCashBalanceTransactionResourceAppliedToPaymentTransactionModel | undefined;
   'created': number;
   'currency': string;
   'customer': string | CustomerModel;
-  'customer_account'?: string;
+  'customer_account'?: string | undefined;
   'ending_balance': number;
-  'funded'?: CustomerBalanceResourceCashBalanceTransactionResourceFundedTransactionModel;
+  'funded'?: CustomerBalanceResourceCashBalanceTransactionResourceFundedTransactionModel | undefined;
   'id': string;
   'livemode': boolean;
   'net_amount': number;
   'object': 'customer_cash_balance_transaction';
-  'refunded_from_payment'?: CustomerBalanceResourceCashBalanceTransactionResourceRefundedFromPaymentTransactionModel;
-  'transferred_to_balance'?: CustomerBalanceResourceCashBalanceTransactionResourceTransferredToBalanceModel;
+  'refunded_from_payment'?: CustomerBalanceResourceCashBalanceTransactionResourceRefundedFromPaymentTransactionModel | undefined;
+  'transferred_to_balance'?: CustomerBalanceResourceCashBalanceTransactionResourceTransferredToBalanceModel | undefined;
   'type': 'adjusted_for_overdraft' | 'applied_to_payment' | 'funded' | 'funding_reversed' | 'refunded_from_payment' | 'return_canceled' | 'return_initiated' | 'transferred_to_balance' | 'unapplied_from_payment';
-  'unapplied_from_payment'?: CustomerBalanceResourceCashBalanceTransactionResourceUnappliedFromPaymentTransactionModel;
+  'unapplied_from_payment'?: CustomerBalanceResourceCashBalanceTransactionResourceUnappliedFromPaymentTransactionModel | undefined;
 };
 
 export type CustomerBalanceResourceCashBalanceTransactionResourceAppliedToPaymentTransactionModel = {
@@ -649,20 +649,20 @@ export type RefundModel = {
   'charge': string | ChargeModel;
   'created': number;
   'currency': string;
-  'description'?: string;
-  'destination_details'?: RefundDestinationDetailsModel;
-  'failure_balance_transaction'?: string | BalanceTransactionModel;
-  'failure_reason'?: string;
+  'description'?: string | undefined;
+  'destination_details'?: RefundDestinationDetailsModel | undefined;
+  'failure_balance_transaction'?: string | BalanceTransactionModel | undefined;
+  'failure_reason'?: string | undefined;
   'id': string;
-  'instructions_email'?: string;
+  'instructions_email'?: string | undefined;
   'metadata': {
   [key: string]: string;
 };
-  'next_action'?: RefundNextActionModel;
+  'next_action'?: RefundNextActionModel | undefined;
   'object': 'refund';
   'payment_intent': string | PaymentIntentModel;
-  'pending_reason'?: 'charge_pending' | 'insufficient_funds' | 'processing';
-  'presentment_details'?: PaymentFlowsPaymentIntentPresentmentDetailsModel;
+  'pending_reason'?: 'charge_pending' | 'insufficient_funds' | 'processing' | undefined;
+  'presentment_details'?: PaymentFlowsPaymentIntentPresentmentDetailsModel | undefined;
   'reason': 'duplicate' | 'expired_uncaptured_charge' | 'fraudulent' | 'requested_by_customer';
   'receipt_number': string;
   'source_transfer_reversal': string | TransferReversalModel;
@@ -693,8 +693,8 @@ export type TransferModel = {
   'currency': string;
   'description': string;
   'destination': string | AccountModel;
-  'destination_payment'?: string | ChargeModel;
-  'fx_quote'?: string;
+  'destination_payment'?: string | ChargeModel | undefined;
+  'fx_quote'?: string | undefined;
   'id': string;
   'livemode': boolean;
   'metadata': {
@@ -709,7 +709,7 @@ export type TransferModel = {
 };
   'reversed': boolean;
   'source_transaction': string | ChargeModel;
-  'source_type'?: string;
+  'source_type'?: string | undefined;
   'transfer_group': string;
 };
 
@@ -735,18 +735,18 @@ export type DisputeModel = {
   'evidence': DisputeEvidenceModel;
   'evidence_details': DisputeEvidenceDetailsModel;
   'id': string;
-  'intended_submission_method'?: 'manual' | 'prefer_manual' | 'prefer_smart_disputes' | 'smart_disputes';
+  'intended_submission_method'?: 'manual' | 'prefer_manual' | 'prefer_smart_disputes' | 'smart_disputes' | undefined;
   'is_charge_refundable': boolean;
   'livemode': boolean;
   'metadata': {
   [key: string]: string;
 };
-  'network_reason_code'?: string;
+  'network_reason_code'?: string | undefined;
   'object': 'dispute';
   'payment_intent': string | PaymentIntentModel;
-  'payment_method_details'?: DisputePaymentMethodDetailsModel;
+  'payment_method_details'?: DisputePaymentMethodDetailsModel | undefined;
   'reason': string;
-  'smart_disputes'?: DisputeSmartDisputesModel;
+  'smart_disputes'?: DisputeSmartDisputesModel | undefined;
   'status': 'lost' | 'needs_response' | 'prevented' | 'under_review' | 'warning_closed' | 'warning_needs_response' | 'warning_under_review' | 'won';
 };
 
@@ -774,7 +774,7 @@ export type IssuingAuthorizationModel = {
   'created': number;
   'currency': string;
   'fleet': IssuingAuthorizationFleetDataModel;
-  'fraud_challenges'?: IssuingAuthorizationFraudChallengeModel[];
+  'fraud_challenges'?: IssuingAuthorizationFraudChallengeModel[] | undefined;
   'fuel': IssuingAuthorizationFuelDataModel;
   'id': string;
   'livemode': boolean;
@@ -789,9 +789,9 @@ export type IssuingAuthorizationModel = {
   'pending_request': IssuingAuthorizationPendingRequestModel;
   'request_history': IssuingAuthorizationRequest_1Model[];
   'status': 'closed' | 'expired' | 'pending' | 'reversed';
-  'token'?: string | IssuingTokenModel;
+  'token'?: string | IssuingTokenModel | undefined;
   'transactions': IssuingTransactionModel[];
-  'treasury'?: IssuingAuthorizationTreasuryModel;
+  'treasury'?: IssuingAuthorizationTreasuryModel | undefined;
   'verification_data': IssuingAuthorizationVerificationDataModel;
   'verified_by_fraud_challenge': boolean;
   'wallet': string;
@@ -803,10 +803,10 @@ export type IssuingCardModel = {
   'cardholder': IssuingCardholderModel;
   'created': number;
   'currency': string;
-  'cvc'?: string;
+  'cvc'?: string | undefined;
   'exp_month': number;
   'exp_year': number;
-  'financial_account'?: string;
+  'financial_account'?: string | undefined;
   'id': string;
   'last4': string;
   'latest_fraud_warning': IssuingCardFraudWarningModel;
@@ -814,7 +814,7 @@ export type IssuingCardModel = {
   'metadata': {
   [key: string]: string;
 };
-  'number'?: string;
+  'number'?: string | undefined;
   'object': 'issuing.card';
   'personalization_design': string | IssuingPersonalizationDesignModel;
   'replaced_by': string | IssuingCardModel;
@@ -848,30 +848,30 @@ export type IssuingTransactionModel = {
 };
   'network_data': IssuingTransactionNetworkDataModel;
   'object': 'issuing.transaction';
-  'purchase_details'?: IssuingTransactionPurchaseDetailsModel;
-  'settlement'?: string | IssuingSettlementModel;
-  'token'?: string | IssuingTokenModel;
-  'treasury'?: IssuingTransactionTreasuryModel;
+  'purchase_details'?: IssuingTransactionPurchaseDetailsModel | undefined;
+  'settlement'?: string | IssuingSettlementModel | undefined;
+  'token'?: string | IssuingTokenModel | undefined;
+  'treasury'?: IssuingTransactionTreasuryModel | undefined;
   'type': 'capture' | 'refund';
   'wallet': 'apple_pay' | 'google_pay' | 'samsung_pay';
 };
 
 export type IssuingDisputeModel = {
   'amount': number;
-  'balance_transactions'?: BalanceTransactionModel[];
+  'balance_transactions'?: BalanceTransactionModel[] | undefined;
   'created': number;
   'currency': string;
   'evidence': IssuingDisputeEvidenceModel;
   'id': string;
   'livemode': boolean;
-  'loss_reason'?: 'cardholder_authentication_issuer_liability' | 'eci5_token_transaction_with_tavv' | 'excess_disputes_in_timeframe' | 'has_not_met_the_minimum_dispute_amount_requirements' | 'invalid_duplicate_dispute' | 'invalid_incorrect_amount_dispute' | 'invalid_no_authorization' | 'invalid_use_of_disputes' | 'merchandise_delivered_or_shipped' | 'merchandise_or_service_as_described' | 'not_cancelled' | 'other' | 'refund_issued' | 'submitted_beyond_allowable_time_limit' | 'transaction_3ds_required' | 'transaction_approved_after_prior_fraud_dispute' | 'transaction_authorized' | 'transaction_electronically_read' | 'transaction_qualifies_for_visa_easy_payment_service' | 'transaction_unattended';
+  'loss_reason'?: 'cardholder_authentication_issuer_liability' | 'eci5_token_transaction_with_tavv' | 'excess_disputes_in_timeframe' | 'has_not_met_the_minimum_dispute_amount_requirements' | 'invalid_duplicate_dispute' | 'invalid_incorrect_amount_dispute' | 'invalid_no_authorization' | 'invalid_use_of_disputes' | 'merchandise_delivered_or_shipped' | 'merchandise_or_service_as_described' | 'not_cancelled' | 'other' | 'refund_issued' | 'submitted_beyond_allowable_time_limit' | 'transaction_3ds_required' | 'transaction_approved_after_prior_fraud_dispute' | 'transaction_authorized' | 'transaction_electronically_read' | 'transaction_qualifies_for_visa_easy_payment_service' | 'transaction_unattended' | undefined;
   'metadata': {
   [key: string]: string;
 };
   'object': 'issuing.dispute';
   'status': 'expired' | 'lost' | 'submitted' | 'unsubmitted' | 'won';
   'transaction': string | IssuingTransactionModel;
-  'treasury'?: IssuingDisputeTreasuryModel;
+  'treasury'?: IssuingDisputeTreasuryModel | undefined;
 };
 
 export type PayoutModel = {
@@ -941,71 +941,71 @@ export type PaymentMethodDetailsBancontactModel = {
 };
 
 export type PaymentMethodDetailsModel = {
-  'ach_credit_transfer'?: PaymentMethodDetailsAchCreditTransferModel;
-  'ach_debit'?: PaymentMethodDetailsAchDebitModel;
-  'acss_debit'?: PaymentMethodDetailsAcssDebitModel;
-  'affirm'?: PaymentMethodDetailsAffirmModel;
-  'afterpay_clearpay'?: PaymentMethodDetailsAfterpayClearpayModel;
-  'alipay'?: PaymentFlowsPrivatePaymentMethodsAlipayDetailsModel;
-  'alma'?: PaymentMethodDetailsAlmaModel;
-  'amazon_pay'?: PaymentMethodDetailsAmazonPayModel;
-  'au_becs_debit'?: PaymentMethodDetailsAuBecsDebitModel;
-  'bacs_debit'?: PaymentMethodDetailsBacsDebitModel;
-  'bancontact'?: PaymentMethodDetailsBancontactModel;
-  'billie'?: PaymentMethodDetailsBillieModel;
-  'blik'?: PaymentMethodDetailsBlikModel;
-  'boleto'?: PaymentMethodDetailsBoletoModel;
-  'card'?: PaymentMethodDetailsCardModel;
-  'card_present'?: PaymentMethodDetailsCardPresentModel;
-  'cashapp'?: PaymentMethodDetailsCashappModel;
-  'crypto'?: PaymentMethodDetailsCryptoModel;
-  'customer_balance'?: PaymentMethodDetailsCustomerBalanceModel;
-  'eps'?: PaymentMethodDetailsEpsModel;
-  'fpx'?: PaymentMethodDetailsFpxModel;
-  'giropay'?: PaymentMethodDetailsGiropayModel;
-  'gopay'?: PaymentMethodDetailsGopayModel;
-  'grabpay'?: PaymentMethodDetailsGrabpayModel;
-  'id_bank_transfer'?: PaymentMethodDetailsIdBankTransferModel;
-  'ideal'?: PaymentMethodDetailsIdealModel;
-  'interac_present'?: PaymentMethodDetailsInteracPresentModel;
-  'kakao_pay'?: PaymentMethodDetailsKakaoPayModel;
-  'klarna'?: PaymentMethodDetailsKlarnaModel;
-  'konbini'?: PaymentMethodDetailsKonbiniModel;
-  'kr_card'?: PaymentMethodDetailsKrCardModel;
-  'link'?: PaymentMethodDetailsLinkModel;
-  'mb_way'?: PaymentMethodDetailsMbWayModel;
-  'mobilepay'?: PaymentMethodDetailsMobilepayModel;
-  'multibanco'?: PaymentMethodDetailsMultibancoModel;
-  'naver_pay'?: PaymentMethodDetailsNaverPayModel;
-  'nz_bank_account'?: PaymentMethodDetailsNzBankAccountModel;
-  'oxxo'?: PaymentMethodDetailsOxxoModel;
-  'p24'?: PaymentMethodDetailsP24Model;
-  'pay_by_bank'?: PaymentMethodDetailsPayByBankModel;
-  'payco'?: PaymentMethodDetailsPaycoModel;
-  'paynow'?: PaymentMethodDetailsPaynowModel;
-  'paypal'?: PaymentMethodDetailsPaypalModel;
-  'paypay'?: PaymentMethodDetailsPaypayModel;
-  'payto'?: PaymentMethodDetailsPaytoModel;
-  'pix'?: PaymentMethodDetailsPixModel;
-  'promptpay'?: PaymentMethodDetailsPromptpayModel;
-  'qris'?: PaymentMethodDetailsQrisModel;
-  'rechnung'?: PaymentMethodDetailsRechnungModel;
-  'revolut_pay'?: PaymentMethodDetailsRevolutPayModel;
-  'samsung_pay'?: PaymentMethodDetailsSamsungPayModel;
-  'satispay'?: PaymentMethodDetailsSatispayModel;
-  'sepa_credit_transfer'?: PaymentMethodDetailsSepaCreditTransferModel;
-  'sepa_debit'?: PaymentMethodDetailsSepaDebitModel;
-  'shopeepay'?: PaymentMethodDetailsShopeepayModel;
-  'sofort'?: PaymentMethodDetailsSofortModel;
-  'stripe_account'?: PaymentMethodDetailsStripeAccountModel;
-  'stripe_balance'?: PaymentMethodDetailsStripeBalanceModel;
-  'swish'?: PaymentMethodDetailsSwishModel;
-  'twint'?: PaymentMethodDetailsTwintModel;
+  'ach_credit_transfer'?: PaymentMethodDetailsAchCreditTransferModel | undefined;
+  'ach_debit'?: PaymentMethodDetailsAchDebitModel | undefined;
+  'acss_debit'?: PaymentMethodDetailsAcssDebitModel | undefined;
+  'affirm'?: PaymentMethodDetailsAffirmModel | undefined;
+  'afterpay_clearpay'?: PaymentMethodDetailsAfterpayClearpayModel | undefined;
+  'alipay'?: PaymentFlowsPrivatePaymentMethodsAlipayDetailsModel | undefined;
+  'alma'?: PaymentMethodDetailsAlmaModel | undefined;
+  'amazon_pay'?: PaymentMethodDetailsAmazonPayModel | undefined;
+  'au_becs_debit'?: PaymentMethodDetailsAuBecsDebitModel | undefined;
+  'bacs_debit'?: PaymentMethodDetailsBacsDebitModel | undefined;
+  'bancontact'?: PaymentMethodDetailsBancontactModel | undefined;
+  'billie'?: PaymentMethodDetailsBillieModel | undefined;
+  'blik'?: PaymentMethodDetailsBlikModel | undefined;
+  'boleto'?: PaymentMethodDetailsBoletoModel | undefined;
+  'card'?: PaymentMethodDetailsCardModel | undefined;
+  'card_present'?: PaymentMethodDetailsCardPresentModel | undefined;
+  'cashapp'?: PaymentMethodDetailsCashappModel | undefined;
+  'crypto'?: PaymentMethodDetailsCryptoModel | undefined;
+  'customer_balance'?: PaymentMethodDetailsCustomerBalanceModel | undefined;
+  'eps'?: PaymentMethodDetailsEpsModel | undefined;
+  'fpx'?: PaymentMethodDetailsFpxModel | undefined;
+  'giropay'?: PaymentMethodDetailsGiropayModel | undefined;
+  'gopay'?: PaymentMethodDetailsGopayModel | undefined;
+  'grabpay'?: PaymentMethodDetailsGrabpayModel | undefined;
+  'id_bank_transfer'?: PaymentMethodDetailsIdBankTransferModel | undefined;
+  'ideal'?: PaymentMethodDetailsIdealModel | undefined;
+  'interac_present'?: PaymentMethodDetailsInteracPresentModel | undefined;
+  'kakao_pay'?: PaymentMethodDetailsKakaoPayModel | undefined;
+  'klarna'?: PaymentMethodDetailsKlarnaModel | undefined;
+  'konbini'?: PaymentMethodDetailsKonbiniModel | undefined;
+  'kr_card'?: PaymentMethodDetailsKrCardModel | undefined;
+  'link'?: PaymentMethodDetailsLinkModel | undefined;
+  'mb_way'?: PaymentMethodDetailsMbWayModel | undefined;
+  'mobilepay'?: PaymentMethodDetailsMobilepayModel | undefined;
+  'multibanco'?: PaymentMethodDetailsMultibancoModel | undefined;
+  'naver_pay'?: PaymentMethodDetailsNaverPayModel | undefined;
+  'nz_bank_account'?: PaymentMethodDetailsNzBankAccountModel | undefined;
+  'oxxo'?: PaymentMethodDetailsOxxoModel | undefined;
+  'p24'?: PaymentMethodDetailsP24Model | undefined;
+  'pay_by_bank'?: PaymentMethodDetailsPayByBankModel | undefined;
+  'payco'?: PaymentMethodDetailsPaycoModel | undefined;
+  'paynow'?: PaymentMethodDetailsPaynowModel | undefined;
+  'paypal'?: PaymentMethodDetailsPaypalModel | undefined;
+  'paypay'?: PaymentMethodDetailsPaypayModel | undefined;
+  'payto'?: PaymentMethodDetailsPaytoModel | undefined;
+  'pix'?: PaymentMethodDetailsPixModel | undefined;
+  'promptpay'?: PaymentMethodDetailsPromptpayModel | undefined;
+  'qris'?: PaymentMethodDetailsQrisModel | undefined;
+  'rechnung'?: PaymentMethodDetailsRechnungModel | undefined;
+  'revolut_pay'?: PaymentMethodDetailsRevolutPayModel | undefined;
+  'samsung_pay'?: PaymentMethodDetailsSamsungPayModel | undefined;
+  'satispay'?: PaymentMethodDetailsSatispayModel | undefined;
+  'sepa_credit_transfer'?: PaymentMethodDetailsSepaCreditTransferModel | undefined;
+  'sepa_debit'?: PaymentMethodDetailsSepaDebitModel | undefined;
+  'shopeepay'?: PaymentMethodDetailsShopeepayModel | undefined;
+  'sofort'?: PaymentMethodDetailsSofortModel | undefined;
+  'stripe_account'?: PaymentMethodDetailsStripeAccountModel | undefined;
+  'stripe_balance'?: PaymentMethodDetailsStripeBalanceModel | undefined;
+  'swish'?: PaymentMethodDetailsSwishModel | undefined;
+  'twint'?: PaymentMethodDetailsTwintModel | undefined;
   'type': string;
-  'us_bank_account'?: PaymentMethodDetailsUsBankAccountModel;
-  'wechat'?: PaymentMethodDetailsWechatModel;
-  'wechat_pay'?: PaymentMethodDetailsWechatPayModel;
-  'zip'?: PaymentMethodDetailsZipModel;
+  'us_bank_account'?: PaymentMethodDetailsUsBankAccountModel | undefined;
+  'wechat'?: PaymentMethodDetailsWechatModel | undefined;
+  'wechat_pay'?: PaymentMethodDetailsWechatPayModel | undefined;
+  'zip'?: PaymentMethodDetailsZipModel | undefined;
 };
 
 export type PaymentMethodDetailsIdealModel = {
@@ -1042,7 +1042,7 @@ export type ReviewModel = {
   'object': 'review';
   'open': boolean;
   'opened_reason': 'manual' | 'rule';
-  'payment_intent'?: string | PaymentIntentModel;
+  'payment_intent'?: string | PaymentIntentModel | undefined;
   'reason': string;
   'session': RadarReviewResourceSessionModel;
 };
@@ -1053,22 +1053,22 @@ export type ChargeTransferDataModel = {
 };
 
 export type TransferDataModel = {
-  'amount'?: number;
+  'amount'?: number | undefined;
   'destination': string | AccountModel;
 };
 
 export type SetupIntentModel = {
   'application': string | ApplicationModel;
-  'attach_to_self'?: boolean;
+  'attach_to_self'?: boolean | undefined;
   'automatic_payment_methods': PaymentFlowsAutomaticPaymentMethodsSetupIntentModel;
   'cancellation_reason': 'abandoned' | 'duplicate' | 'requested_by_customer';
   'client_secret': string;
   'created': number;
   'customer': string | CustomerModel | DeletedCustomerModel;
-  'customer_account'?: string;
+  'customer_account'?: string | undefined;
   'description': string;
   'excluded_payment_method_types': Array<'acss_debit' | 'affirm' | 'afterpay_clearpay' | 'alipay' | 'alma' | 'amazon_pay' | 'au_becs_debit' | 'bacs_debit' | 'bancontact' | 'billie' | 'blik' | 'boleto' | 'card' | 'cashapp' | 'crypto' | 'customer_balance' | 'eps' | 'fpx' | 'giropay' | 'gopay' | 'grabpay' | 'id_bank_transfer' | 'ideal' | 'kakao_pay' | 'klarna' | 'konbini' | 'kr_card' | 'mb_way' | 'mobilepay' | 'multibanco' | 'naver_pay' | 'nz_bank_account' | 'oxxo' | 'p24' | 'pay_by_bank' | 'payco' | 'paynow' | 'paypal' | 'paypay' | 'payto' | 'pix' | 'promptpay' | 'qris' | 'rechnung' | 'revolut_pay' | 'samsung_pay' | 'satispay' | 'sepa_debit' | 'shopeepay' | 'sofort' | 'stripe_balance' | 'swish' | 'twint' | 'us_bank_account' | 'wechat_pay' | 'zip'>;
-  'flow_directions'?: Array<'inbound' | 'outbound'>;
+  'flow_directions'?: Array<'inbound' | 'outbound'> | undefined;
   'id': string;
   'last_setup_error': ApiErrorsModel;
   'latest_attempt': string | SetupAttemptModel;
@@ -1099,15 +1099,15 @@ export type PaymentMethodCardModel = {
   'brand': string;
   'checks': PaymentMethodCardChecksModel;
   'country': string;
-  'description'?: string;
+  'description'?: string | undefined;
   'display_brand': string;
   'exp_month': number;
   'exp_year': number;
-  'fingerprint'?: string;
+  'fingerprint'?: string | undefined;
   'funding': string;
   'generated_from': PaymentMethodCardGeneratedCardModel;
-  'iin'?: string;
-  'issuer'?: string;
+  'iin'?: string | undefined;
+  'issuer'?: string | undefined;
   'last4': string;
   'networks': NetworksModel;
   'regulated_status': 'regulated' | 'unregulated';
@@ -1123,7 +1123,7 @@ export type InvoiceSettingCustomerSettingModel = {
 };
 
 export type ConnectAccountReferenceModel = {
-  'account'?: string | AccountModel;
+  'account'?: string | AccountModel | undefined;
   'type': 'account' | 'self';
 };
 
@@ -1137,11 +1137,11 @@ export type SubscriptionModel = {
   'application': string | ApplicationModel | DeletedApplicationModel;
   'application_fee_percent': number;
   'automatic_tax': SubscriptionAutomaticTaxModel;
-  'billing_cadence'?: string;
+  'billing_cadence'?: string | undefined;
   'billing_cycle_anchor': number;
   'billing_cycle_anchor_config': SubscriptionsResourceBillingCycleAnchorConfigModel;
   'billing_mode': SubscriptionsResourceBillingModeModel;
-  'billing_schedules'?: SubscriptionsResourceBillingSchedulesModel[];
+  'billing_schedules'?: SubscriptionsResourceBillingSchedulesModel[] | undefined;
   'billing_thresholds': SubscriptionBillingThresholdsModel;
   'cancel_at': number;
   'cancel_at_period_end': boolean;
@@ -1151,11 +1151,11 @@ export type SubscriptionModel = {
   'created': number;
   'currency': string;
   'customer': string | CustomerModel | DeletedCustomerModel;
-  'customer_account'?: string;
+  'customer_account'?: string | undefined;
   'days_until_due': number;
   'default_payment_method': string | PaymentMethodModel;
   'default_source': string | PaymentSourceModel;
-  'default_tax_rates'?: TaxRateModel[];
+  'default_tax_rates'?: TaxRateModel[] | undefined;
   'description': string;
   'discounts': Array<string | DiscountModel>;
   'ended_at': number;
@@ -1167,7 +1167,7 @@ export type SubscriptionModel = {
   'object': 'list';
   'url': string;
 };
-  'last_price_migration_error'?: SubscriptionsResourcePriceMigrationErrorModel;
+  'last_price_migration_error'?: SubscriptionsResourcePriceMigrationErrorModel | undefined;
   'latest_invoice': string | InvoiceModel;
   'livemode': boolean;
   'metadata': {
@@ -1181,7 +1181,7 @@ export type SubscriptionModel = {
   'pending_invoice_item_interval': SubscriptionPendingInvoiceItemIntervalModel;
   'pending_setup_intent': string | SetupIntentModel;
   'pending_update': SubscriptionsResourcePendingUpdateModel;
-  'prebilling'?: SubscriptionPrebillingDataModel;
+  'prebilling'?: SubscriptionPrebillingDataModel | undefined;
   'schedule': string | SubscriptionScheduleModel;
   'start_date': number;
   'status': 'active' | 'canceled' | 'incomplete' | 'incomplete_expired' | 'past_due' | 'paused' | 'trialing' | 'unpaid';
@@ -1199,7 +1199,7 @@ export type PriceModel = {
   'currency': string;
   'currency_options'?: {
   [key: string]: CurrencyOptionModel;
-};
+} | undefined;
   'custom_unit_amount': CustomUnitAmountModel;
   'id': string;
   'livemode': boolean;
@@ -1207,13 +1207,13 @@ export type PriceModel = {
   'metadata': {
   [key: string]: string;
 };
-  'migrate_to'?: MigrateToModel;
+  'migrate_to'?: MigrateToModel | undefined;
   'nickname': string;
   'object': 'price';
   'product': string | ProductModel | DeletedProductModel;
   'recurring': RecurringModel;
   'tax_behavior': 'exclusive' | 'inclusive' | 'unspecified';
-  'tiers'?: PriceTierModel[];
+  'tiers'?: PriceTierModel[] | undefined;
   'tiers_mode': 'graduated' | 'volume';
   'transform_quantity': TransformQuantityModel;
   'type': 'one_time' | 'recurring';
@@ -1224,7 +1224,7 @@ export type PriceModel = {
 export type ProductModel = {
   'active': boolean;
   'created': number;
-  'default_price'?: string | PriceModel;
+  'default_price'?: string | PriceModel | undefined;
   'description': string;
   'id': string;
   'images': string[];
@@ -1237,10 +1237,10 @@ export type ProductModel = {
   'object': 'product';
   'package_dimensions': PackageDimensionsModel;
   'shippable': boolean;
-  'statement_descriptor'?: string;
+  'statement_descriptor'?: string | undefined;
   'tax_code': string | TaxCodeModel;
   'type': 'good' | 'service';
-  'unit_label'?: string;
+  'unit_label'?: string | undefined;
   'updated': number;
   'url': string;
 };
@@ -1260,7 +1260,7 @@ export type TaxIdModel = {
   'country': string;
   'created': number;
   'customer': string | CustomerModel;
-  'customer_account'?: string;
+  'customer_account'?: string | undefined;
   'id': string;
   'livemode': boolean;
   'object': 'tax_id';
@@ -1271,10 +1271,10 @@ export type TaxIdModel = {
 };
 
 export type TaxIDsOwnerModel = {
-  'account'?: string | AccountModel;
-  'application'?: string | ApplicationModel;
-  'customer'?: string | CustomerModel;
-  'customer_account'?: string;
+  'account'?: string | AccountModel | undefined;
+  'application'?: string | ApplicationModel | undefined;
+  'customer'?: string | CustomerModel | undefined;
+  'customer_account'?: string | undefined;
   'type': 'account' | 'application' | 'customer' | 'self';
 };
 
@@ -1292,29 +1292,29 @@ export type InvoiceModel = {
   'amount_paid': number;
   'amount_remaining': number;
   'amount_shipping': number;
-  'amounts_due'?: PaymentPlanAmountModel[];
+  'amounts_due'?: PaymentPlanAmountModel[] | undefined;
   'application': string | ApplicationModel | DeletedApplicationModel;
   'attempt_count': number;
   'attempted': boolean;
-  'auto_advance'?: boolean;
+  'auto_advance'?: boolean | undefined;
   'automatic_tax': AutomaticTaxModel;
   'automatically_finalizes_at': number;
   'billing_reason': 'automatic_pending_invoice_item_invoice' | 'manual' | 'quote_accept' | 'subscription' | 'subscription_create' | 'subscription_cycle' | 'subscription_threshold' | 'subscription_update' | 'upcoming';
   'collection_method': 'charge_automatically' | 'send_invoice';
-  'confirmation_secret'?: InvoicesResourceConfirmationSecretModel;
+  'confirmation_secret'?: InvoicesResourceConfirmationSecretModel | undefined;
   'created': number;
   'currency': string;
   'custom_fields': InvoiceSettingCustomFieldModel[];
   'customer': string | CustomerModel | DeletedCustomerModel;
-  'customer_account'?: string;
+  'customer_account'?: string | undefined;
   'customer_address': AddressModel;
   'customer_email': string;
   'customer_name': string;
   'customer_phone': string;
   'customer_shipping': ShippingModel;
   'customer_tax_exempt': 'exempt' | 'none' | 'reverse';
-  'customer_tax_ids'?: InvoicesResourceInvoiceTaxIdModel[];
-  'default_margins'?: Array<string | MarginModel>;
+  'customer_tax_ids'?: InvoicesResourceInvoiceTaxIdModel[] | undefined;
+  'default_margins'?: Array<string | MarginModel> | undefined;
   'default_payment_method': string | PaymentMethodModel;
   'default_source': string | PaymentSourceModel;
   'default_tax_rates': TaxRateModel[];
@@ -1325,9 +1325,9 @@ export type InvoiceModel = {
   'ending_balance': number;
   'footer': string;
   'from_invoice': InvoicesResourceFromInvoiceModel;
-  'hosted_invoice_url'?: string;
-  'id'?: string;
-  'invoice_pdf'?: string;
+  'hosted_invoice_url'?: string | undefined;
+  'id'?: string | undefined;
+  'invoice_pdf'?: string | undefined;
   'issuer': ConnectAccountReferenceModel;
   'last_finalization_error': ApiErrorsModel;
   'latest_revision': string | InvoiceModel;
@@ -1352,7 +1352,7 @@ export type InvoiceModel = {
   'has_more': boolean;
   'object': 'list';
   'url': string;
-};
+} | undefined;
   'period_end': number;
   'period_start': number;
   'post_payment_credit_notes_amount': number;
@@ -1365,15 +1365,15 @@ export type InvoiceModel = {
   'statement_descriptor': string;
   'status': 'draft' | 'open' | 'paid' | 'uncollectible' | 'void';
   'status_transitions': InvoicesResourceStatusTransitionsModel;
-  'subscription'?: string | SubscriptionModel;
+  'subscription'?: string | SubscriptionModel | undefined;
   'subtotal': number;
   'subtotal_excluding_tax': number;
   'test_clock': string | TestHelpersTestClockModel;
-  'threshold_reason'?: InvoiceThresholdReasonModel;
+  'threshold_reason'?: InvoiceThresholdReasonModel | undefined;
   'total': number;
   'total_discount_amounts': DiscountsResourceDiscountAmountModel[];
   'total_excluding_tax': number;
-  'total_margin_amounts'?: MarginsResourceMarginAmountModel[];
+  'total_margin_amounts'?: MarginsResourceMarginAmountModel[] | undefined;
   'total_pretax_credit_amounts': InvoicesResourcePretaxCreditAmountModel[];
   'total_taxes': BillingBillResourceInvoicingTaxesTaxModel[];
   'webhooks_delivered_at': number;
@@ -1382,7 +1382,7 @@ export type InvoiceModel = {
 export type DeletedDiscountModel = {
   'checkout_session': string;
   'customer': string | CustomerModel | DeletedCustomerModel;
-  'customer_account'?: string;
+  'customer_account'?: string | undefined;
   'deleted': boolean;
   'id': string;
   'invoice': string;
@@ -1430,7 +1430,7 @@ export type BillingCreditGrantModel = {
   'category': 'paid' | 'promotional';
   'created': number;
   'customer': string | CustomerModel | DeletedCustomerModel;
-  'customer_account'?: string;
+  'customer_account'?: string | undefined;
   'effective_at': number;
   'expires_at': number;
   'id': string;
@@ -1440,7 +1440,7 @@ export type BillingCreditGrantModel = {
 };
   'name': string;
   'object': 'billing.credit_grant';
-  'priority'?: number;
+  'priority'?: number | undefined;
   'test_clock': string | TestHelpersTestClockModel;
   'updated': number;
   'voided_at': number;
@@ -1459,9 +1459,9 @@ export type BillingCreditGrantsResourceBalanceDebitModel = {
 
 export type InvoicesResourcePretaxCreditAmountModel = {
   'amount': number;
-  'credit_balance_transaction'?: string | BillingCreditBalanceTransactionModel;
-  'discount'?: string | DiscountModel | DeletedDiscountModel;
-  'margin'?: string | MarginModel;
+  'credit_balance_transaction'?: string | BillingCreditBalanceTransactionModel | undefined;
+  'discount'?: string | DiscountModel | DeletedDiscountModel | undefined;
+  'margin'?: string | MarginModel | undefined;
   'type': 'credit_balance_transaction' | 'discount' | 'margin';
 };
 
@@ -1475,8 +1475,8 @@ export type LineItemModel = {
   'id': string;
   'invoice': string;
   'livemode': boolean;
-  'margin_amounts'?: MarginsResourceMarginAmountModel[];
-  'margins'?: Array<string | MarginModel>;
+  'margin_amounts'?: MarginsResourceMarginAmountModel[] | undefined;
+  'margins'?: Array<string | MarginModel> | undefined;
   'metadata': {
   [key: string]: string;
 };
@@ -1487,7 +1487,7 @@ export type LineItemModel = {
   'pricing': BillingBillResourceInvoicingPricingPricingModel;
   'quantity': number;
   'subscription': string | SubscriptionModel;
-  'tax_calculation_reference'?: TaxProductIntegrationResourceTaxCalculationReferenceModel;
+  'tax_calculation_reference'?: TaxProductIntegrationResourceTaxCalculationReferenceModel | undefined;
   'taxes': BillingBillResourceInvoicingTaxesTaxModel[];
 };
 
@@ -1495,13 +1495,13 @@ export type BillingBillResourceInvoicingParentsInvoiceSubscriptionParentModel = 
   'metadata': {
   [key: string]: string;
 };
-  'pause_collection'?: BillingBillResourceInvoicingCommonInvoicePauseCollectionModel;
+  'pause_collection'?: BillingBillResourceInvoicingCommonInvoicePauseCollectionModel | undefined;
   'subscription': string | SubscriptionModel;
-  'subscription_proration_date'?: number;
+  'subscription_proration_date'?: number | undefined;
 };
 
 export type BillingBillResourceInvoicingParentsInvoiceParentModel = {
-  'billing_cadence_details'?: BillingBillResourceInvoicingParentsInvoiceBillingCadenceParentModel;
+  'billing_cadence_details'?: BillingBillResourceInvoicingParentsInvoiceBillingCadenceParentModel | undefined;
   'quote_details': BillingBillResourceInvoicingParentsInvoiceQuoteParentModel;
   'subscription_details': BillingBillResourceInvoicingParentsInvoiceSubscriptionParentModel;
   'type': 'billing_cadence_details' | 'quote_details' | 'subscription_details';
@@ -1524,25 +1524,25 @@ export type InvoicePaymentModel = {
 
 export type SubscriptionScheduleModel = {
   'application': string | ApplicationModel | DeletedApplicationModel;
-  'billing_behavior'?: 'prorate_on_next_phase' | 'prorate_up_front';
+  'billing_behavior'?: 'prorate_on_next_phase' | 'prorate_up_front' | undefined;
   'billing_mode': SubscriptionsResourceBillingModeModel;
   'canceled_at': number;
   'completed_at': number;
   'created': number;
   'current_phase': SubscriptionScheduleCurrentPhaseModel;
   'customer': string | CustomerModel | DeletedCustomerModel;
-  'customer_account'?: string;
+  'customer_account'?: string | undefined;
   'default_settings': SubscriptionSchedulesResourceDefaultSettingsModel;
   'end_behavior': 'cancel' | 'none' | 'release' | 'renew';
   'id': string;
-  'last_price_migration_error'?: SubscriptionsResourcePriceMigrationErrorModel;
+  'last_price_migration_error'?: SubscriptionsResourcePriceMigrationErrorModel | undefined;
   'livemode': boolean;
   'metadata': {
   [key: string]: string;
 };
   'object': 'subscription_schedule';
   'phases': SubscriptionSchedulePhaseConfigurationModel[];
-  'prebilling'?: SubscriptionPrebillingDataModel;
+  'prebilling'?: SubscriptionPrebillingDataModel | undefined;
   'released_at': number;
   'released_subscription': string;
   'status': 'active' | 'canceled' | 'completed' | 'not_started' | 'released';
@@ -1552,7 +1552,7 @@ export type SubscriptionScheduleModel = {
 
 export type SubscriptionSchedulesResourceDefaultSettingsModel = {
   'application_fee_percent': number;
-  'automatic_tax'?: SubscriptionSchedulesResourceDefaultSettingsAutomaticTaxModel;
+  'automatic_tax'?: SubscriptionSchedulesResourceDefaultSettingsAutomaticTaxModel | undefined;
   'billing_cycle_anchor': 'automatic' | 'phase_start';
   'billing_thresholds': SubscriptionBillingThresholdsModel;
   'collection_method': 'charge_automatically' | 'send_invoice';
@@ -1571,13 +1571,13 @@ export type SubscriptionTransferDataModel = {
 export type SubscriptionSchedulePhaseConfigurationModel = {
   'add_invoice_items': SubscriptionScheduleAddInvoiceItemModel[];
   'application_fee_percent': number;
-  'automatic_tax'?: SchedulesPhaseAutomaticTaxModel;
+  'automatic_tax'?: SchedulesPhaseAutomaticTaxModel | undefined;
   'billing_cycle_anchor': 'automatic' | 'phase_start';
   'billing_thresholds': SubscriptionBillingThresholdsModel;
   'collection_method': 'charge_automatically' | 'send_invoice';
   'currency': string;
   'default_payment_method': string | PaymentMethodModel;
-  'default_tax_rates'?: TaxRateModel[];
+  'default_tax_rates'?: TaxRateModel[] | undefined;
   'description': string;
   'discounts': DiscountsResourceStackableDiscountModel[];
   'end_date': number;
@@ -1587,13 +1587,13 @@ export type SubscriptionSchedulePhaseConfigurationModel = {
   [key: string]: string;
 };
   'on_behalf_of': string | AccountModel;
-  'pause_collection'?: SubscriptionSchedulesResourcePauseCollectionModel;
+  'pause_collection'?: SubscriptionSchedulesResourcePauseCollectionModel | undefined;
   'proration_behavior': 'always_invoice' | 'create_prorations' | 'none';
   'start_date': number;
   'transfer_data': SubscriptionTransferDataModel;
-  'trial_continuation'?: 'continue' | 'none';
+  'trial_continuation'?: 'continue' | 'none' | undefined;
   'trial_end': number;
-  'trial_settings'?: SubscriptionSchedulesResourceTrialSettingsModel;
+  'trial_settings'?: SubscriptionSchedulesResourceTrialSettingsModel | undefined;
 };
 
 export type CreditNoteModel = {
@@ -1602,7 +1602,7 @@ export type CreditNoteModel = {
   'created': number;
   'currency': string;
   'customer': string | CustomerModel | DeletedCustomerModel;
-  'customer_account'?: string;
+  'customer_account'?: string | undefined;
   'customer_balance_transaction': string | CustomerBalanceTransactionModel;
   'discount_amount': number;
   'discount_amounts': DiscountsResourceDiscountAmountModel[];
@@ -1647,7 +1647,7 @@ export type CustomerBalanceTransactionModel = {
   'credit_note': string | CreditNoteModel;
   'currency': string;
   'customer': string | CustomerModel;
-  'customer_account'?: string;
+  'customer_account'?: string | undefined;
   'description': string;
   'ending_balance': number;
   'id': string;
@@ -1661,7 +1661,7 @@ export type CustomerBalanceTransactionModel = {
 };
 
 export type QuoteModel = {
-  'allow_backdated_lines'?: boolean;
+  'allow_backdated_lines'?: boolean | undefined;
   'amount_subtotal': number;
   'amount_total': number;
   'application': string | ApplicationModel | DeletedApplicationModel;
@@ -1673,8 +1673,8 @@ export type QuoteModel = {
   'created': number;
   'currency': string;
   'customer': string | CustomerModel | DeletedCustomerModel;
-  'customer_account'?: string;
-  'default_tax_rates'?: Array<string | TaxRateModel>;
+  'customer_account'?: string | undefined;
+  'default_tax_rates'?: Array<string | TaxRateModel> | undefined;
   'description': string;
   'discounts': Array<string | DiscountModel>;
   'expires_at': number;
@@ -1689,8 +1689,8 @@ export type QuoteModel = {
   'has_more': boolean;
   'object': 'list';
   'url': string;
-};
-  'lines'?: string[];
+} | undefined;
+  'lines'?: string[] | undefined;
   'livemode': boolean;
   'metadata': {
   [key: string]: string;
@@ -1699,13 +1699,13 @@ export type QuoteModel = {
   'object': 'quote';
   'on_behalf_of': string | AccountModel;
   'status': 'accepted' | 'accepting' | 'canceled' | 'draft' | 'open' | 'stale';
-  'status_details'?: QuotesResourceStatusDetailsStatusDetailsModel;
+  'status_details'?: QuotesResourceStatusDetailsStatusDetailsModel | undefined;
   'status_transitions': QuotesResourceStatusTransitionsModel;
   'subscription': string | SubscriptionModel;
   'subscription_data': QuotesResourceSubscriptionDataSubscriptionDataModel;
-  'subscription_data_overrides'?: QuotesResourceSubscriptionDataSubscriptionDataOverridesModel[];
+  'subscription_data_overrides'?: QuotesResourceSubscriptionDataSubscriptionDataOverridesModel[] | undefined;
   'subscription_schedule': string | SubscriptionScheduleModel;
-  'subscription_schedules'?: QuotesResourceSubscriptionScheduleWithAppliesToModel[];
+  'subscription_schedules'?: QuotesResourceSubscriptionScheduleWithAppliesToModel[] | undefined;
   'test_clock': string | TestHelpersTestClockModel;
   'total_details': QuotesResourceTotalDetailsModel;
   'transfer_data': QuotesResourceTransferDataModel;
@@ -1717,22 +1717,22 @@ export type QuotesResourceFromQuoteModel = {
 };
 
 export type TaxFormModel = {
-  'au_serr'?: TaxReportingResourceTaxFormAuSerrModel;
-  'ca_mrdp'?: TaxReportingResourceTaxFormCaMrdpModel;
+  'au_serr'?: TaxReportingResourceTaxFormAuSerrModel | undefined;
+  'ca_mrdp'?: TaxReportingResourceTaxFormCaMrdpModel | undefined;
   'corrected_by': string | TaxFormModel;
   'created': number;
-  'eu_dac7'?: TaxReportingResourceTaxFormEuDac7Model;
+  'eu_dac7'?: TaxReportingResourceTaxFormEuDac7Model | undefined;
   'filing_statuses': TaxReportingResourceTaxFormFilingStatusModel[];
-  'gb_mrdp'?: TaxReportingResourceTaxFormGbMrdpModel;
+  'gb_mrdp'?: TaxReportingResourceTaxFormGbMrdpModel | undefined;
   'id': string;
   'livemode': boolean;
-  'nz_mrdp'?: TaxReportingResourceTaxFormNzMrdpModel;
+  'nz_mrdp'?: TaxReportingResourceTaxFormNzMrdpModel | undefined;
   'object': 'tax.form';
   'payee': TaxReportingResourceTaxFormPayeeModel;
   'type': 'au_serr' | 'ca_mrdp' | 'eu_dac7' | 'gb_mrdp' | 'nz_mrdp' | 'us_1099_k' | 'us_1099_misc' | 'us_1099_nec';
-  'us_1099_k'?: TaxReportingResourceTaxFormUs1099KModel;
-  'us_1099_misc'?: TaxReportingResourceTaxFormUs1099MiscModel;
-  'us_1099_nec'?: TaxReportingResourceTaxFormUs1099NecModel;
+  'us_1099_k'?: TaxReportingResourceTaxFormUs1099KModel | undefined;
+  'us_1099_misc'?: TaxReportingResourceTaxFormUs1099MiscModel | undefined;
+  'us_1099_nec'?: TaxReportingResourceTaxFormUs1099NecModel | undefined;
 };
 
 export type TreasuryCreditReversalModel = {
@@ -1755,14 +1755,14 @@ export type TreasuryCreditReversalModel = {
 };
 
 export type TreasuryTransactionsResourceFlowDetailsModel = {
-  'credit_reversal'?: TreasuryCreditReversalModel;
-  'debit_reversal'?: TreasuryDebitReversalModel;
-  'inbound_transfer'?: TreasuryInboundTransferModel;
-  'issuing_authorization'?: IssuingAuthorizationModel;
-  'outbound_payment'?: TreasuryOutboundPaymentModel;
-  'outbound_transfer'?: TreasuryOutboundTransferModel;
-  'received_credit'?: TreasuryReceivedCreditModel;
-  'received_debit'?: TreasuryReceivedDebitModel;
+  'credit_reversal'?: TreasuryCreditReversalModel | undefined;
+  'debit_reversal'?: TreasuryDebitReversalModel | undefined;
+  'inbound_transfer'?: TreasuryInboundTransferModel | undefined;
+  'issuing_authorization'?: IssuingAuthorizationModel | undefined;
+  'outbound_payment'?: TreasuryOutboundPaymentModel | undefined;
+  'outbound_transfer'?: TreasuryOutboundTransferModel | undefined;
+  'received_credit'?: TreasuryReceivedCreditModel | undefined;
+  'received_debit'?: TreasuryReceivedDebitModel | undefined;
   'type': 'credit_reversal' | 'debit_reversal' | 'inbound_transfer' | 'issuing_authorization' | 'other' | 'outbound_payment' | 'outbound_transfer' | 'received_credit' | 'received_debit';
 };
 
@@ -1777,10 +1777,10 @@ export type TreasuryTransactionModel = {
   'has_more': boolean;
   'object': 'list';
   'url': string;
-};
+} | undefined;
   'financial_account': string;
   'flow': string;
-  'flow_details'?: TreasuryTransactionsResourceFlowDetailsModel;
+  'flow_details'?: TreasuryTransactionsResourceFlowDetailsModel | undefined;
   'flow_type': 'credit_reversal' | 'debit_reversal' | 'inbound_transfer' | 'issuing_authorization' | 'other' | 'outbound_payment' | 'outbound_transfer' | 'received_credit' | 'received_debit';
   'id': string;
   'livemode': boolean;
@@ -1887,7 +1887,7 @@ export type TreasuryOutboundTransferModel = {
   'metadata': {
   [key: string]: string;
 };
-  'network_details'?: TreasuryOutboundTransfersResourceNetworkDetailsModel;
+  'network_details'?: TreasuryOutboundTransfersResourceNetworkDetailsModel | undefined;
   'object': 'treasury.outbound_transfer';
   'returned_details': TreasuryOutboundTransfersResourceReturnedDetailsModel;
   'statement_descriptor': string;
@@ -1898,10 +1898,10 @@ export type TreasuryOutboundTransferModel = {
 };
 
 export type TreasuryReceivedCreditsResourceSourceFlowsDetailsModel = {
-  'credit_reversal'?: TreasuryCreditReversalModel;
-  'outbound_payment'?: TreasuryOutboundPaymentModel;
-  'outbound_transfer'?: TreasuryOutboundTransferModel;
-  'payout'?: PayoutModel;
+  'credit_reversal'?: TreasuryCreditReversalModel | undefined;
+  'outbound_payment'?: TreasuryOutboundPaymentModel | undefined;
+  'outbound_transfer'?: TreasuryOutboundTransferModel | undefined;
+  'payout'?: PayoutModel | undefined;
   'type': 'credit_reversal' | 'other' | 'outbound_payment' | 'outbound_transfer' | 'payout';
 };
 
@@ -1910,7 +1910,7 @@ export type TreasuryReceivedCreditsResourceLinkedFlowsModel = {
   'issuing_authorization': string;
   'issuing_transaction': string;
   'source_flow': string;
-  'source_flow_details'?: TreasuryReceivedCreditsResourceSourceFlowsDetailsModel;
+  'source_flow_details'?: TreasuryReceivedCreditsResourceSourceFlowsDetailsModel | undefined;
   'source_flow_type': string;
 };
 
@@ -1927,7 +1927,7 @@ export type TreasuryReceivedCreditModel = {
   'linked_flows': TreasuryReceivedCreditsResourceLinkedFlowsModel;
   'livemode': boolean;
   'network': 'ach' | 'card' | 'stripe' | 'us_domestic_wire';
-  'network_details'?: TreasuryReceivedCreditsResourceNetworkDetailsModel;
+  'network_details'?: TreasuryReceivedCreditsResourceNetworkDetailsModel | undefined;
   'object': 'treasury.received_credit';
   'reversal_details': TreasuryReceivedCreditsResourceReversalDetailsModel;
   'status': 'failed' | 'succeeded';
@@ -1943,11 +1943,11 @@ export type TreasuryReceivedDebitModel = {
   'financial_account': string;
   'hosted_regulatory_receipt_url': string;
   'id': string;
-  'initiating_payment_method_details'?: TreasurySharedResourceInitiatingPaymentMethodDetailsInitiatingPaymentMethodDetailsModel;
+  'initiating_payment_method_details'?: TreasurySharedResourceInitiatingPaymentMethodDetailsInitiatingPaymentMethodDetailsModel | undefined;
   'linked_flows': TreasuryReceivedDebitsResourceLinkedFlowsModel;
   'livemode': boolean;
   'network': 'ach' | 'card' | 'stripe';
-  'network_details'?: TreasuryReceivedDebitsResourceNetworkDetailsModel;
+  'network_details'?: TreasuryReceivedDebitsResourceNetworkDetailsModel | undefined;
   'object': 'treasury.received_debit';
   'reversal_details': TreasuryReceivedDebitsResourceReversalDetailsModel;
   'status': 'failed' | 'succeeded';
@@ -1961,7 +1961,7 @@ export type TreasuryTransactionEntryModel = {
   'effective_at': number;
   'financial_account': string;
   'flow': string;
-  'flow_details'?: TreasuryTransactionsResourceFlowDetailsModel;
+  'flow_details'?: TreasuryTransactionsResourceFlowDetailsModel | undefined;
   'flow_type': 'credit_reversal' | 'debit_reversal' | 'inbound_transfer' | 'issuing_authorization' | 'other' | 'outbound_payment' | 'outbound_transfer' | 'received_credit' | 'received_debit';
   'id': string;
   'livemode': boolean;
