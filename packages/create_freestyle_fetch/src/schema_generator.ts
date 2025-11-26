@@ -140,6 +140,19 @@ export class SchemaGenerator {
             return parts.join(' & ')
         }
 
+        // Handle nullable types (e.g. type: ['string', 'null'])
+        if (Array.isArray(schema.type)) {
+            const nonNullTypes = schema.type.filter((t) => t !== 'null')
+            if (nonNullTypes.length === 1) {
+                const innerSchema = {
+                    ...schema,
+                    type: nonNullTypes[0],
+                } as OpenAPIV3_1.SchemaObject
+                return `${this.mapSchemaObjectToType(name, innerSchema)} | null`
+            }
+            return 'any'
+        }
+
         switch (schema.type) {
             case 'string':
                 if (schema.enum)
@@ -173,7 +186,7 @@ export class SchemaGenerator {
                                 value
                             )
                             props.push(
-                                `  '${key}'${isRequired ? '' : '?'}: ${typeStr};`
+                                `  '${key}'${isRequired ? '' : '?'}: ${typeStr}${isRequired ? '' : ' | undefined'};`
                             )
                         }
                     )
