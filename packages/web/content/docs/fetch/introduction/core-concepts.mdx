@@ -24,7 +24,7 @@ const postRequest = base.def_method('POST');
 When you call `.build()`, you get a **FetchUnit**. A Unit is a sealed, executable representation of a request.
 
 -   **Execution**: The Unit exposes the `.query()` method.
--   **Requirements**: If you defined dynamic URL parameters (e.g., `$id`) or a request body in the builder, the `.query()` method will *require* them as arguments. You cannot compile a request that is missing data.
+-   **Requirements**: If you defined a request body or search parameters in the builder, the `.query()` method will *require* them as arguments. You cannot compile a request that is missing data. Note that this applies to dynamic URL parameters (e.g., `$id`) only through the **Router** — a standalone builder's `.def_url()` accepts them at runtime but does not generate a required `path` argument type from the URL.
 
 ```typescript
 // If the builder defined a body validator...

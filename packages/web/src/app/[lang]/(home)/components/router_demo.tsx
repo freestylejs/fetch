@@ -23,7 +23,7 @@ export const RouterDemo = () => {
             <span className="text-purple-500 dark:text-purple-400">
                 builder
             </span>
-            ().<span className="text-blue-500 dark:text-blue-400">build</span>()
+            ()
         </span>
     )
 
@@ -321,15 +321,15 @@ export const routerCode = `
 const api = f.router('https://api.com', {
     auth: {
         login: {
-            POST: f.builder().build()
+            POST: f.builder()
         }
     },
     users: {
         $id: {
-            GET: f.builder().build(),
+            GET: f.builder(),
         },
         posts: {
-            GET: f.builder().build()
+            GET: f.builder()
         }
     }
 })

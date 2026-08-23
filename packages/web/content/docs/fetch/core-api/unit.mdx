@@ -38,7 +38,7 @@ const authorizedUnit = unit.set_options({
 
 #### `copy()`
 
-Creates a deep copy of the `FetchUnit`.
+Creates a **shallow copy** of the `FetchUnit`: the option store is copied, while the underlying builder and its procedures/middleware are shared.
 
 ```typescript
 const clone = unit.copy();
