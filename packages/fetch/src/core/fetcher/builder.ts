@@ -80,6 +80,30 @@ export class FetchBuilder<
         return newBuilder
     }
 
+    private _withDefaultOption(
+        apply: (store: FetchOptionStore) => void
+    ): FetchBuilder<
+        $Method,
+        $PathParams,
+        $SearchParams,
+        $Body,
+        $Response,
+        $ModeOptions,
+        $BaseUrl
+    > {
+        const newBuilder = this._clone<
+            $Method,
+            $PathParams,
+            $SearchParams,
+            $Body,
+            $Response,
+            $ModeOptions,
+            $BaseUrl
+        >()
+        apply(newBuilder.$store)
+        return newBuilder
+    }
+
     /**
      * Build fetch unit
      * @returns Fetch Unit
@@ -199,17 +223,9 @@ export class FetchBuilder<
         $ModeOptions,
         $BaseUrl
     > {
-        const newBuilder = this._clone<
-            $Method,
-            $PathParams,
-            $SearchParams,
-            $Body,
-            $Response,
-            $ModeOptions,
-            $BaseUrl
-        >()
-        newBuilder.$store.defaultCache = cache
-        return newBuilder
+        return this._withDefaultOption((store) => {
+            store.defaultCache = cache
+        })
     }
     public def_default_mode(
         mode: FetchOption['mode']
@@ -222,17 +238,9 @@ export class FetchBuilder<
         $ModeOptions,
         $BaseUrl
     > {
-        const newBuilder = this._clone<
-            $Method,
-            $PathParams,
-            $SearchParams,
-            $Body,
-            $Response,
-            $ModeOptions,
-            $BaseUrl
-        >()
-        newBuilder.$store.defaultMode = mode
-        return newBuilder
+        return this._withDefaultOption((store) => {
+            store.defaultMode = mode
+        })
     }
     public def_default_credentials(
         credentials: FetchOption['credentials']
@@ -245,17 +253,9 @@ export class FetchBuilder<
         $ModeOptions,
         $BaseUrl
     > {
-        const newBuilder = this._clone<
-            $Method,
-            $PathParams,
-            $SearchParams,
-            $Body,
-            $Response,
-            $ModeOptions,
-            $BaseUrl
-        >()
-        newBuilder.$store.defaultCredentials = credentials
-        return newBuilder
+        return this._withDefaultOption((store) => {
+            store.defaultCredentials = credentials
+        })
     }
     public def_default_redirect(
         redirect: FetchOption['redirect']
@@ -268,17 +268,9 @@ export class FetchBuilder<
         $ModeOptions,
         $BaseUrl
     > {
-        const newBuilder = this._clone<
-            $Method,
-            $PathParams,
-            $SearchParams,
-            $Body,
-            $Response,
-            $ModeOptions,
-            $BaseUrl
-        >()
-        newBuilder.$store.defaultRedirect = redirect
-        return newBuilder
+        return this._withDefaultOption((store) => {
+            store.defaultRedirect = redirect
+        })
     }
     public def_default_referrer(
         referrer: FetchOption['referrer']
@@ -291,17 +283,9 @@ export class FetchBuilder<
         $ModeOptions,
         $BaseUrl
     > {
-        const newBuilder = this._clone<
-            $Method,
-            $PathParams,
-            $SearchParams,
-            $Body,
-            $Response,
-            $ModeOptions,
-            $BaseUrl
-        >()
-        newBuilder.$store.defaultReferrer = referrer
-        return newBuilder
+        return this._withDefaultOption((store) => {
+            store.defaultReferrer = referrer
+        })
     }
     public def_default_referrer_policy(
         referrerPolicy: FetchOption['referrerPolicy']
@@ -314,17 +298,9 @@ export class FetchBuilder<
         $ModeOptions,
         $BaseUrl
     > {
-        const newBuilder = this._clone<
-            $Method,
-            $PathParams,
-            $SearchParams,
-            $Body,
-            $Response,
-            $ModeOptions,
-            $BaseUrl
-        >()
-        newBuilder.$store.defaultReferrerPolicy = referrerPolicy
-        return newBuilder
+        return this._withDefaultOption((store) => {
+            store.defaultReferrerPolicy = referrerPolicy
+        })
     }
     public def_default_integrity(
         integrity: FetchOption['integrity']
@@ -337,17 +313,9 @@ export class FetchBuilder<
         $ModeOptions,
         $BaseUrl
     > {
-        const newBuilder = this._clone<
-            $Method,
-            $PathParams,
-            $SearchParams,
-            $Body,
-            $Response,
-            $ModeOptions,
-            $BaseUrl
-        >()
-        newBuilder.$store.defaultIntegrity = integrity
-        return newBuilder
+        return this._withDefaultOption((store) => {
+            store.defaultIntegrity = integrity
+        })
     }
     public def_default_keepalive(
         keepalive: FetchOption['keepalive']
@@ -360,17 +328,9 @@ export class FetchBuilder<
         $ModeOptions,
         $BaseUrl
     > {
-        const newBuilder = this._clone<
-            $Method,
-            $PathParams,
-            $SearchParams,
-            $Body,
-            $Response,
-            $ModeOptions,
-            $BaseUrl
-        >()
-        newBuilder.$store.defaultKeepalive = keepalive
-        return newBuilder
+        return this._withDefaultOption((store) => {
+            store.defaultKeepalive = keepalive
+        })
     }
     public def_default_window(
         window: FetchOption['window']
@@ -383,17 +343,9 @@ export class FetchBuilder<
         $ModeOptions,
         $BaseUrl
     > {
-        const newBuilder = this._clone<
-            $Method,
-            $PathParams,
-            $SearchParams,
-            $Body,
-            $Response,
-            $ModeOptions,
-            $BaseUrl
-        >()
-        newBuilder.$store.defaultWindow = window
-        return newBuilder
+        return this._withDefaultOption((store) => {
+            store.defaultWindow = window
+        })
     }
     public def_default_priority(
         priority: FetchOption['priority']
@@ -406,17 +358,9 @@ export class FetchBuilder<
         $ModeOptions,
         $BaseUrl
     > {
-        const newBuilder = this._clone<
-            $Method,
-            $PathParams,
-            $SearchParams,
-            $Body,
-            $Response,
-            $ModeOptions,
-            $BaseUrl
-        >()
-        newBuilder.$store.defaultPriority = priority
-        return newBuilder
+        return this._withDefaultOption((store) => {
+            store.defaultPriority = priority
+        })
     }
 
     public searchParamsValidator!: (
