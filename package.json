@@ -46,7 +46,7 @@
         "rimraf": "latest",
         "tsup": "latest",
         "turbo": "latest",
-        "typescript": "latest",
+        "typescript": "^5.9.3",
         "vite": "latest",
         "vite-tsconfig-paths": "latest",
         "vitest": "latest"
