@@ -232,13 +232,13 @@ type FetchUnitRequestHandler<FetchPathParams, FetchSearchParams, FetchBody> =
     }) => Request
 
 export type {
-    FetchUnitOption,
+    DefaultFetchModeOptions,
+    FetchModeOptionsShape,
+    FetchPathParamsShape,
     FetchQueryOptions,
     FetchQueryOptionsPartial,
+    FetchSearchParamsShape,
+    FetchUnitOption,
     FetchUnitRequestHandler,
     Param,
-    FetchSearchParamsShape,
-    FetchPathParamsShape,
-    FetchModeOptionsShape,
-    DefaultFetchModeOptions,
 }
