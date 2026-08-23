@@ -13,11 +13,11 @@ export class ProcedureSet<I> {
         return Array.from(this.registeredProcedure)
     }
 
-    public get executor(): Procedure<I> {
-        return (arg: I): void => {
+    public get executor(): (arg?: I) => void {
+        return (arg?: I): void => {
             const executionList = this.procedureList
             for (const procedure of executionList) {
-                procedure.$(arg)
+                procedure.$(arg as I)
                 if (procedure.once) {
                     this.remove(procedure)
                 }

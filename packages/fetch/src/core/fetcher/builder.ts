@@ -129,14 +129,14 @@ export class FetchBuilder<
     }
 
     public static new<
-        FetchMethod extends FetchMethodString,
+        FetchMethod extends FetchMethodString = 'GET',
         FetchPathParams extends FetchPathParamsShape = unknown,
         FetchSearchParams extends FetchSearchParamsShape = unknown,
         FetchBody = unknown,
         FetchResponse = unknown,
         FetchModeOptions extends
             FetchModeOptionsShape = DefaultFetchModeOptions,
-        const FetchBaseUrl extends string = '',
+        FetchBaseUrl extends string = '',
     >(): FetchBuilder<
         FetchMethod,
         FetchPathParams,
@@ -363,9 +363,9 @@ export class FetchBuilder<
         })
     }
 
-    public searchParamsValidator!: (
+    public searchParamsValidator: (
         searchParams: FetchSearchParamsShape
-    ) => $SearchParams
+    ) => $SearchParams = (searchParams) => searchParams as $SearchParams
     public def_searchparams<FetchSearchParamsInjection extends $SearchParams>(
         searchParamsValidator: (
             params: FetchSearchParamsShape
@@ -484,7 +484,7 @@ export class FetchBuilder<
         return newBuilder
     }
 
-    public bodyValidator!: (body: unknown) => $Body
+    public bodyValidator: (body: unknown) => $Body = (body) => body as $Body
     /**
      * @description Validate body data using any schema validation library
      * @param bodyValidator validate body data, return parsed body data
@@ -671,7 +671,11 @@ export class FetchBuilder<
         $Response,
         {
             isJsonMode: $ModeOptions['isJsonMode']
-            isSafeMode: QueryMode extends 'throw' ? false : true
+            isSafeMode: [QueryMode] extends ['throw']
+                ? false
+                : [QueryMode] extends ['not_throw']
+                  ? true
+                  : boolean
         },
         $BaseUrl
     > {
@@ -683,7 +687,11 @@ export class FetchBuilder<
             $Response,
             {
                 isJsonMode: $ModeOptions['isJsonMode']
-                isSafeMode: QueryMode extends 'throw' ? false : true
+                isSafeMode: [QueryMode] extends ['throw']
+                    ? false
+                    : [QueryMode] extends ['not_throw']
+                      ? true
+                      : boolean
             },
             $BaseUrl
         >()
@@ -744,7 +752,7 @@ export class FetchBuilder<
         baseUrl: string,
         searchParams?: $SearchParams
     ): string {
-        if (!searchParams) return baseUrl
+        if (searchParams === undefined) return baseUrl
 
         try {
             const validatedSearchParams: Record<string, Param | Array<Param>> =

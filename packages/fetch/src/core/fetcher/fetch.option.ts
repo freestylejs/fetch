@@ -41,13 +41,22 @@ export class FetchOptionStore {
         }
     }
 
+    private static copyHeaderSource(headers: FetchHeader): FetchHeader {
+        if (headers instanceof Headers)
+            return new Headers(headers) as FetchHeader
+        if (Array.isArray(headers)) return [...headers] as FetchHeader
+        return { ...headers } as FetchHeader
+    }
+
     public copy(): FetchOptionStore {
         const newStore = new FetchOptionStore()
         Object.assign(newStore, this)
         if (this._headers !== null) {
-            newStore._headers = { ...this._headers } as FetchHeader
+            newStore._headers = FetchOptionStore.copyHeaderSource(this._headers)
         }
-        newStore.defaultHeaders = { ...this.defaultHeaders } as FetchHeader
+        newStore.defaultHeaders = FetchOptionStore.copyHeaderSource(
+            this.defaultHeaders
+        )
         return newStore
     }
 

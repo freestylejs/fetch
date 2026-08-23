@@ -215,10 +215,17 @@ export type IsDynamicPath<Path extends string> = Path extends `$${string}`
 export type GetDynamicPath<Path extends string> =
     Path extends `$${infer DynamicPath}` ? DynamicPath : never
 
-type JoinRouterUrl<
-    BaseUrl extends string,
-    Suffix extends string,
-> = BaseUrl extends `${infer B}/` ? `${B}/${Suffix}` : `${BaseUrl}/${Suffix}`
+type StripTrailingSlash<S extends string> = S extends `${infer Head}/`
+    ? StripTrailingSlash<Head>
+    : S
+
+type JoinRouterUrl<BaseUrl extends string, Suffix extends string> = [
+    StripTrailingSlash<BaseUrl>,
+] extends ['']
+    ? Suffix
+    : `${StripTrailingSlash<BaseUrl>}/${Suffix}`
+
+type NoAny<T> = 0 extends 1 & T ? unknown : T
 
 type BuildRouterUrlFromStructure<
     RouterBuilderStructure,
@@ -242,8 +249,8 @@ type BuildRouterUrlFromStructure<
                       : {
                             [CollectedPathParamsList in PathParamsList[number]]: Param
                         },
-                  SearchParams,
-                  Body,
+                  NoAny<SearchParams>,
+                  NoAny<Body>,
                   Response,
                   IsJsonMode,
                   BaseUrl

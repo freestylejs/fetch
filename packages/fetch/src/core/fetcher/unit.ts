@@ -14,6 +14,20 @@ import type {
 } from './core.type'
 import type { FetchOptionStore } from './fetch.option'
 
+const FETCH_OPTION_ALLOWED_VALUES = {
+    cache: [
+        'default',
+        'force-cache',
+        'no-cache',
+        'no-store',
+        'only-if-cached',
+        'reload',
+    ],
+    mode: ['cors', 'navigate', 'no-cors', 'same-origin'],
+    priority: ['auto', 'high', 'low'],
+    redirect: ['error', 'follow', 'manual'],
+} as const
+
 /**
  * @description Fetch unit
  */
@@ -271,7 +285,10 @@ export class FetchUnit<
         return requestURI
     }
 
-    private getValidBody(targetBody: unknown) {
+    private getValidBody(targetBody: unknown): {
+        body: BodyInit
+        jsonSerialized: boolean
+    } {
         if (
             targetBody instanceof Blob ||
             targetBody instanceof FormData ||
@@ -279,7 +296,7 @@ export class FetchUnit<
             targetBody instanceof ReadableStream ||
             targetBody instanceof URLSearchParams
         ) {
-            return targetBody
+            return { body: targetBody, jsonSerialized: false }
         }
 
         try {
@@ -295,7 +312,7 @@ export class FetchUnit<
                     }
                 )
 
-            return serializedJson
+            return { body: serializedJson, jsonSerialized: true }
         } catch (e) {
             if (e instanceof SyntaxError) throw e
             throw new SyntaxError(
@@ -307,6 +324,23 @@ export class FetchUnit<
         }
     }
 
+    private validateFetchOptions(options: Record<string, unknown>): void {
+        for (const [key, allowedValues] of Object.entries(
+            FETCH_OPTION_ALLOWED_VALUES
+        )) {
+            const value = options[key]
+            if (value === undefined) continue
+            if (
+                !(allowedValues as ReadonlyArray<string>).includes(
+                    value as string
+                )
+            )
+                throw new Error(
+                    `Invalid fetch option "${key}": ${JSON.stringify(value)}. Allowed: ${(allowedValues as ReadonlyArray<string>).join(', ')}`
+                )
+        }
+    }
+
     private createRequest(
         queryOptions?: FetchQueryOptionsPartial<
             $PathParams,
@@ -314,10 +348,38 @@ export class FetchUnit<
             $Body
         >
     ): Request {
-        // Generate body
-        const body: BodyInit | null = queryOptions?.body
-            ? this.getValidBody(this.$builder.bodyValidator(queryOptions?.body))
-            : this.$store.body
+        const optionOverrides: Partial<FetchUnitOption> = {
+            ...(queryOptions?.options ?? {}),
+        }
+        delete (optionOverrides as Record<string, unknown>).headers
+        delete (optionOverrides as Record<string, unknown>).body
+        delete (optionOverrides as Record<string, unknown>).signal
+        delete (optionOverrides as Record<string, unknown>).method
+
+        this.validateFetchOptions({
+            ...this.$store.options,
+            ...optionOverrides,
+        } as Record<string, unknown>)
+        if (
+            queryOptions?.timeout !== undefined &&
+            !(
+                typeof queryOptions.timeout === 'number' &&
+                queryOptions.timeout > 0
+            )
+        )
+            throw new Error(
+                `Invalid fetch option "timeout": ${JSON.stringify(queryOptions.timeout)}. Allowed: positive number`
+            )
+
+        let body: BodyInit | null = this.$store.body
+        let jsonSerialized = false
+        if (queryOptions?.body !== undefined) {
+            const resolvedBody = this.getValidBody(
+                this.$builder.bodyValidator(queryOptions.body)
+            )
+            body = resolvedBody.body
+            jsonSerialized = resolvedBody.jsonSerialized
+        }
 
         // Generate headers
         const headers: Headers = new Headers(
@@ -330,7 +392,10 @@ export class FetchUnit<
         )
 
         // Validate headers
-        if (this.$builder.isJsonMode && !headers.has('Content-Type')) {
+        if (
+            (this.$builder.isJsonMode || jsonSerialized) &&
+            !headers.has('Content-Type')
+        ) {
             headers.set('Content-Type', 'application/json')
         }
 
@@ -352,7 +417,7 @@ export class FetchUnit<
             this.getRequestURI(queryOptions?.path, queryOptions?.search),
             {
                 ...this.$store.options,
-                ...queryOptions?.options,
+                ...optionOverrides,
                 headers,
                 body: body,
                 signal: signals.length > 0 ? AbortSignal.any(signals) : null,
@@ -412,13 +477,19 @@ export class FetchUnit<
 
             if (!this.$builder.isSafeMode) throw error
         } finally {
-            this.$builder.finallyProcedure.executor(
-                queryOptions as FetchQueryOptions<
-                    $PathParams,
-                    $SearchParams,
-                    $Body
-                >
-            )
+            try {
+                this.$builder.finallyProcedure.executor(
+                    queryOptions as FetchQueryOptions<
+                        $PathParams,
+                        $SearchParams,
+                        $Body
+                    >
+                )
+            } catch (finallyError) {
+                this.$builder.unknownErrorProcedure?.executor({
+                    error: finallyError,
+                })
+            }
         }
 
         return undefined as $ModeOptions['isSafeMode'] extends true

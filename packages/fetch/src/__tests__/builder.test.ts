@@ -40,6 +40,15 @@ describe('FetchBuilder', () => {
         expect(() => b.bodyValidator({ name: 123 })).toThrow()
     })
 
+    it('should DEFAULT to identity validators when none injected [F1]', () => {
+        const b = f.builder()
+        const body = { injected: false }
+        expect(b.bodyValidator(body)).toEqual(body)
+
+        const searchParams = { query: 'inferred' }
+        expect(b.searchParamsValidator(searchParams)).toEqual(searchParams)
+    })
+
     it('should be immutable', () => {
         const originalBuilder = f
             .builder()

@@ -1,11 +1,26 @@
 import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 import { expectType, type TypeEqual } from 'ts-expect'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import {
+    afterAll,
+    afterEach,
+    beforeAll,
+    describe,
+    expect,
+    it,
+    vi,
+} from 'vitest'
 import { z } from 'zod'
+import * as freestyleFetch from '..'
 import { f } from '..'
 import { FetchPathParamsError, FetchResponseError } from '../core/error'
+import type {
+    FetchOption,
+    FetchQueryOptions,
+    FetchUnitOption,
+} from '../core/fetcher/core.type'
 import { FetchUnit, type InferFetchUnit } from '../core/fetcher/unit'
+import type { OmitNever } from '../utils/types'
 import { label } from './utils/test.label'
 
 const BASE_URL = 'https://unit-api/v2' as const
@@ -31,6 +46,12 @@ const apiServer = setupServer(
         http.get(`${BASE_URL}/books`, () => {
             return HttpResponse.json('Not Found', {
                 status: 404,
+            })
+        }),
+
+        http.post(`${BASE_URL}/echo-content-type`, async ({ request }) => {
+            return HttpResponse.json({
+                contentType: request.headers.get('content-type'),
             })
         }),
 
@@ -791,6 +812,388 @@ describe('FetchUnit', () => {
                 //@ts-ignore: standalone builder has no typed body
                 fetchUnit.query({ body: () => 'unserializable' })
             ).rejects.toBeInstanceOf(SyntaxError)
+        }
+    )
+
+    it(
+        label.case(
+            'should SEND falsy body values (0 / empty string / false) [F1]'
+        ),
+        async () => {
+            const fetchUnit = f
+                .builder()
+                .def_method('POST')
+                .def_url(`${BASE_URL}/books`)
+                .def_json()
+                .def_response(async ({ json }) => json())
+                .build()
+
+            //@ts-ignore: standalone builder has no typed body
+            await expect(fetchUnit.query({ body: 0 })).resolves.toStrictEqual({
+                data: 0,
+                status: 'success',
+            })
+            //@ts-ignore: standalone builder has no typed body
+            await expect(fetchUnit.query({ body: '' })).resolves.toStrictEqual({
+                data: '',
+                status: 'success',
+            })
+            await expect(
+                //@ts-ignore: standalone builder has no typed body
+                fetchUnit.query({ body: false })
+            ).resolves.toStrictEqual({
+                data: false,
+                status: 'success',
+            })
+        }
+    )
+
+    it(
+        label.case(
+            'should PASS THROUGH body & search when no validator injected (identity default) [F1]'
+        ),
+        async () => {
+            const fetchUnit = f
+                .builder()
+                .def_method('GET')
+                .def_url(`${BASE_URL}/books/7`)
+                .def_json()
+                .def_response(async ({ json }) => json())
+                .build()
+
+            await expect(
+                //@ts-ignore: standalone builder has no typed search params
+                fetchUnit.query({ search: { name: 'Inferred' } })
+            ).resolves.toStrictEqual({
+                data: {
+                    name: 'Inferred',
+                    price: null,
+                    id: '7',
+                },
+                status: 'success',
+            })
+
+            const postUnit = f
+                .builder()
+                .def_method('POST')
+                .def_url(`${BASE_URL}/books`)
+                .def_json()
+                .def_response(async ({ json }) => json())
+                .build()
+
+            await expect(
+                //@ts-ignore: standalone builder has no typed body
+                postUnit.query({ body: { injected: false } })
+            ).resolves.toStrictEqual({
+                data: { injected: false },
+                status: 'success',
+            })
+        }
+    )
+
+    it(
+        label.case(
+            'should PRESERVE original outcome when finally procedure crashes [F2]'
+        ),
+        async () => {
+            let routedError: unknown
+            const crashingHandler = () => {
+                throw new Error('finally crash')
+            }
+
+            const failUnit = f
+                .builder()
+                .def_query_mode('throw')
+                .def_method('GET')
+                .def_url(`${BASE_URL}/books`)
+                .def_unknown_err_handler(({ error }) => {
+                    routedError = error
+                })
+                .def_final_handler(crashingHandler)
+                .build()
+
+            await expect(failUnit.query()).rejects.toBeInstanceOf(
+                FetchResponseError
+            )
+            expect(routedError).toBeInstanceOf(Error)
+            expect((routedError as Error).message).toBe('finally crash')
+
+            const okUnit = f
+                .builder()
+                .def_method('GET')
+                .def_url(`${BASE_URL}/books/1`)
+                .def_json()
+                .def_response(async ({ json }) => json())
+                .def_unknown_err_handler(({ error }) => {
+                    routedError = error
+                })
+                .def_final_handler(crashingHandler)
+                .build()
+
+            await expect(okUnit.query()).resolves.toStrictEqual({
+                data: { name: null, price: null, id: '1' },
+                status: 'success',
+            })
+            expect((routedError as Error).message).toBe('finally crash')
+        }
+    )
+
+    it(
+        label.case(
+            'should REJECT invalid fetch option values before request creation [F5]'
+        ),
+        async () => {
+            let capturedError: unknown
+            const fetchUnit = f
+                .builder()
+                .def_method('GET')
+                .def_url(`${BASE_URL}/books/1`)
+                .def_unknown_err_handler(({ error }) => {
+                    capturedError = error
+                })
+                .build()
+
+            const mockFetch = vi.spyOn(global, 'fetch')
+
+            await expect(
+                fetchUnit.query({
+                    //@ts-ignore: intentionally invalid cache value
+                    options: { cache: 'bogus' },
+                })
+            ).rejects.toThrowError('Invalid fetch option "cache"')
+
+            expect(mockFetch).not.toHaveBeenCalled()
+            expect(capturedError).toBeInstanceOf(Error)
+            expect((capturedError as Error).message).toContain(
+                'Invalid fetch option "cache"'
+            )
+
+            capturedError = undefined
+            await expect(fetchUnit.query({ timeout: -1 })).rejects.toThrowError(
+                'Invalid fetch option "timeout"'
+            )
+            expect((capturedError as Error).message).toContain(
+                'Invalid fetch option "timeout"'
+            )
+            capturedError = undefined
+
+            mockFetch.mockRestore()
+        }
+    )
+
+    it(
+        label.case(
+            'should DROP undocumented option keys from queryOptions.options [F6]'
+        ),
+        async () => {
+            let capturedRequest: Request | undefined
+            const mockFetch = vi
+                .spyOn(global, 'fetch')
+                .mockImplementation(async (req) => {
+                    capturedRequest = req as Request
+                    return HttpResponse.json({ data: null })
+                })
+
+            const controller = new AbortController()
+            const fetchUnit = f
+                .builder()
+                .def_method('GET')
+                .def_url(`${BASE_URL}/books/1`)
+                .build()
+
+            const undocumentedOptions = {
+                method: 'DELETE',
+                headers: { 'X-Dropped': 'yes' },
+                body: 'dropped',
+                signal: controller.signal,
+            } as unknown as Partial<FetchUnitOption>
+            await fetchUnit.query({ options: undocumentedOptions })
+            mockFetch.mockRestore()
+
+            expect(capturedRequest).toBeDefined()
+            expect(capturedRequest!.method).toBe('GET')
+            expect(capturedRequest!.headers.get('X-Dropped')).toBeNull()
+        }
+    )
+
+    it(
+        label.case(
+            'should SET application/json content-type on serialized bodies outside json mode [F7]'
+        ),
+        async () => {
+            const fetchUnit = f
+                .builder()
+                .def_method('POST')
+                .def_url(`${BASE_URL}/echo-content-type`)
+                .def_response(async ({ response }) => response.json())
+                .build()
+
+            await expect(
+                //@ts-ignore: standalone builder has no typed body
+                fetchUnit.query({ body: { serialized: true } })
+            ).resolves.toStrictEqual({
+                contentType: 'application/json',
+            })
+        }
+    )
+
+    it(
+        label.case(
+            'should NOT touch content-type for passthrough FormData body [F7]'
+        ),
+        async () => {
+            let capturedContentType: string | null = null
+            const mockFetch = vi
+                .spyOn(global, 'fetch')
+                .mockImplementation(async (req) => {
+                    capturedContentType = (req as Request).headers.get(
+                        'content-type'
+                    )
+                    return HttpResponse.json({ data: null })
+                })
+
+            const formData = new FormData()
+            formData.append('name', 'Book')
+
+            const fetchUnit = f
+                .builder()
+                .def_method('POST')
+                .def_url(`${BASE_URL}/echo-content-type`)
+                .build()
+
+            //@ts-ignore: standalone builder has no typed body
+            //@ts-ignore: standalone builder has no typed body
+            await fetchUnit.query({ body: formData })
+            mockFetch.mockRestore()
+
+            expect(capturedContentType).toMatch(/^multipart\/form-data/)
+        }
+    )
+
+    it(
+        label.case(
+            'should THROW FetchResponseError on 3xx responses [F8 behavior lock]'
+        ),
+        async () => {
+            const mockFetch = vi.spyOn(global, 'fetch').mockImplementation(
+                async () =>
+                    new Response(null, {
+                        status: 302,
+                        statusText: 'Found',
+                        headers: { Location: 'https://unit-api/v2/next' },
+                    })
+            )
+
+            const followUnit = f
+                .builder()
+                .def_query_mode('throw')
+                .def_method('GET')
+                .def_url(`${BASE_URL}/redirect`)
+                .build()
+
+            const err = await followUnit.query().catch((e) => e)
+            mockFetch.mockRestore()
+            expect(err).toBeInstanceOf(FetchResponseError)
+            expect((err as FetchResponseError).status).toBe(302)
+            expect((err as FetchResponseError).statusMessage).toBe('Found')
+
+            const manualMock = vi.spyOn(global, 'fetch').mockImplementation(
+                async () =>
+                    new Response(null, {
+                        status: 302,
+                        statusText: 'Found',
+                    })
+            )
+            await expect(
+                followUnit.set_options({ redirect: 'manual' }).query()
+            ).rejects.toBeInstanceOf(FetchResponseError)
+            manualMock.mockRestore()
+        }
+    )
+
+    it(
+        label.case(
+            'should KEEP object keys when any flows into OmitNever & LOCK widened query mode typing [F9]'
+        ),
+        () => {
+            expectType<
+                TypeEqual<
+                    keyof OmitNever<{ path: any; search: any; body: any }>,
+                    'path' | 'search' | 'body'
+                >
+            >(true)
+
+            const pickWideMode = (): 'throw' | 'not_throw' => 'not_throw'
+            const wideMode = pickWideMode()
+            const wideBuilder = f
+                .builder()
+                .def_response(() => 42)
+                .def_query_mode(wideMode)
+            expect(wideBuilder.isSafeMode).toBe(true)
+            const wideUnit = wideBuilder.build()
+            expectType<
+                TypeEqual<ReturnType<typeof wideUnit.query>, Promise<number>>
+            >(true)
+
+            const safeBuilder = f
+                .builder()
+                .def_response(() => 42)
+                .def_query_mode('not_throw')
+            expect(safeBuilder.isSafeMode).toBe(true)
+            type SafeQuery = ReturnType<
+                ReturnType<typeof safeBuilder.build>['query']
+            >
+            expectType<TypeEqual<SafeQuery, Promise<number | undefined>>>(true)
+
+            const throwBuilder = f
+                .builder()
+                .def_response(() => 42)
+                .def_query_mode('throw')
+            expect(throwBuilder.isSafeMode).toBe(false)
+            type ThrowQuery = ReturnType<
+                ReturnType<typeof throwBuilder.build>['query']
+            >
+            expectType<TypeEqual<ThrowQuery, Promise<number>>>(true)
+        }
+    )
+
+    it(
+        label.case(
+            'should REJECT static dollar segments & relative dollar urls without path params [S-1 intentional strictness]'
+        ),
+        async () => {
+            const staticDollarUnit = f
+                .builder()
+                .def_method('GET')
+                .def_url(`${BASE_URL}/books$v2`)
+                .build()
+
+            await expect(staticDollarUnit.query()).rejects.toBeInstanceOf(
+                freestyleFetch.FetchPathParamsError
+            )
+
+            const relativeDollarUnit = f
+                .builder()
+                .def_method('GET')
+                .def_url('relative/api/$id')
+                .build()
+
+            await expect(relativeDollarUnit.query()).rejects.toBeInstanceOf(
+                FetchPathParamsError
+            )
+
+            expect(typeof freestyleFetch.FetchPathParamsError).toBe('function')
+            expect(typeof freestyleFetch.FetchSearchParamsError).toBe(
+                'function'
+            )
+            expect(typeof freestyleFetch.FetchResponseError).toBe('function')
+
+            const exportedOptionTypes: [
+                FetchOption['redirect'],
+                FetchUnitOption['priority'],
+                FetchQueryOptions<unknown, unknown, unknown>['timeout'],
+            ] = ['follow', 'high', 1000]
+            expect(exportedOptionTypes).toStrictEqual(['follow', 'high', 1000])
         }
     )
 })

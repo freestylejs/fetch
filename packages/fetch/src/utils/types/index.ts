@@ -33,7 +33,12 @@ export type ToOptionalField<
     Keys extends keyof TargetRecord,
 > = Prettify<Omit<TargetRecord, Keys> & Partial<Pick<TargetRecord, Keys>>>
 
-type IfUnknown<T, Y, N> = [unknown] extends [T] ? Y : N
+type IsAny<T> = 0 extends 1 & T ? true : false
+type IfUnknown<T, Y, N> = [unknown] extends [T]
+    ? IsAny<T> extends true
+        ? N
+        : Y
+    : N
 export type OmitNever<RecordT> = Prettify<{
     [Key in keyof RecordT as IfUnknown<RecordT[Key], never, Key>]: RecordT[Key]
 }>
