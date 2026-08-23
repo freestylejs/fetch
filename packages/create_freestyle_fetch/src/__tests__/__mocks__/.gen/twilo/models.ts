@@ -58,19 +58,19 @@ export type EventWebhookRequestModel = {
   /**
    * Optionally set this property to a friendly name for the Event Webhook. A friendly name may be assigned to each of your webhooks to help you differentiate them. The friendly name is for convenience only. You should use the webhook `id` property for any programmatic tasks.
    */
-  'friendly_name'?: string | undefined;
+  'friendly_name'?: string | null | undefined;
   /**
    * Set this property to the OAuth client ID that SendGrid will pass to your OAuth server or service provider to generate an OAuth access token. When passing data in this property, you must also include the `oauth_token_url` property.
    */
-  'oauth_client_id'?: string | undefined;
+  'oauth_client_id'?: string | null | undefined;
   /**
    * Set this property to the OAuth client secret that SendGrid will pass to your OAuth server or service provider to generate an OAuth access token. This secret is needed only once to create an access token. SendGrid will store the secret, allowing you to update your client ID and Token URL without passing the secret to SendGrid again. When passing data in this field, you must also include the `oauth_client_id` and `oauth_token_url` properties.
    */
-  'oauth_client_secret'?: string | undefined;
+  'oauth_client_secret'?: string | null | undefined;
   /**
    * Set this property to the URL where SendGrid will send the OAuth client ID and client secret to generate an OAuth access token. This should be your OAuth server or service provider. When passing data in this field, you must also include the `oauth_client_id` property.
    */
-  'oauth_token_url'?: string | undefined;
+  'oauth_token_url'?: string | null | undefined;
 };
 
 export type EventWebhookTestRequestModel = {
@@ -85,15 +85,15 @@ export type EventWebhookTestRequestModel = {
   /**
    * The client ID Twilio SendGrid sends to your OAuth server or service provider to generate an OAuth access token. When passing data in this property, you must also include the `oauth_token_url` property.
    */
-  'oauth_client_id'?: string | undefined;
+  'oauth_client_id'?: string | null | undefined;
   /**
    * The `oauth_client_secret` is needed only once to create an access token. SendGrid will store this secret, allowing you to update your Client ID and Token URL without passing the secret to SendGrid again. When passing data in this field, you must also include the `oauth_client_id` and `oauth_token_url` properties.
    */
-  'oauth_client_secret'?: string | undefined;
+  'oauth_client_secret'?: string | null | undefined;
   /**
    * The URL where Twilio SendGrid sends the Client ID and Client Secret to generate an access token. This should be your OAuth server or service provider. When passing data in this field, you must also include the `oauth_client_id` property.
    */
-  'oauth_token_url'?: string | undefined;
+  'oauth_token_url'?: string | null | undefined;
 };
 
 export type EventWebhookBaseResponsePropsModel = {
@@ -156,7 +156,7 @@ export type EventWebhookBaseResponsePropsModel = {
   /**
    * An optional friendly name assigned to the Event Webhook to help you differentiate it. The friendly name is for convenience only. You should use the webhook `id` property for any programmatic tasks.
    */
-  'friendly_name'?: string | undefined;
+  'friendly_name'?: string | null | undefined;
   /**
    * A unique string used to identify the webhook. A webhook's ID is generated programmatically and cannot be changed after creation. You can assign a natural language identifier to your webhook using the `friendly_name` property.
    */
@@ -167,7 +167,7 @@ export type EventWebhookDateResponsePropsModel = {
   /**
    * An ISO 8601 timestamp in UTC timezone when the Event Webhook was created. If a Webhook's `created_date` is `null`, it is a [legacy Event Webook](https://www.twilio.com/en-us/changelog/event-webhooks), which means it is your oldest Webhook.
    */
-  'created_date'?: string | undefined;
+  'created_date'?: string | null | undefined;
   /**
    * An ISO 8601 timestamp in UTC timezone when the Event Webhook was last modified.
    */
@@ -178,11 +178,11 @@ export type EventWebhookOauthResponsePropsModel = {
   /**
    * The OAuth client ID SendGrid sends to your OAuth server or service provider to generate an OAuth access token.
    */
-  'oauth_client_id'?: string | undefined;
+  'oauth_client_id'?: string | null | undefined;
   /**
    * The URL where SendGrid sends the OAuth client ID and client secret to generate an access token. This should be your OAuth server or service provider.
    */
-  'oauth_token_url'?: string | undefined;
+  'oauth_token_url'?: string | null | undefined;
 };
 
 export type EventWebhookSignedResponsePropModel = {
@@ -252,7 +252,7 @@ export type EventWebhookUnsignedResponseModel = {
   /**
    * An optional friendly name assigned to the Event Webhook to help you differentiate it. The friendly name is for convenience only. You should use the webhook `id` property for any programmatic tasks.
    */
-  'friendly_name'?: string | undefined;
+  'friendly_name'?: string | null | undefined;
   /**
    * A unique string used to identify the webhook. A webhook's ID is generated programmatically and cannot be changed after creation. You can assign a natural language identifier to your webhook using the `friendly_name` property.
    */
@@ -260,7 +260,7 @@ export type EventWebhookUnsignedResponseModel = {
   /**
    * An ISO 8601 timestamp in UTC timezone when the Event Webhook was created. If a Webhook's `created_date` is `null`, it is a [legacy Event Webook](https://www.twilio.com/en-us/changelog/event-webhooks), which means it is your oldest Webhook.
    */
-  'created_date'?: string | undefined;
+  'created_date'?: string | null | undefined;
   /**
    * An ISO 8601 timestamp in UTC timezone when the Event Webhook was last modified.
    */
@@ -268,11 +268,11 @@ export type EventWebhookUnsignedResponseModel = {
   /**
    * The OAuth client ID SendGrid sends to your OAuth server or service provider to generate an OAuth access token.
    */
-  'oauth_client_id'?: string | undefined;
+  'oauth_client_id'?: string | null | undefined;
   /**
    * The URL where SendGrid sends the OAuth client ID and client secret to generate an access token. This should be your OAuth server or service provider.
    */
-  'oauth_token_url'?: string | undefined;
+  'oauth_token_url'?: string | null | undefined;
 };
 
 export type EventWebhookSignedResponseModel = {
@@ -335,7 +335,7 @@ export type EventWebhookSignedResponseModel = {
   /**
    * An optional friendly name assigned to the Event Webhook to help you differentiate it. The friendly name is for convenience only. You should use the webhook `id` property for any programmatic tasks.
    */
-  'friendly_name'?: string | undefined;
+  'friendly_name'?: string | null | undefined;
   /**
    * A unique string used to identify the webhook. A webhook's ID is generated programmatically and cannot be changed after creation. You can assign a natural language identifier to your webhook using the `friendly_name` property.
    */
@@ -343,7 +343,7 @@ export type EventWebhookSignedResponseModel = {
   /**
    * An ISO 8601 timestamp in UTC timezone when the Event Webhook was created. If a Webhook's `created_date` is `null`, it is a [legacy Event Webook](https://www.twilio.com/en-us/changelog/event-webhooks), which means it is your oldest Webhook.
    */
-  'created_date'?: string | undefined;
+  'created_date'?: string | null | undefined;
   /**
    * An ISO 8601 timestamp in UTC timezone when the Event Webhook was last modified.
    */
@@ -351,11 +351,11 @@ export type EventWebhookSignedResponseModel = {
   /**
    * The OAuth client ID SendGrid sends to your OAuth server or service provider to generate an OAuth access token.
    */
-  'oauth_client_id'?: string | undefined;
+  'oauth_client_id'?: string | null | undefined;
   /**
    * The URL where SendGrid sends the OAuth client ID and client secret to generate an access token. This should be your OAuth server or service provider.
    */
-  'oauth_token_url'?: string | undefined;
+  'oauth_token_url'?: string | null | undefined;
   /**
    * The public key you can use to verify the SendGrid signature.
    */
@@ -422,7 +422,7 @@ export type EventWebhookNoDatesResponseModel = {
   /**
    * An optional friendly name assigned to the Event Webhook to help you differentiate it. The friendly name is for convenience only. You should use the webhook `id` property for any programmatic tasks.
    */
-  'friendly_name'?: string | undefined;
+  'friendly_name'?: string | null | undefined;
   /**
    * A unique string used to identify the webhook. A webhook's ID is generated programmatically and cannot be changed after creation. You can assign a natural language identifier to your webhook using the `friendly_name` property.
    */
@@ -430,11 +430,11 @@ export type EventWebhookNoDatesResponseModel = {
   /**
    * The OAuth client ID SendGrid sends to your OAuth server or service provider to generate an OAuth access token.
    */
-  'oauth_client_id'?: string | undefined;
+  'oauth_client_id'?: string | null | undefined;
   /**
    * The URL where SendGrid sends the OAuth client ID and client secret to generate an access token. This should be your OAuth server or service provider.
    */
-  'oauth_token_url'?: string | undefined;
+  'oauth_token_url'?: string | null | undefined;
   /**
    * The public key you can use to verify the SendGrid signature.
    */
@@ -480,7 +480,7 @@ export type ErrorResponseModel = {
   /**
    * When applicable, this property value will be the field that generated the error.
    */
-  'field'?: string | undefined;
+  'field'?: string | null | undefined;
   /**
    * When applicable, this property value will be helper text or a link to documentation to help you troubleshoot the error.
    */
@@ -510,18 +510,18 @@ export const EventWebhookRequest: z.ZodType<EventWebhookRequestModel> = z.object
 'open': z.boolean().optional(),
 'click': z.boolean().optional(),
 'dropped': z.boolean().optional(),
-'friendly_name': z.string().optional(),
-'oauth_client_id': z.string().optional(),
-'oauth_client_secret': z.string().optional(),
-'oauth_token_url': z.string().optional()
+'friendly_name': z.string().nullable().optional(),
+'oauth_client_id': z.string().nullable().optional(),
+'oauth_client_secret': z.string().nullable().optional(),
+'oauth_token_url': z.string().nullable().optional()
 });
 
 export const EventWebhookTestRequest: z.ZodType<EventWebhookTestRequestModel> = z.object({
 'id': z.string().optional(),
 'url': z.string(),
-'oauth_client_id': z.string().optional(),
-'oauth_client_secret': z.string().optional(),
-'oauth_token_url': z.string().optional()
+'oauth_client_id': z.string().nullable().optional(),
+'oauth_client_secret': z.string().nullable().optional(),
+'oauth_token_url': z.string().nullable().optional()
 });
 
 export const EventWebhookBaseResponseProps: z.ZodType<EventWebhookBaseResponsePropsModel> = z.object({
@@ -539,18 +539,18 @@ export const EventWebhookBaseResponseProps: z.ZodType<EventWebhookBaseResponsePr
 'open': z.boolean().optional(),
 'click': z.boolean().optional(),
 'dropped': z.boolean().optional(),
-'friendly_name': z.string().optional(),
+'friendly_name': z.string().nullable().optional(),
 'id': z.string().optional()
 });
 
 export const EventWebhookDateResponseProps: z.ZodType<EventWebhookDateResponsePropsModel> = z.object({
-'created_date': z.iso.datetime().optional(),
+'created_date': z.iso.datetime().nullable().optional(),
 'updated_date': z.iso.datetime().optional()
 });
 
 export const EventWebhookOauthResponseProps: z.ZodType<EventWebhookOauthResponsePropsModel> = z.object({
-'oauth_client_id': z.string().optional(),
-'oauth_token_url': z.string().optional()
+'oauth_client_id': z.string().nullable().optional(),
+'oauth_token_url': z.string().nullable().optional()
 });
 
 export const EventWebhookSignedResponseProp: z.ZodType<EventWebhookSignedResponsePropModel> = z.object({
@@ -572,12 +572,12 @@ export const EventWebhookUnsignedResponse: z.ZodType<EventWebhookUnsignedRespons
 'open': z.boolean().optional(),
 'click': z.boolean().optional(),
 'dropped': z.boolean().optional(),
-'friendly_name': z.string().optional(),
+'friendly_name': z.string().nullable().optional(),
 'id': z.string().optional(),
-'created_date': z.iso.datetime().optional(),
+'created_date': z.iso.datetime().nullable().optional(),
 'updated_date': z.iso.datetime().optional(),
-'oauth_client_id': z.string().optional(),
-'oauth_token_url': z.string().optional()
+'oauth_client_id': z.string().nullable().optional(),
+'oauth_token_url': z.string().nullable().optional()
 });
 
 export const EventWebhookSignedResponse: z.ZodType<EventWebhookSignedResponseModel> = z.object({
@@ -595,12 +595,12 @@ export const EventWebhookSignedResponse: z.ZodType<EventWebhookSignedResponseMod
 'open': z.boolean().optional(),
 'click': z.boolean().optional(),
 'dropped': z.boolean().optional(),
-'friendly_name': z.string().optional(),
+'friendly_name': z.string().nullable().optional(),
 'id': z.string().optional(),
-'created_date': z.iso.datetime().optional(),
+'created_date': z.iso.datetime().nullable().optional(),
 'updated_date': z.iso.datetime().optional(),
-'oauth_client_id': z.string().optional(),
-'oauth_token_url': z.string().optional(),
+'oauth_client_id': z.string().nullable().optional(),
+'oauth_token_url': z.string().nullable().optional(),
 'public_key': z.string().optional()
 });
 
@@ -619,10 +619,10 @@ export const EventWebhookNoDatesResponse: z.ZodType<EventWebhookNoDatesResponseM
 'open': z.boolean().optional(),
 'click': z.boolean().optional(),
 'dropped': z.boolean().optional(),
-'friendly_name': z.string().optional(),
+'friendly_name': z.string().nullable().optional(),
 'id': z.string().optional(),
-'oauth_client_id': z.string().optional(),
-'oauth_token_url': z.string().optional(),
+'oauth_client_id': z.string().nullable().optional(),
+'oauth_token_url': z.string().nullable().optional(),
 'public_key': z.string().optional()
 });
 
@@ -641,7 +641,7 @@ export const ParseSetting: z.ZodType<ParseSettingModel> = z.object({
 export const ErrorResponse: z.ZodType<ErrorResponseModel> = z.object({
 'errors': z.array(z.object({
 'message': z.string().optional(),
-'field': z.string().optional(),
+'field': z.string().nullable().optional(),
 'help': z.object({}).optional()
 })).optional(),
 'id': z.string().optional()

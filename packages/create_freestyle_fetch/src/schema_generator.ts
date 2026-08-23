@@ -1,6 +1,19 @@
 import type { OpenAPIV3_1 } from 'openapi-types'
 import { SchemaValidationError } from './errors' // Assumed existing
-import { createJSDocComment, toPascalCase } from './utils' // Assumed existing
+import {
+    createJSDocComment,
+    formatZodLiteral,
+    quoteString,
+    toPascalCase,
+    toSafeIdentifier,
+} from './utils' // Assumed existing
+
+/**
+ * Output context for generated Zod expressions.
+ * - "models": references are bare exported names (models.ts scope)
+ * - "api": references are qualified as Model.<ExportedName> (api.ts scope)
+ */
+export type OutputContext = 'models' | 'api'
 
 export class SchemaGenerator {
     private spec: OpenAPIV3_1.Document
@@ -26,7 +39,7 @@ export class SchemaGenerator {
         this.schemaNameMap.clear()
 
         for (const key of Object.keys(this.spec.components.schemas)) {
-            let name = toPascalCase(key)
+            let name = toSafeIdentifier(toPascalCase(key))
 
             // If name already exists (collision), append a counter
             // e.g., if "User" and "user" both exist, second becomes "User_1"
@@ -42,15 +55,94 @@ export class SchemaGenerator {
         }
     }
 
+    /**
+     * Lazily builds the collision-resolution map if it has not been built yet.
+     */
+    private ensureSchemaNames() {
+        if (
+            this.schemaNameMap.size === 0 &&
+            this.spec.components?.schemas &&
+            Object.keys(this.spec.components.schemas).length > 0
+        ) {
+            this.initializeSchemaNames()
+        }
+    }
+
     private getSchemaName(key: string): string {
-        return this.schemaNameMap.get(key) || toPascalCase(key)
+        return (
+            this.schemaNameMap.get(key) ?? toSafeIdentifier(toPascalCase(key))
+        )
+    }
+
+    /**
+     * Resolves a raw component schema key (e.g. the terminal segment of a
+     * $ref) to the exported model name, honoring collision resolution
+     * ("_1" suffixes) and identifier sanitization.
+     */
+    public getExportedName(rawName: string): string {
+        this.ensureSchemaNames()
+        return this.getSchemaName(rawName)
+    }
+
+    /**
+     * The raw schema key → exported model name collision-resolution map.
+     * Consumers generating references into models.ts must go through it.
+     */
+    public getCollisionMap(): ReadonlyMap<string, string> {
+        this.ensureSchemaNames()
+        return new Map(this.schemaNameMap)
     }
 
     public generateZodSchema(
         schema: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
-        nameHint: string = 'inline'
+        nameHint: string = 'inline',
+        outputContext: OutputContext = 'models'
     ): string {
-        return this.mapSchemaObjectToZod(nameHint, schema)
+        return this.mapSchemaObjectToZod(
+            nameHint,
+            schema,
+            undefined,
+            outputContext
+        )
+    }
+
+    /**
+     * Schemas that must NOT get an explicit `: z.ZodType<X>` annotation:
+     * - union/discriminatedUnion/intersection results (their inferred type
+     *   is not compatible with a plain ZodType<X> declaration), and
+     * - schemas referenced as members of such compositions (the annotation
+     *   erases discriminant/propValues info required by z.discriminatedUnion).
+     */
+    private computeAnnotationExemptions(): Set<string> {
+        const exempt = new Set<string>()
+        const schemas = this.spec.components?.schemas
+        if (!schemas) return exempt
+
+        const isComposition = (schema: any): boolean =>
+            schema &&
+            !this.isReferenceObject(schema) &&
+            Boolean(schema.allOf || schema.oneOf || schema.anyOf)
+
+        for (const [parentName, refs] of this.schemaReferences) {
+            if (!isComposition(schemas[parentName])) continue
+            for (const ref of refs) exempt.add(ref)
+        }
+        return exempt
+    }
+
+    private shouldAnnotate(name: string, exemptions: Set<string>): boolean {
+        const schema = this.spec.components?.schemas?.[name]
+        if (!schema || this.isReferenceObject(schema)) return false
+
+        // Cyclic schemas must keep their explicit annotation: the initializer
+        // chain relies on it to break TS7022 circularity. Losing it degrades
+        // every `z.lazy(() => X)` that references them to `any`.
+        if (this.cyclicSchemas.has(name)) return true
+
+        // Composition results rely on inference (G-7).
+        if (schema.allOf || schema.oneOf || schema.anyOf) return false
+
+        return !exemptions.has(name)
     }
 
     public generateModels(): string {
@@ -67,6 +159,9 @@ export class SchemaGenerator {
 
         // 2. Detect Cycles
         this.cyclicSchemas = this.detectCycles()
+
+        // 2.5. Determine which schemas must rely on type inference
+        const annotationExemptions = this.computeAnnotationExemptions()
 
         // 3. Clear processed cache to regenerate with correct lazy/static strategies
         this.processedSchemas.clear()
@@ -102,7 +197,7 @@ export class SchemaGenerator {
                 this.mapSchemaObjectToZod(name)
             const pascalName = this.getSchemaName(name)
 
-            // Use explicit type for perf.
+            // Use explicit type for perf, unless inference is required (G-7).
             const schema = this.spec.components?.schemas?.[name]
             const description =
                 schema && !this.isReferenceObject(schema)
@@ -110,14 +205,25 @@ export class SchemaGenerator {
                     : undefined
             const jsDoc = createJSDocComment(undefined, description)
 
+            const typeAnnotation = this.shouldAnnotate(
+                name,
+                annotationExemptions
+            )
+                ? `: z.ZodType<${pascalName}Model>`
+                : ''
+
             modelStrings.push(
-                `${jsDoc}export const ${pascalName}: z.ZodType<${pascalName}Model> = ${zodSchema};`
+                `${jsDoc}export const ${pascalName}${typeAnnotation} = ${zodSchema};`
             )
         }
 
         return modelStrings.join('\n\n')
     }
 
+    /**
+     * G-9: OpenAPI 3.0 `nullable: true` widens the generated model type
+     * with `| null` (mirroring the `.nullable()` added on the Zod side).
+     */
     private mapSchemaObjectToType(
         name: string,
         schemaObject?: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject
@@ -130,6 +236,24 @@ export class SchemaGenerator {
             return `${this.getSchemaName(refName)}Model`
         }
 
+        const baseType = this.computeBaseType(name, schema)
+
+        // Nullability already expressed via a 3.1 type array is handled inside
+        // computeBaseType; only the boolean 3.0 keyword appends here.
+        const typeArrayIncludesNull =
+            Array.isArray(schema.type) && schema.type.includes('null')
+        // `nullable` is an OpenAPI 3.0 keyword absent from the 3.1 typings.
+        const isNullable = (schema as { nullable?: boolean }).nullable === true
+        if (isNullable && !typeArrayIncludesNull) {
+            return `${baseType} | null`
+        }
+        return baseType
+    }
+
+    private computeBaseType(
+        name: string,
+        schema: OpenAPIV3_1.SchemaObject
+    ): string {
         if (schema.oneOf || schema.anyOf) {
             const items = schema.oneOf || schema.anyOf || []
             const parts = items.map((i) => this.mapSchemaObjectToType(name, i))
@@ -156,10 +280,14 @@ export class SchemaGenerator {
             return 'any'
         }
 
+        // G-13: enums with non-string members must keep their literal types.
+        // String-only enums render identically through the same path.
+        if (schema.enum) {
+            return schema.enum.map((e) => formatZodLiteral(e)).join(' | ')
+        }
+
         switch (schema.type) {
             case 'string':
-                if (schema.enum)
-                    return schema.enum.map((e) => `'${e}'`).join(' | ')
                 return 'string'
             case 'integer':
             case 'number':
@@ -198,13 +326,16 @@ export class SchemaGenerator {
                                 '  '
                             )
                             props.push(
-                                `${jsDoc}  '${key}'${isRequired ? '' : '?'}: ${typeStr}${isRequired ? '' : ' | undefined'};`
+                                `${jsDoc}  ${quoteString(key)}${isRequired ? '' : '?'}: ${typeStr}${isRequired ? '' : ' | undefined'};`
                             )
                         }
                     )
                 }
 
-                if (schema.additionalProperties) {
+                // G-8: a properties-bearing schema must not also declare a
+                // string index signature (conflicting member types, TS2411).
+                // The runtime catchall on the Zod side is preserved.
+                if (schema.additionalProperties && !schema.properties) {
                     const additionalTypes =
                         typeof schema.additionalProperties === 'object'
                             ? this.mapSchemaObjectToType(
@@ -251,10 +382,19 @@ export class SchemaGenerator {
         return sorted
     }
 
+    /**
+     * Qualifies a bare exported model name for the given output context.
+     * In api.ts scope, models live behind the `Model` namespace import.
+     */
+    private modelRef(name: string, outputContext: OutputContext): string {
+        return outputContext === 'api' ? `Model.${name}` : name
+    }
+
     private mapSchemaObjectToZod(
         name: string,
         schemaObject?: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
-        currentSchema?: string
+        currentSchema?: string,
+        outputContext: OutputContext = 'models'
     ): string {
         const schema = schemaObject || this.spec.components?.schemas?.[name]
         if (!schema) {
@@ -268,14 +408,14 @@ export class SchemaGenerator {
         // Used cached string if fully processed
         if (this.processedSchemas.has(name) && !schemaObject) {
             // IMPORTANT: Use the unique name
-            return this.getSchemaName(name)
+            return this.modelRef(this.getSchemaName(name), outputContext)
         }
 
         // Lazy Loading for Cycles
         if (!schemaObject && this.processingStack.has(name)) {
             const from = currentSchema || name
             this.trackReference(from, name)
-            return `z.lazy(() => ${this.getSchemaName(name)})`
+            return `z.lazy(() => ${this.modelRef(this.getSchemaName(name), outputContext)})`
         }
 
         if (!schemaObject) {
@@ -306,9 +446,14 @@ export class SchemaGenerator {
                     !this.processedSchemas.has(refName) &&
                     !this.processingStack.has(refName)
                 ) {
-                    this.mapSchemaObjectToZod(refName, undefined, name)
+                    this.mapSchemaObjectToZod(
+                        refName,
+                        undefined,
+                        name,
+                        outputContext
+                    )
                 }
-                const result = `z.lazy(() => ${this.getSchemaName(refName)})`
+                const result = `z.lazy(() => ${this.modelRef(this.getSchemaName(refName), outputContext)})`
 
                 if (!schemaObject) {
                     this.processingStack.delete(name)
@@ -318,8 +463,11 @@ export class SchemaGenerator {
             }
 
             // Standard Reference
-            this.mapSchemaObjectToZod(refName, undefined, name)
-            const result = this.getSchemaName(refName)
+            this.mapSchemaObjectToZod(refName, undefined, name, outputContext)
+            const result = this.modelRef(
+                this.getSchemaName(refName),
+                outputContext
+            )
 
             if (!schemaObject) {
                 this.processingStack.delete(name)
@@ -331,7 +479,9 @@ export class SchemaGenerator {
         // Handle allOf, oneOf, anyOf, and Types
         if (schema.allOf) {
             const allOfSchemas = schema.allOf
-                .map((s) => this.mapSchemaObjectToZod(name, s))
+                .map((s) =>
+                    this.mapSchemaObjectToZod(name, s, undefined, outputContext)
+                )
                 .join('.and(')
             const zodSchema = allOfSchemas + ')'.repeat(schema.allOf.length - 1)
             if (!schemaObject) {
@@ -343,11 +493,13 @@ export class SchemaGenerator {
 
         if (schema.oneOf || schema.anyOf) {
             const items = schema.oneOf || schema.anyOf || []
-            const options = items.map((s) => this.mapSchemaObjectToZod(name, s))
+            const options = items.map((s) =>
+                this.mapSchemaObjectToZod(name, s, undefined, outputContext)
+            )
 
             let zodSchema: string
             if (schema.oneOf && schema.discriminator) {
-                zodSchema = `z.discriminatedUnion('${schema.discriminator.propertyName}', [${options.join(', ')}])`
+                zodSchema = `z.discriminatedUnion(${quoteString(schema.discriminator.propertyName)}, [${options.join(', ')}])`
             } else {
                 zodSchema = `z.union([${options.join(', ')}])`
             }
@@ -362,8 +514,27 @@ export class SchemaGenerator {
         // Standard Types
         let zodString = 'z.any()'
 
+        // G-13: const/enum values are handled generically (independent of the
+        // declared type) so non-string members and type-less enums keep their
+        // literal values instead of degrading to z.any()/plain primitives.
+        if (schema.const !== undefined) {
+            zodString = `z.literal(${formatZodLiteral(schema.const)})`
+        } else if (
+            schema.enum &&
+            schema.enum.every((e) => typeof e === 'string')
+        ) {
+            // G-13: string-only enums keep z.enum
+            zodString = `z.enum([${schema.enum
+                .map((e) => quoteString(e))
+                .join(', ')}])`
+        } else if (schema.enum) {
+            // G-13: non-string members require literal unions
+            zodString = `z.union([${schema.enum
+                .map((e) => `z.literal(${formatZodLiteral(e)})`)
+                .join(', ')}])`
+        }
         // Handle nullable types
-        if (Array.isArray(schema.type)) {
+        else if (Array.isArray(schema.type)) {
             if (schema.type.includes('null')) {
                 const nonNullTypes = schema.type.filter((t) => t !== 'null')
                 if (nonNullTypes.length === 1) {
@@ -371,7 +542,7 @@ export class SchemaGenerator {
                         ...schema,
                         type: nonNullTypes[0],
                     } as OpenAPIV3_1.SchemaObject
-                    zodString = `${this.mapSchemaObjectToZod(name, innerSchema)}.nullable()`
+                    zodString = `${this.mapSchemaObjectToZod(name, innerSchema, currentSchema, outputContext)}.nullable()`
                 } else {
                     // Complex union nullable
                     zodString = 'z.any()' // Simplification for complex union arrays
@@ -380,25 +551,17 @@ export class SchemaGenerator {
         } else {
             switch (schema.type) {
                 case 'string':
-                    if (schema.const) {
-                        zodString = `z.literal('${schema.const}')`
-                    } else if (schema.enum) {
-                        zodString = `z.enum([${schema.enum.map((e) => `'${e}'`).join(', ')}])`
-                    } else {
-                        zodString = 'z.string()'
-                        if (schema.format === 'date-time')
-                            zodString = 'z.iso.datetime()' // Zod 3.20+
-                        else if (schema.format === 'email')
-                            zodString = 'z.email()'
-                        else if (schema.format === 'uri') zodString = 'z.url()'
-                        else if (schema.format === 'uuid')
-                            zodString = 'z.uuid()'
-                        if (schema.pattern) {
-                            const escapedPattern = schema.pattern
-                                .replace(/\\/g, '\\\\')
-                                .replace(/\//g, '\\/')
-                            zodString += `.regex(/${escapedPattern}/)`
-                        }
+                    zodString = 'z.string()'
+                    if (schema.format === 'date-time')
+                        zodString = 'z.iso.datetime()' // Zod 3.20+
+                    else if (schema.format === 'email') zodString = 'z.email()'
+                    else if (schema.format === 'uri') zodString = 'z.url()'
+                    else if (schema.format === 'uuid') zodString = 'z.uuid()'
+                    if (schema.pattern) {
+                        const escapedPattern = schema.pattern
+                            .replace(/\\/g, '\\\\')
+                            .replace(/\//g, '\\/')
+                        zodString += `.regex(/${escapedPattern}/)`
                     }
                     break
                 case 'number':
@@ -417,7 +580,9 @@ export class SchemaGenerator {
                     if (schema.items) {
                         const itemSchema = this.mapSchemaObjectToZod(
                             name,
-                            schema.items
+                            schema.items,
+                            currentSchema,
+                            outputContext
                         )
                         zodString = `z.array(${itemSchema})`
                     } else {
@@ -433,9 +598,11 @@ export class SchemaGenerator {
                                     schema.required?.includes(key)
                                 const zodType = this.mapSchemaObjectToZod(
                                     key,
-                                    value
+                                    value,
+                                    currentSchema,
+                                    outputContext
                                 )
-                                return `'${key}': ${isRequired ? zodType : `${zodType}.optional()`}`
+                                return `${quoteString(key)}: ${isRequired ? zodType : `${zodType}.optional()`}`
                             })
                             .join(',\n')
                         zodString = `z.object({\n${properties}\n})`
@@ -451,7 +618,9 @@ export class SchemaGenerator {
                         ) {
                             const additionalSchema = this.mapSchemaObjectToZod(
                                 name,
-                                schema.additionalProperties
+                                schema.additionalProperties,
+                                currentSchema,
+                                outputContext
                             )
                             // If it's a record (no properties defined), use z.record
                             if (schema.properties) {
@@ -466,6 +635,14 @@ export class SchemaGenerator {
                     zodString = 'z.any()'
                     break
             }
+        }
+
+        // G-9: OpenAPI 3.0 boolean `nullable: true` appends .nullable().
+        // Nullability already expressed via a 3.1 type array is handled above.
+        // `nullable` is an OpenAPI 3.0 keyword absent from the 3.1 typings.
+        const isNullable = (schema as { nullable?: boolean }).nullable === true
+        if (isNullable && !Array.isArray(schema.type)) {
+            zodString += '.nullable()'
         }
 
         if (!schemaObject) {

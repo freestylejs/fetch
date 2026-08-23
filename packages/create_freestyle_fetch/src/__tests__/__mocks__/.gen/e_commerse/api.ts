@@ -8,7 +8,7 @@ export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {
     const middleware = authMw ? authMw : []
 
     return f.router({
-        baseUrl: config.baseUrl || 'https://{environment}.example.com/v{version}',
+        baseUrl: config.baseUrl || 'https://api.example.com/v1',
         middleware
     }, {
 /**
@@ -22,7 +22,7 @@ export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {
  *
  * Retrieve a paginated list of products with filtering options.
  */
-'GET': f.builder().def_json().def_searchparams(z.object({ category: z.enum(['electronics', 'clothing', 'books']).optional(), priceRange: z.array(z.number()).optional(), page: z.number().int().min(1).optional(), limit: z.number().int().min(1).max(100).optional(), sort: z.record(z.string(), z.enum(['asc', 'desc'])).optional() }).parse).def_response(async ({ json }) => z.array(Model.Product).parse(await json())),
+'GET': f.builder().def_json().def_searchparams(z.object({ 'category': z.enum(['electronics', 'clothing', 'books']).optional(), 'priceRange': z.array(z.number()).optional(), 'page': z.number().int().min(1).optional(), 'limit': z.number().int().min(1).max(100).optional(), 'sort': z.record(z.string(), z.enum(['asc', 'desc'])).optional() }).parse).def_response(async ({ json }) => z.array(Model.Product).parse(await json())),
 /**
  * Create a new product
  *

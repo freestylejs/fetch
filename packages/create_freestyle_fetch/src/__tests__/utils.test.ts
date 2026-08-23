@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
     convertHtmlToMarkdown,
     createJSDocComment,
+    quoteString,
     toPascalCase,
+    toSafeIdentifier,
 } from '../utils'
 
 describe('utils', () => {
@@ -186,6 +188,43 @@ describe('utils', () => {
             expect(toPascalCase('HellObject')).toBe('HellObject') // No separators, preserve
             expect(toPascalCase('BaseList')).toBe('BaseList')
             expect(toPascalCase('ProductList')).toBe('ProductList')
+        })
+    })
+
+    describe('quoteString', () => {
+        it('should wrap values in single quotes', () => {
+            expect(quoteString('start-date')).toBe("'start-date'")
+            expect(quoteString('page')).toBe("'page'")
+        })
+
+        it('should escape single quotes', () => {
+            expect(quoteString("it's")).toBe("'it\\'s'")
+        })
+
+        it('should escape backslashes', () => {
+            expect(quoteString('a\\b')).toBe("'a\\\\b'")
+        })
+
+        it('should escape both quotes and backslashes', () => {
+            expect(quoteString("a'b\\c")).toBe("'a\\'b\\\\c'")
+        })
+    })
+
+    describe('toSafeIdentifier', () => {
+        it('should keep valid identifiers unchanged', () => {
+            expect(toSafeIdentifier('UserProfile')).toBe('UserProfile')
+            expect(toSafeIdentifier('_private')).toBe('_private')
+            expect(toSafeIdentifier('$special')).toBe('$special')
+            expect(toSafeIdentifier('User2Fa')).toBe('User2Fa')
+        })
+
+        it('should prefix underscore for numeric-leading names (G-14a)', () => {
+            expect(toSafeIdentifier('2fa')).toBe('_2fa')
+            expect(toSafeIdentifier('2faDisable')).toBe('_2faDisable')
+        })
+
+        it('should handle empty strings', () => {
+            expect(toSafeIdentifier('')).toBe('_')
         })
     })
 })

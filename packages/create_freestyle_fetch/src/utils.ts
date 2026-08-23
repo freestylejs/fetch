@@ -54,6 +54,48 @@ export function toPascalCase(str: string): string {
 }
 
 /**
+ * Quotes a value as a single-quoted string literal safe for embedding in
+ * generated code, escaping backslashes and single quotes.
+ *
+ * @example
+ * quoteString("start-date") // "'start-date'"
+ * quoteString("it's")       // "'it\\'s'"
+ * quoteString("a\\b")       // "'a\\\\b'"
+ */
+export function quoteString(value: string): string {
+    return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`
+}
+
+/**
+ * Formats a scalar enum/const value as a Zod literal expression fragment.
+ * Strings are quoted, null stays bare, numbers/booleans render as-is.
+ *
+ * @example
+ * formatZodLiteral("a")  // "'a'"
+ * formatZodLiteral(42)   // "42"
+ * formatZodLiteral(null) // "null"
+ */
+export function formatZodLiteral(value: unknown): string {
+    if (typeof value === 'string') return quoteString(value)
+    if (value === null) return 'null'
+    return String(value)
+}
+
+/**
+ * Ensures a name is a valid ECMAScript identifier by prefixing an underscore
+ * when it starts with a character that cannot begin an identifier (e.g. a digit).
+ *
+ * @example
+ * toSafeIdentifier("UserProfile") // "UserProfile"
+ * toSafeIdentifier("2fa")         // "_2fa"
+ * toSafeIdentifier("")            // "_"
+ */
+export function toSafeIdentifier(name: string): string {
+    if (!name) return '_'
+    return /^[A-Za-z_$]/.test(name) ? name : `_${name}`
+}
+
+/**
  * Converts HTML content to Markdown for better JSDoc rendering
  */
 export function convertHtmlToMarkdown(html: string): string {

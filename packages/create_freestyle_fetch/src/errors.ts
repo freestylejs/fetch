@@ -137,3 +137,26 @@ ${this.suggestion ? `\n  ${chalk.yellow('💡 Suggestion:')} ${this.suggestion}`
     `.trim()
     }
 }
+
+/**
+ * Error for unsupported or unresolvable security schemes
+ */
+export class AuthSchemeError extends GeneratorError {
+    constructor(
+        message: string,
+        public schemeName: string,
+        public suggestion?: string
+    ) {
+        super(message)
+    }
+
+    format(): string {
+        return `
+${chalk.red('✗')} ${chalk.bold('Unsupported Security Scheme')}
+
+  ${chalk.dim('Scheme:')} ${this.schemeName}
+  ${chalk.dim('Issue:')} ${this.message}
+${this.suggestion ? `\n  ${chalk.yellow('💡 Suggestion:')} ${this.suggestion}` : ''}
+    `.trim()
+    }
+}

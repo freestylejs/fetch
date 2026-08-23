@@ -15,6 +15,7 @@ export class SpecValidator {
     public validate(): ValidationWarning[] {
         this.warnings = []
         this.checkOperationIds()
+        this.checkServerVariables()
         this.checkUnusedSchemas()
         return this.warnings
     }
@@ -51,6 +52,30 @@ export class SpecValidator {
 
     private checkUnusedSchemas() {
         // pass for now
+    }
+
+    /**
+     * G-10: the router generator substitutes `{var}` placeholders of
+     * servers[0].url with variables[x].default. Placeholders that cannot be
+     * resolved would remain literal in the generated baseUrl — warn instead
+     * of failing the whole generation.
+     */
+    private checkServerVariables() {
+        const server = this.spec.servers?.[0]
+        if (!server?.url) return
+
+        for (const match of server.url.matchAll(/\{([^{}]+)\}/g)) {
+            const name = match[1]
+            if (!name) continue
+            const variable = server.variables?.[name]
+            if (!variable || variable.default === undefined) {
+                this.warnings.push({
+                    code: 'UNRESOLVED_SERVER_VARIABLE',
+                    message: `Server URL contains "{${name}}" but servers[0].variables.${name}.default is not defined. The placeholder will remain literal in the generated baseUrl.`,
+                    path: server.url,
+                })
+            }
+        }
     }
 
     public formatWarnings(): string {

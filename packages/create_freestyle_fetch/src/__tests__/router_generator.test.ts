@@ -50,7 +50,7 @@ describe('Router Generator Comprehensive Tests', () => {
         const code = generateRouter(parsedPaths, spec)
 
         expect(code).toContain(
-            '.def_searchparams(z.object({ page: z.number().optional(), sort: z.string() }).parse)'
+            ".def_searchparams(z.object({ 'page': z.number().optional(), 'sort': z.string() }).parse)"
         )
     })
 
@@ -218,13 +218,13 @@ describe('Router Generator Comprehensive Tests', () => {
         const code = generateRouter(parsedPaths, spec)
 
         // GET should have common param
-        expect(code).toContain('common: z.string().optional()')
+        expect(code).toContain("'common': z.string().optional()")
 
         expect(code).toMatch(
-            /def_searchparams\(z\.object\({.*common: z\.string\(\)\.optional\(\).*}\)\.parse\)/
+            /def_searchparams\(z\.object\(\{.*'common': z\.string\(\)\.optional\(\).*\}\)\.parse\)/
         )
         expect(code).toMatch(
-            /def_searchparams\(z\.object\({.*specific: z\.number\(\)\.optional\(\).*}\)\.parse\)/
+            /def_searchparams\(z\.object\(\{.*'specific': z\.number\(\)\.optional\(\).*\}\)\.parse\)/
         )
     })
 

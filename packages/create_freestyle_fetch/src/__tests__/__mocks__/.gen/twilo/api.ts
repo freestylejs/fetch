@@ -75,7 +75,10 @@ export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {
  * 
  * For more information about cryptographically signing the Event Webhook, see [**Getting Started with the Event Webhook Security Features**](https://sendgrid.com/docs/for-developers/tracking-events/getting-started-event-webhook-security-features).
  */
-'GET': f.builder().def_json(),
+'GET': f.builder().def_json().def_response(async ({ json }) => z.object({
+'id': z.string().optional(),
+'public_key': z.string().optional()
+}).parse(await json())),
 /**
  * Toggle signature verification for a single Event Webhook by ID
  *
@@ -87,7 +90,12 @@ export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {
  * 
  * For more information about cryptographically signing the Event Webhook, see [**Getting Started with the Event Webhook Security Features**](https://sendgrid.com/docs/for-developers/tracking-events/getting-started-event-webhook-security-features).
  */
-'PATCH': f.builder().def_json()
+'PATCH': f.builder().def_json().def_body((body) => z.object({
+'enabled': z.boolean()
+}).parse(body)).def_response(async ({ json }) => z.object({
+'id': z.string().optional(),
+'public_key': z.string().optional()
+}).parse(await json()))
 }
 },
 '$id': {
@@ -185,7 +193,9 @@ export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {
  *
  * **This endpoint allows you to retrieve all of your current inbound parse settings.**
  */
-'GET': f.builder().def_json(),
+'GET': f.builder().def_json().def_response(async ({ json }) => z.object({
+'result': z.array(Model.ParseSetting).optional()
+}).parse(await json())),
 /**
  * Create a parse setting
  *
@@ -199,7 +209,7 @@ export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {
  * 
  * The `url` represents a location where the parsed message data will be delivered. Twilio SendGrid will make an HTTP POST request to this `url` with the message data. The `url` must be publicly reachable, and your application must return a `200` status code to signal that the message data has been received.
  */
-'POST': f.builder().def_json().def_response(async ({ json }) => Model.ParseSetting.parse(await json())),
+'POST': f.builder().def_json().def_body(Model.ParseSetting.parse).def_response(async ({ json }) => Model.ParseSetting.parse(await json())),
 '$hostname': {
 /**
  * Retrieve a specific parse setting
@@ -216,7 +226,7 @@ export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {
  * 
  * You can retrieve all your Inbound Parse settings and their associated host names with the "Retrieve all parse settings" endpoint.
  */
-'PATCH': f.builder().def_json().def_response(async ({ json }) => Model.ParseSetting.parse(await json())),
+'PATCH': f.builder().def_json().def_body(Model.ParseSetting.parse).def_response(async ({ json }) => Model.ParseSetting.parse(await json())),
 /**
  * Delete a parse setting
  *
@@ -237,7 +247,14 @@ export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {
  * 
  * There are a number of pre-made integrations for the SendGrid Parse Webhook which make processing events easy. You can find these integrations in the [Library Index](https://docs.sendgrid.com/for-developers/sending-email/libraries#webhook-libraries).
  */
-'GET': f.builder().def_json().def_searchparams(z.object({ limit: z.string().optional(), offset: z.string().optional(), aggregated_by: AggregatedBy.optional(), start_date: z.string(), end_date: z.string().optional() }).parse)
+'GET': f.builder().def_json().def_searchparams(z.object({ 'limit': z.string().optional(), 'offset': z.string().optional(), 'aggregated_by': Model.AggregatedBy.optional(), 'start_date': z.string(), 'end_date': z.string().optional() }).parse).def_response(async ({ json }) => z.array(z.object({
+'date': z.string(),
+'stats': z.array(z.object({
+'metrics': z.object({
+'received': z.number()
+}).optional()
+}))
+})).parse(await json()))
 }
 },
 'security': {
@@ -247,32 +264,105 @@ export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {
  *
  * Create a new webhook security policy. Note: One of signature or oauth must be given to have a valid security policy.
  */
-'POST': f.builder().def_json(),
+'POST': f.builder().def_json().def_body((body) => z.object({
+'name': z.string().optional(),
+'oauth': z.object({
+'client_id': z.string().optional(),
+'client_secret': z.string().optional(),
+'token_url': z.string().optional(),
+'scopes': z.array(z.string()).optional()
+}).optional(),
+'signature': z.object({
+'enabled': z.boolean().optional()
+}).optional()
+}).parse(body)).def_response(async ({ json }) => z.object({
+'policy': z.object({
+'id': z.string().optional(),
+'name': z.string().optional(),
+'oauth': z.object({
+'client_id': z.string().optional(),
+'token_url': z.string().optional(),
+'scopes': z.array(z.string()).optional()
+}).optional(),
+'signature': z.object({
+'public_key': z.string().optional()
+}).optional()
+}).optional()
+}).parse(await json())),
 /**
  * Retrieve all webhook security policies for your account
  *
  * Returns a list of all webhook security policies configured for your account, including their IDs, names, and security configurations.
  */
-'GET': f.builder().def_json(),
+'GET': f.builder().def_json().def_response(async ({ json }) => z.object({
+'policies': z.array(z.object({
+'id': z.string().optional(),
+'name': z.string().optional(),
+'oauth': z.object({
+'client_id': z.string().optional(),
+'token_url': z.string().optional(),
+'scopes': z.array(z.string()).optional()
+}).optional(),
+'signature': z.object({
+'public_key': z.string().optional()
+}).optional()
+})).optional()
+}).parse(await json())),
 '$id': {
 /**
  * Update an existing webhook security policy
  *
  * Update an existing webhook security policy with new configuration values.
  */
-'PATCH': f.builder().def_json(),
+'PATCH': f.builder().def_json().def_body((body) => z.object({
+'name': z.string().optional(),
+'oauth': z.object({
+'client_id': z.string().optional(),
+'client_secret': z.string().optional(),
+'token_url': z.string().optional(),
+'scopes': z.array(z.string()).optional()
+}).optional(),
+'signature': z.object({
+'enabled': z.boolean().optional()
+}).optional()
+}).parse(body)).def_response(async ({ json }) => z.object({
+'policy': z.object({
+'id': z.string().optional(),
+'name': z.string().optional(),
+'oauth': z.object({
+'client_id': z.string().optional(),
+'token_url': z.string().optional(),
+'scopes': z.array(z.string()).optional()
+}).optional()
+}).optional()
+}).parse(await json())),
 /**
  * Retrieve a specific webhook security policy
  *
  * Retrieve the details of a specific webhook security policy by its ID.
  */
-'GET': f.builder().def_json(),
+'GET': f.builder().def_json().def_response(async ({ json }) => z.object({
+'policy': z.object({
+'id': z.string().optional(),
+'name': z.string().optional(),
+'oauth': z.object({
+'client_id': z.string().optional(),
+'token_url': z.string().optional(),
+'scopes': z.array(z.string()).optional()
+}).optional(),
+'signature': z.object({
+'public_key': z.string().optional()
+}).optional()
+}).optional()
+}).parse(await json())),
 /**
  * Delete a specific webhook security policy
  *
  * Permanently delete a webhook security policy by its ID.
  */
-'DELETE': f.builder().def_json().def_searchparams(z.object({ force: z.boolean().optional() }).parse)
+'DELETE': f.builder().def_json().def_searchparams(z.object({ 'force': z.boolean().optional() }).parse).def_response(async ({ json }) => z.object({
+'policy': z.string().nullable().optional()
+}).parse(await json()))
 }
 }
 }

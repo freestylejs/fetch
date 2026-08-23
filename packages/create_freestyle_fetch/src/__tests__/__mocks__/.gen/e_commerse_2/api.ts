@@ -8,7 +8,7 @@ export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {
     const middleware = authMw ? authMw : []
 
     return f.router({
-        baseUrl: config.baseUrl || 'https://{environment}.example-commerce.com/api/v2',
+        baseUrl: config.baseUrl || 'https://api.example-commerce.com/api/v2',
         middleware
     }, {
 /**
@@ -20,7 +20,7 @@ export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {
 /**
  * Search and filter products
  */
-'GET': f.builder().def_json().def_searchparams(z.object({ searchQuery: z.string().optional(), tags: z.array(z.string()).optional(), page: z.number().int().min(1).optional() }).parse).def_response(async ({ json }) => Model.PaginatedProductResponse.parse(await json())),
+'GET': f.builder().def_json().def_searchparams(z.object({ 'searchQuery': z.string().optional(), 'tags': z.array(z.string()).optional(), 'page': z.number().int().min(1).optional() }).parse).def_response(async ({ json }) => Model.PaginatedProductResponse.parse(await json())),
 /**
  * Add a new product with an image
  */
@@ -40,7 +40,9 @@ export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {
  *
  * Begins processing an order. A callback URL is invoked upon completion.
  */
-'POST': f.builder().def_json()
+'POST': f.builder().def_json().def_body((body) => z.object({
+'notificationUrl': z.url()
+}).parse(body))
 }
 }
 }

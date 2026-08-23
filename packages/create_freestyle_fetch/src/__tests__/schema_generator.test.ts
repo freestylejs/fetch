@@ -859,8 +859,33 @@ describe('SchemaGenerator', () => {
             const generator = new SchemaGenerator(spec)
             const models = generator.generateModels()
 
+            // G-7: discriminatedUnion results rely on inference, no ZodType annotation
             expect(models).toContain(
-                "export const UnionHell: z.ZodType<UnionHellModel> = z.discriminatedUnion('type', [OptionA, OptionB]);"
+                "export const UnionHell = z.discriminatedUnion('type', [OptionA, OptionB]);"
+            )
+            // Union members must also drop the annotation so discriminant
+            // info survives into z.discriminatedUnion.
+            expect(models).toContain('export const OptionA = z.object({')
+            expect(models).toContain('export const OptionB = z.object({')
+        })
+
+        it('should annotate plain object schemas with ZodType', () => {
+            const spec = createSpec({
+                Plain: {
+                    type: 'object',
+                    properties: { id: { type: 'string' } },
+                },
+                ListOfPlain: {
+                    type: 'array',
+                    items: { $ref: '#/components/schemas/Plain' },
+                },
+            })
+            const generator = new SchemaGenerator(spec)
+            const models = generator.generateModels()
+
+            // object schemas keep their explicit type annotation
+            expect(models).toContain(
+                'export const Plain: z.ZodType<PlainModel> = z.object({'
             )
         })
 
@@ -1012,6 +1037,77 @@ describe('SchemaGenerator', () => {
             expect(() =>
                 generator.generateZodSchema(undefined as any, 'NonExistent')
             ).toThrow('Schema "NonExistent" not found')
+        })
+
+        it('should prefix underscore for numeric-leading schema names (G-14a)', () => {
+            const spec = createSpec({
+                '2fa': {
+                    type: 'object',
+                    properties: { enabled: { type: 'boolean' } },
+                },
+                '2fa_disable': {
+                    type: 'object',
+                    properties: { ok: { type: 'boolean' } },
+                },
+            })
+            const generator = new SchemaGenerator(spec)
+
+            const exported = generator.getExportedName('2fa')
+            expect(exported).toBe('_2fa')
+            expect(generator.getExportedName('2fa_disable')).toBe('_2faDisable')
+
+            const models = generator.generateModels()
+            expect(models).toContain('export type _2faModel = {')
+            expect(models).toContain(
+                'export const _2fa: z.ZodType<_2faModel> = z.object({'
+            )
+            expect(models).toContain('export type _2faDisableModel = {')
+
+            // api-context references use the sanitized name too
+            const refResult = generator.generateZodSchema(
+                { $ref: '#/components/schemas/2fa' },
+                'ref',
+                'api'
+            )
+            expect(refResult).toBe('Model._2fa')
+        })
+
+        it('should escape quotes and backslashes in enums, consts and keys (G-15)', () => {
+            const spec = createSpec({
+                Tricky: {
+                    type: 'string',
+                    enum: ["it's", 'a\\b'],
+                },
+                Consty: {
+                    type: 'string',
+                    const: "con'st",
+                },
+                Keyed: {
+                    type: 'object',
+                    properties: {
+                        "quo'te": { type: 'string' },
+                        'back\\slash': { type: 'number' },
+                    },
+                },
+            })
+            const models = new SchemaGenerator(spec).generateModels()
+
+            // enum values
+            expect(models).toContain("z.enum(['it\\'s', 'a\\\\b'])")
+            // type-level enum union
+            expect(models).toContain("'it\\'s' | 'a\\\\b'")
+            // const literal
+            expect(models).toContain("z.literal('con\\'st')")
+            // object keys
+            expect(models).toContain("'quo\\'te'")
+            expect(models).toContain("'back\\\\slash'")
+
+            const inline = new SchemaGenerator(spec).generateZodSchema(
+                spec.components!.schemas!.Keyed as OpenAPIV3_1.SchemaObject,
+                'Keyed'
+            )
+            expect(inline).toContain("'quo\\'te'")
+            expect(inline).toContain("'back\\\\slash'")
         })
 
         it('should handle caching of processed schemas', () => {

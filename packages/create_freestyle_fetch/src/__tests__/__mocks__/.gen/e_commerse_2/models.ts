@@ -78,13 +78,13 @@ export const User: z.ZodType<UserModel> = z.object({
 'legacyId': z.number().int().optional()
 });
 
-export const ProductInput: z.ZodType<ProductInputModel> = z.object({
+export const ProductInput = z.object({
 'name': z.string(),
 'description': z.string().optional(),
 'price': z.number().min(0)
 });
 
-export const Product: z.ZodType<ProductModel> = ProductInput.and(z.object({
+export const Product = ProductInput.and(z.object({
 'id': z.uuid().optional(),
 'imageUrl': z.url().optional(),
 'stock': z.number().int().optional()
@@ -97,21 +97,21 @@ export const PaginatedResponse: z.ZodType<PaginatedResponseModel> = z.object({
 'items': z.array(z.any()).optional()
 });
 
-export const PaginatedProductResponse: z.ZodType<PaginatedProductResponseModel> = PaginatedResponse;
+export const PaginatedProductResponse = PaginatedResponse;
 
-export const CreditCard: z.ZodType<CreditCardModel> = z.object({
+export const CreditCard = z.object({
 'methodType': z.enum(['card']),
 'cardNumber': z.string(),
 'expiry': z.string().optional(),
 'cvv': z.string().optional()
 });
 
-export const PayPal: z.ZodType<PayPalModel> = z.object({
+export const PayPal = z.object({
 'methodType': z.enum(['paypal_account']),
 'email': z.email()
 });
 
-export const PaymentMethod: z.ZodType<PaymentMethodModel> = z.discriminatedUnion('methodType', [CreditCard, PayPal]);
+export const PaymentMethod = z.discriminatedUnion('methodType', [CreditCard, PayPal]);
 
 export const CallbackPayload: z.ZodType<CallbackPayloadModel> = z.object({
 'orderId': z.uuid().optional(),

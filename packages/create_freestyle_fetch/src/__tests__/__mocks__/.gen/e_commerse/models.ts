@@ -35,18 +35,18 @@ export type ErrorModel = {
 
 
 
-export const Product: z.ZodType<ProductModel> = z.object({
+export const Product = z.object({
 'id': z.uuid(),
 'name': z.string(),
 'productType': z.string(),
 'price': z.number().min(0)
 });
 
-export const ElectronicsProduct: z.ZodType<ElectronicsProductModel> = Product.and(z.object({
+export const ElectronicsProduct = Product.and(z.object({
 'specs': z.record(z.string(), z.string()).optional()
 }));
 
-export const ClothingProduct: z.ZodType<ClothingProductModel> = Product.and(z.object({
+export const ClothingProduct = Product.and(z.object({
 'size': z.enum(['S', 'M', 'L', 'XL']).optional(),
 'color': z.string().optional()
 }));

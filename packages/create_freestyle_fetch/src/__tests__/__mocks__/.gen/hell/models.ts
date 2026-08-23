@@ -35,7 +35,7 @@ export type UnionHellModel = OptionAModel | OptionBModel;
 
 
 
-export const HellObject: z.ZodType<HellObjectModel> = z.object({
+export const HellObject = z.object({
 'required-key': z.string(),
 'optional-key': z.string().optional(),
 'spaced key': z.number(),
@@ -50,18 +50,18 @@ export const DeepNested: z.ZodType<DeepNestedModel> = z.object({
 }).optional()
 });
 
-export const IntersectionHell: z.ZodType<IntersectionHellModel> = HellObject.and(z.object({
+export const IntersectionHell = HellObject.and(z.object({
 'extra': z.string().optional()
 }));
 
-export const OptionA: z.ZodType<OptionAModel> = z.object({
+export const OptionA = z.object({
 'type': z.enum(['A']),
 'a': z.string().optional()
 });
 
-export const OptionB: z.ZodType<OptionBModel> = z.object({
+export const OptionB = z.object({
 'type': z.enum(['B']),
 'b': z.number().optional()
 });
 
-export const UnionHell: z.ZodType<UnionHellModel> = z.discriminatedUnion('type', [OptionA, OptionB]);
+export const UnionHell = z.discriminatedUnion('type', [OptionA, OptionB]);

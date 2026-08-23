@@ -18,12 +18,6 @@ export interface AuthConfig {
     oauth2?: {
         accessToken: string | (() => Promise<string>)
     }
-    /** openIdConnect */
-    openIdConnect?: {
-    }
-    /** Client certificate authentication */
-    mutualTls?: {
-    }
 }
 
 export const createAuthMiddleware = (config: AuthConfig) => {
@@ -73,20 +67,6 @@ export const createAuthMiddleware = (config: AuthConfig) => {
             if (token) {
                 req.headers.set('Authorization', `Bearer ${token}`)
             }
-            return next(req)
-        })
-        middlewares.push(mw)
-    }
-    if (config.openIdConnect) {
-        const mw = f.middleware()
-        mw.use(async (req, next) => {
-            return next(req)
-        })
-        middlewares.push(mw)
-    }
-    if (config.mutualTls) {
-        const mw = f.middleware()
-        mw.use(async (req, next) => {
             return next(req)
         })
         middlewares.push(mw)

@@ -1,4 +1,6 @@
 import type { OpenAPIV3_1 } from 'openapi-types'
+import { AuthSchemeError } from './errors'
+import { quoteString } from './utils'
 
 export interface SecurityScheme {
     type: 'apiKey' | 'http' | 'oauth2' | 'openIdConnect'
@@ -8,6 +10,17 @@ export interface SecurityScheme {
     description?: string
 }
 
+const HTTP_METHODS = [
+    'get',
+    'put',
+    'post',
+    'delete',
+    'options',
+    'head',
+    'patch',
+    'trace',
+] as const
+
 export class AuthGenerator {
     private schemes: Record<string, SecurityScheme> = {}
     private globalSecurity: Record<string, string[]>[] = []
@@ -16,20 +29,119 @@ export class AuthGenerator {
         this.analyze()
     }
 
+    /**
+     * Collects every security scheme name required by the document
+     * (global `security` plus per-operation requirements).
+     */
+    private referencedSchemeNames(): Set<string> {
+        const used = new Set<string>()
+        const collect = (security?: Record<string, string[]>[]) => {
+            for (const requirement of security ?? []) {
+                for (const key of Object.keys(requirement)) used.add(key)
+            }
+        }
+        collect(this.spec.security)
+        for (const pathItem of Object.values(this.spec.paths ?? {})) {
+            if (!pathItem || typeof pathItem !== 'object') continue
+            const item = pathItem as Record<string, any>
+            collect(item.security)
+            for (const method of HTTP_METHODS) {
+                const operation = item[method]
+                if (operation && typeof operation === 'object') {
+                    collect(operation.security)
+                }
+            }
+        }
+        return used
+    }
+
+    /**
+     * G-12: returns why a resolved scheme cannot be mapped onto generated
+     * middleware, or undefined when it is supported.
+     */
+    private unsupportedReason(scheme: SecurityScheme): string | undefined {
+        if (scheme.type === 'http') {
+            if (scheme.scheme !== 'bearer' && scheme.scheme !== 'basic') {
+                return `http scheme "${scheme.scheme ?? '<missing>'}" is not supported`
+            }
+            return undefined
+        }
+        if (scheme.type === 'apiKey') {
+            if (!scheme.name) return 'apiKey scheme is missing its "name"'
+            if (
+                scheme.in !== 'header' &&
+                scheme.in !== 'query' &&
+                scheme.in !== 'cookie'
+            ) {
+                return `apiKey location "${scheme.in ?? '<missing>'}" is not supported`
+            }
+            return undefined
+        }
+        if (scheme.type === 'oauth2') return undefined
+        return `"${scheme.type}" type is not supported`
+    }
+
     private analyze() {
+        const referenced = this.referencedSchemeNames()
+
         if (this.spec.components?.securitySchemes) {
-            for (const [key, scheme] of Object.entries(
+            for (const [key, schemeOrRef] of Object.entries(
                 this.spec.components.securitySchemes
             )) {
-                if ('$ref' in scheme) continue // Skip refs for now, or resolve them if possible
-                const s = scheme as any
-                this.schemes[key] = {
-                    type: s.type,
-                    name: s.name,
-                    in: s.in,
-                    scheme: s.scheme,
-                    description: s.description,
+                // G-11: dereference securitySchemes $refs before processing.
+                let source: any = schemeOrRef
+                if ('$ref' in schemeOrRef && schemeOrRef.$ref) {
+                    const prefix = '#/components/securitySchemes/'
+                    const ref = schemeOrRef.$ref as string
+                    if (!ref.startsWith(prefix)) {
+                        throw new AuthSchemeError(
+                            `Unresolvable security scheme $ref "${ref}"`,
+                            key,
+                            'Point the $ref at an existing component under #/components/securitySchemes/'
+                        )
+                    }
+                    const name = ref.slice(prefix.length).split('/')[0] ?? ''
+                    const resolved = (
+                        this.spec.components.securitySchemes as Record<
+                            string,
+                            any
+                        >
+                    )[name]
+                    if (!resolved || '$ref' in resolved) {
+                        throw new AuthSchemeError(
+                            `Unresolvable security scheme $ref "${ref}"`,
+                            key,
+                            'Point the $ref at an existing component under #/components/securitySchemes/'
+                        )
+                    }
+                    source = resolved
                 }
+
+                const scheme: SecurityScheme = {
+                    type: source.type,
+                    name: source.name,
+                    in: source.in,
+                    scheme: source.scheme,
+                    description: source.description,
+                }
+
+                // G-12: unmatched type/scheme combinations must fail loudly
+                // when the document actually requires them; unreferenced
+                // declarations are excluded from the client surface instead
+                // of emitting dead no-op middleware.
+                const reason = this.unsupportedReason(scheme)
+                if (reason) {
+                    if (referenced.has(key)) {
+                        throw new AuthSchemeError(
+                            `Security scheme "${key}": ${reason}`,
+                            key,
+                            'Implement the scheme manually or use a supported type (apiKey, http bearer/basic, oauth2)'
+                        )
+                    }
+                    continue
+                }
+
+                this.schemes[key] = scheme
             }
         }
 
@@ -114,17 +226,17 @@ export class AuthGenerator {
                 lines.push(`            if (value) {`)
                 if (scheme.in === 'header') {
                     lines.push(
-                        `                req.headers.set('${scheme.name}', value)`
+                        `                req.headers.set(${quoteString(String(scheme.name))}, value)`
                     )
                 } else if (scheme.in === 'query') {
                     lines.push(`                const url = new URL(req.url)`)
                     lines.push(
-                        `                url.searchParams.append('${scheme.name}', value)`
+                        `                url.searchParams.append(${quoteString(String(scheme.name))}, value)`
                     )
                     lines.push(`                req = new Request(url, req)`)
                 } else if (scheme.in === 'cookie') {
                     lines.push(
-                        `                req.headers.append('Cookie', \`\${'${scheme.name}'}=\${value}\`)`
+                        `                req.headers.append('Cookie', \`\${${quoteString(String(scheme.name))}}=\${value}\`)`
                     )
                 }
                 lines.push(`            }`)
