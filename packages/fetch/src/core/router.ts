@@ -73,6 +73,41 @@ class Router<
         return typeof value === 'object' && value !== null
     }
 
+    private static readonly commonOptionTable = {
+        cache: 'def_default_cache',
+        credentials: 'def_default_credentials',
+        integrity: 'def_default_integrity',
+        keepalive: 'def_default_keepalive',
+        mode: 'def_default_mode',
+        priority: 'def_default_priority',
+        redirect: 'def_default_redirect',
+        referrer: 'def_default_referrer',
+        referrerPolicy: 'def_default_referrer_policy',
+        window: 'def_default_window',
+    } as const satisfies Record<
+        Exclude<keyof FetchCommonConfiguration, 'baseUrl' | 'middleware'>,
+        string
+    >
+
+    private static applyCommonOptions(
+        builder: DefaultFetchBuilderShape,
+        commonConfig: FetchCommonConfiguration
+    ): void {
+        for (const [key, methodName] of Object.entries(
+            Router.commonOptionTable
+        )) {
+            const value =
+                commonConfig[key as keyof typeof Router.commonOptionTable]
+            if (!value) continue
+            ;(builder as unknown as Record<string, (v: unknown) => void>)[
+                methodName
+            ]!(value)
+        }
+        if (commonConfig.middleware) {
+            builder.def_middleware(commonConfig.middleware)
+        }
+    }
+
     private buildRouterStructure<T extends Record<string, unknown>>(
         structure: BuilderStructure,
         commonConfig: FetchCommonConfiguration,
@@ -95,42 +130,7 @@ class Router<
                     .def_url(Router.getUrlPath(baseUrl))
                     .def_method(key)
 
-                // 2. Set common config
-                if (commonConfig.cache) {
-                    newBuilder.def_default_cache(commonConfig.cache)
-                }
-                if (commonConfig.credentials) {
-                    newBuilder.def_default_credentials(commonConfig.credentials)
-                }
-                if (commonConfig.integrity) {
-                    newBuilder.def_default_integrity(commonConfig.integrity)
-                }
-                if (commonConfig.keepalive) {
-                    newBuilder.def_default_keepalive(commonConfig.keepalive)
-                }
-                if (commonConfig.mode) {
-                    newBuilder.def_default_mode(commonConfig.mode)
-                }
-                if (commonConfig.priority) {
-                    newBuilder.def_default_priority(commonConfig.priority)
-                }
-                if (commonConfig.redirect) {
-                    newBuilder.def_default_redirect(commonConfig.redirect)
-                }
-                if (commonConfig.referrer) {
-                    newBuilder.def_default_referrer(commonConfig.referrer)
-                }
-                if (commonConfig.referrerPolicy) {
-                    newBuilder.def_default_referrer_policy(
-                        commonConfig.referrerPolicy
-                    )
-                }
-                if (commonConfig.window) {
-                    newBuilder.def_default_window(commonConfig.window)
-                }
-                if (commonConfig.middleware) {
-                    newBuilder.def_middleware(commonConfig.middleware)
-                }
+                Router.applyCommonOptions(newBuilder, commonConfig)
 
                 // 3. Build
                 result[key] = newBuilder.build()
