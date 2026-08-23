@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 import { f } from '..'
+import { FetchPathParamsError } from '../core/error'
 import { FetchBuilder } from '../core/fetcher'
 import { FetchUnit } from '../core/fetcher/unit'
 
@@ -78,5 +79,23 @@ describe('FetchBuilder', () => {
         await fetchUnit.query()
         expect(mockFetch).toHaveBeenCalledOnce()
         mockFetch.mockRestore()
+    })
+
+    it('should preserve numeric zero path params', () => {
+        const b = f.builder()
+        const url = b.buildPathParams('https://api.com/books/$id', {
+            id: 0,
+        })
+        expect(url).toBe('https://api.com/books/0')
+    })
+
+    it('should reject missing or empty path params', () => {
+        const b = f.builder()
+        expect(() =>
+            b.buildPathParams('https://api.com/books/$id', {})
+        ).toThrow(FetchPathParamsError)
+        expect(() =>
+            b.buildPathParams('https://api.com/books/$id', { id: '' })
+        ).toThrow(FetchPathParamsError)
     })
 })

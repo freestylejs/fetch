@@ -83,17 +83,24 @@ export class FetchUnit<
     > {
         const copyUnit = this.copy()
 
-        options.cache && copyUnit.set_cache(options.cache)
-        options.credentials && copyUnit.set_credentials(options.credentials)
-        options.integrity && copyUnit.set_integrity(options.integrity)
-        options.keepalive && copyUnit.set_keepalive(options.keepalive)
-        options.mode && copyUnit.set_mode(options.mode)
-        options.priority && copyUnit.set_priority(options.priority)
-        options.redirect && copyUnit.set_redirect(options.redirect)
-        options.referrer && copyUnit.set_referrer(options.referrer)
-        options.referrerPolicy &&
-            copyUnit.set_referrer_policy(options.referrerPolicy)
-        options.window && copyUnit.set_window(options.window)
+        if (options.cache !== undefined) copyUnit.$store.cache = options.cache
+        if (options.credentials !== undefined)
+            copyUnit.$store.credentials = options.credentials
+        if (options.integrity !== undefined)
+            copyUnit.$store.integrity = options.integrity
+        if (options.keepalive !== undefined)
+            copyUnit.$store.keepalive = options.keepalive
+        if (options.mode !== undefined) copyUnit.$store.mode = options.mode
+        if (options.priority !== undefined)
+            copyUnit.$store.priority = options.priority
+        if (options.redirect !== undefined)
+            copyUnit.$store.redirect = options.redirect
+        if (options.referrer !== undefined)
+            copyUnit.$store.referrer = options.referrer
+        if (options.referrerPolicy !== undefined)
+            copyUnit.$store.referrerPolicy = options.referrerPolicy
+        if (options.window !== undefined)
+            copyUnit.$store.window = options.window
 
         return copyUnit
     }
@@ -276,9 +283,21 @@ export class FetchUnit<
         }
 
         try {
-            const serializedJson: string = JSON.stringify(targetBody)
+            const serializedJson = JSON.stringify(targetBody) as
+                | string
+                | undefined
+
+            if (serializedJson === undefined)
+                throw new SyntaxError(
+                    `Json serialization failed. Please check your body, ${targetBody}`,
+                    {
+                        cause: [targetBody],
+                    }
+                )
+
             return serializedJson
         } catch (e) {
+            if (e instanceof SyntaxError) throw e
             throw new SyntaxError(
                 `Json serialization failed. Please check your body, ${targetBody}`,
                 {
@@ -361,12 +380,12 @@ export class FetchUnit<
             ? $Response | undefined
             : $Response
     > {
-        const request: Request = this.createRequest(queryOptions)
-
         const fetcher = (req: Request) => fetch(req)
 
         let response: Response
         try {
+            const request: Request = this.createRequest(queryOptions)
+
             response = await this.$builder.middleware.execute(request, fetcher)
             if (!response.ok) throw new FetchResponseError(response)
 
@@ -393,9 +412,13 @@ export class FetchUnit<
 
             if (!this.$builder.isSafeMode) throw error
         } finally {
-            if (queryOptions) {
-                this.$builder.finallyProcedure.executor(queryOptions)
-            }
+            this.$builder.finallyProcedure.executor(
+                queryOptions as FetchQueryOptions<
+                    $PathParams,
+                    $SearchParams,
+                    $Body
+                >
+            )
         }
 
         return undefined as $ModeOptions['isSafeMode'] extends true

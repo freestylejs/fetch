@@ -564,7 +564,8 @@ describe('FetchUnit', () => {
     })
 
     it(label.case('should HANDLE unknown error & handled once'), async () => {
-        let errorHandled = false
+        let onceHandledCount = 0
+        let loggerHandledCount = 0
 
         const fetchUnit = f
             .builder()
@@ -573,19 +574,31 @@ describe('FetchUnit', () => {
             .def_default_referrer('about:client')
             .def_url('https://unknown.com')
             .def_json()
+            .def_response(() => {
+                throw new Error('Unknown processing failure')
+            })
             .def_unknown_err_handler(() => {
                 // ERROR_HANDLED should be called only once
-                errorHandled = true
+                onceHandledCount += 1
             }, true)
             .def_unknown_err_handler(() => {
                 // LOGGER should be called every time
-                // eslint-disable-next-line no-console
-                console.log('ERROR_HANDLED', errorHandled)
+                loggerHandledCount += 1
             })
             .build()
 
-        await fetchUnit.query()
-        expect(errorHandled).toBe(false)
+        await expect(fetchUnit.query()).rejects.toThrowError(
+            'Unknown processing failure'
+        )
+        expect(onceHandledCount).toBe(1)
+        expect(loggerHandledCount).toBe(1)
+
+        await expect(fetchUnit.query()).rejects.toThrowError(
+            'Unknown processing failure'
+        )
+        // once procedure must NOT run again
+        expect(onceHandledCount).toBe(1)
+        expect(loggerHandledCount).toBe(2)
     })
 
     it(label.case('should ABORT request with timeout'), async () => {
@@ -628,12 +641,156 @@ describe('FetchUnit', () => {
         label.case(
             'should HANDLE path param error on invalid dynamic path param structure'
         ),
-        () => {
-            try {
-                f.builder().def_url(`${BASE_URL}/books/_$id`).build()
-            } catch (e) {
-                expect(e).toBeInstanceOf(FetchPathParamsError)
-            }
+        async () => {
+            const fetchUnit = f
+                .builder()
+                .def_method('GET')
+                .def_url(`${BASE_URL}/books/_$id`)
+                .build()
+
+            await expect(
+                //@ts-ignore: standalone builder has no typed path params
+                fetchUnit.query({ path: { id: 'x' } })
+            ).rejects.toBeInstanceOf(FetchPathParamsError)
+        }
+    )
+
+    it(label.case('should KEEP numeric zero path param'), async () => {
+        const fetchUnit = f
+            .builder()
+            .def_method('GET')
+            .def_url(`${BASE_URL}/books/$id`)
+            .def_json()
+            .def_response(async ({ json }) => json())
+            .build()
+
+        //@ts-ignore: standalone builder has no typed path params
+        const apiResponse = await fetchUnit.query({ path: { id: 0 } })
+
+        expect(apiResponse).toStrictEqual({
+            data: {
+                name: null,
+                price: null,
+                id: '0',
+            },
+            status: 'success',
+        })
+    })
+
+    it(
+        label.case(
+            'should REJECT missing path param & EXECUTE finally without query options'
+        ),
+        async () => {
+            let finallyCalls = 0
+
+            const fetchUnit = f
+                .builder()
+                .def_method('GET')
+                .def_url(`${BASE_URL}/books/$id`)
+                .def_final_handler(() => {
+                    finallyCalls += 1
+                })
+                .build()
+
+            await expect(fetchUnit.query()).rejects.toBeInstanceOf(
+                FetchPathParamsError
+            )
+            expect(finallyCalls).toBe(1)
+        }
+    )
+
+    it(
+        label.case(
+            'should ISOLATE once handlers between units built from the same builder'
+        ),
+        async () => {
+            let finallyCalls = 0
+
+            const baseBuilder = f
+                .builder()
+                .def_method('GET')
+                .def_url(`${BASE_URL}/books`)
+                .def_final_handler(() => {
+                    finallyCalls += 1
+                }, true)
+
+            const unitA = baseBuilder.build()
+            const unitB = baseBuilder.build()
+
+            await expect(unitA.query()).rejects.toBeInstanceOf(
+                FetchResponseError
+            )
+            expect(finallyCalls).toBe(1)
+
+            await expect(unitB.query()).rejects.toBeInstanceOf(
+                FetchResponseError
+            )
+            expect(finallyCalls).toBe(2)
+        }
+    )
+
+    it(
+        label.case(
+            'should ROUTE createRequest stage errors through unknown error & finally procedures'
+        ),
+        async () => {
+            let unknownHandled = false
+            let finallyCalled = false
+            let capturedError: unknown
+
+            const fetchUnit = f
+                .builder()
+                .def_query_mode('throw')
+                .def_method('POST')
+                .def_url(`${BASE_URL}/books`)
+                .def_body((body: unknown) => body)
+                .def_unknown_err_handler(({ error }) => {
+                    capturedError = error
+                    unknownHandled = true
+                })
+                .def_final_handler(() => {
+                    finallyCalled = true
+                })
+                .build()
+
+            const circularBody: Record<string, unknown> = {}
+            circularBody.self = circularBody
+
+            await expect(
+                //@ts-ignore: standalone builder has no typed body
+                fetchUnit.query({ body: circularBody })
+            ).rejects.toBeInstanceOf(SyntaxError)
+            expect(unknownHandled).toBe(true)
+            expect(capturedError).toBeInstanceOf(SyntaxError)
+            expect(finallyCalled).toBe(true)
+        }
+    )
+
+    it(label.case('should SET falsy option values via set_options'), () => {
+        const fetchUnit = f.builder().def_default_keepalive(true).build()
+        const updated = fetchUnit.set_options({ keepalive: false })
+
+        expect(updated).not.toBe(fetchUnit)
+        expect(updated.$store.keepalive).toBe(false)
+        expect(fetchUnit.$store.keepalive).toBe(true)
+    })
+
+    it(
+        label.case('should REJECT when body serialization yields undefined'),
+        async () => {
+            const fetchUnit = f
+                .builder()
+                .def_query_mode('throw')
+                .def_method('POST')
+                .def_url(`${BASE_URL}/books`)
+                .def_body((body: unknown) => body)
+                .build()
+
+            await expect(
+                //@ts-ignore: standalone builder has no typed body
+                fetchUnit.query({ body: () => 'unserializable' })
+            ).rejects.toBeInstanceOf(SyntaxError)
         }
     )
 })

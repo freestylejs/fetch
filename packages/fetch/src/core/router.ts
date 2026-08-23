@@ -66,46 +66,65 @@ class Router<
     }
 
     private static getUrlPath(baseUrl = '', subPath?: string): string {
-        if (!subPath) return baseUrl
-        return baseUrl ? `${baseUrl}/${subPath}` : subPath
+        const normalizedBaseUrl = baseUrl.replace(/\/+$/, '')
+        if (!subPath) return normalizedBaseUrl
+        return normalizedBaseUrl ? `${normalizedBaseUrl}/${subPath}` : subPath
     }
     private static isRecord(value: unknown): value is Record<string, unknown> {
         return typeof value === 'object' && value !== null
     }
 
-    private static readonly commonOptionTable = {
-        cache: 'def_default_cache',
-        credentials: 'def_default_credentials',
-        integrity: 'def_default_integrity',
-        keepalive: 'def_default_keepalive',
-        mode: 'def_default_mode',
-        priority: 'def_default_priority',
-        redirect: 'def_default_redirect',
-        referrer: 'def_default_referrer',
-        referrerPolicy: 'def_default_referrer_policy',
-        window: 'def_default_window',
-    } as const satisfies Record<
-        Exclude<keyof FetchCommonConfiguration, 'baseUrl' | 'middleware'>,
-        string
-    >
-
     private static applyCommonOptions(
         builder: DefaultFetchBuilderShape,
         commonConfig: FetchCommonConfiguration
-    ): void {
-        for (const [key, methodName] of Object.entries(
-            Router.commonOptionTable
-        )) {
-            const value =
-                commonConfig[key as keyof typeof Router.commonOptionTable]
-            if (!value) continue
-            ;(builder as unknown as Record<string, (v: unknown) => void>)[
-                methodName
-            ]!(value)
-        }
-        if (commonConfig.middleware) {
-            builder.def_middleware(commonConfig.middleware)
-        }
+    ): DefaultFetchBuilderShape {
+        const appliers: Array<
+            (b: DefaultFetchBuilderShape) => DefaultFetchBuilderShape
+        > = [
+            (b) =>
+                commonConfig.cache
+                    ? b.def_default_cache(commonConfig.cache)
+                    : b,
+            (b) =>
+                commonConfig.credentials
+                    ? b.def_default_credentials(commonConfig.credentials)
+                    : b,
+            (b) =>
+                commonConfig.integrity
+                    ? b.def_default_integrity(commonConfig.integrity)
+                    : b,
+            (b) =>
+                commonConfig.keepalive
+                    ? b.def_default_keepalive(commonConfig.keepalive)
+                    : b,
+            (b) =>
+                commonConfig.mode ? b.def_default_mode(commonConfig.mode) : b,
+            (b) =>
+                commonConfig.priority
+                    ? b.def_default_priority(commonConfig.priority)
+                    : b,
+            (b) =>
+                commonConfig.redirect
+                    ? b.def_default_redirect(commonConfig.redirect)
+                    : b,
+            (b) =>
+                commonConfig.referrer
+                    ? b.def_default_referrer(commonConfig.referrer)
+                    : b,
+            (b) =>
+                commonConfig.referrerPolicy
+                    ? b.def_default_referrer_policy(commonConfig.referrerPolicy)
+                    : b,
+            (b) =>
+                commonConfig.window
+                    ? b.def_default_window(commonConfig.window)
+                    : b,
+            (b) =>
+                commonConfig.middleware
+                    ? b.def_middleware(commonConfig.middleware)
+                    : b,
+        ]
+        return appliers.reduce((acc, apply) => apply(acc), builder)
     }
 
     private buildRouterStructure<T extends Record<string, unknown>>(
@@ -126,11 +145,11 @@ class Router<
 
             if (Router.isFetchMethod(key) && Router.isFetchBuilder(value)) {
                 // 1. URL / Method
-                const newBuilder = value
-                    .def_url(Router.getUrlPath(baseUrl))
-                    .def_method(key)
-
-                Router.applyCommonOptions(newBuilder, commonConfig)
+                // 2. Common configuration
+                const newBuilder = Router.applyCommonOptions(
+                    value.def_url(Router.getUrlPath(baseUrl)).def_method(key),
+                    commonConfig
+                )
 
                 // 3. Build
                 result[key] = newBuilder.build()
@@ -196,6 +215,11 @@ export type IsDynamicPath<Path extends string> = Path extends `$${string}`
 export type GetDynamicPath<Path extends string> =
     Path extends `$${infer DynamicPath}` ? DynamicPath : never
 
+type JoinRouterUrl<
+    BaseUrl extends string,
+    Suffix extends string,
+> = BaseUrl extends `${infer B}/` ? `${B}/${Suffix}` : `${BaseUrl}/${Suffix}`
+
 type BuildRouterUrlFromStructure<
     RouterBuilderStructure,
     BaseUrl extends string = '',
@@ -229,12 +253,12 @@ type BuildRouterUrlFromStructure<
           ? IsDynamicPath<Key> extends true
               ? BuildRouterUrlFromStructure<
                     RouterBuilderStructure[Key],
-                    `${BaseUrl}/${string}`,
+                    JoinRouterUrl<BaseUrl, string>,
                     readonly [...PathParamsList, GetDynamicPath<Key>]
                 >
               : BuildRouterUrlFromStructure<
                     RouterBuilderStructure[Key],
-                    `${BaseUrl}/${Key}`,
+                    JoinRouterUrl<BaseUrl, Key>,
                     PathParamsList
                 >
           : never

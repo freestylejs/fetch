@@ -44,6 +44,10 @@ export class FetchOptionStore {
     public copy(): FetchOptionStore {
         const newStore = new FetchOptionStore()
         Object.assign(newStore, this)
+        if (this._headers !== null) {
+            newStore._headers = { ...this._headers } as FetchHeader
+        }
+        newStore.defaultHeaders = { ...this.defaultHeaders } as FetchHeader
         return newStore
     }
 

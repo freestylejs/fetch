@@ -125,7 +125,7 @@ export class FetchBuilder<
             $Response,
             $ModeOptions,
             $BaseUrl
-        >(this.$store, this)
+        >(this._store.copy(), this._clone())
     }
 
     public static new<
@@ -692,7 +692,7 @@ export class FetchBuilder<
     }
 
     public buildPathParams(baseUrl: string, pathParams?: $PathParams): string {
-        if (!pathParams) return baseUrl
+        if (!baseUrl.includes('$')) return baseUrl
 
         try {
             const baseUrlObject: URL = new URL(baseUrl)
@@ -714,11 +714,15 @@ export class FetchBuilder<
                         )?.[paramKey]
 
                         if (
-                            !dynamicParam ||
-                            (typeof dynamicParam !== 'number' &&
-                                typeof dynamicParam !== 'string')
+                            typeof dynamicParam !== 'number' &&
+                            !(
+                                typeof dynamicParam === 'string' &&
+                                dynamicParam.length > 0
+                            )
                         )
-                            return paramList
+                            throw new SyntaxError(
+                                `Missing or invalid value for path param "$${paramKey}" in ${baseUrl}`
+                            )
 
                         paramList.push(String(dynamicParam))
                         return paramList
