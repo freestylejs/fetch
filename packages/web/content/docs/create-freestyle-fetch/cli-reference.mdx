@@ -58,36 +58,59 @@ npx create-freestyle-fetch generate \
 
 ## Output Files
 
-The `generate` command creates four files in the output directory:
+The `generate` command creates the following files in the output directory:
 
-### A. `models.ts`
+### A. `types.ts`
 
-Contains **Zod schemas** for all components defined in your OpenAPI specification:
+Contains pure TypeScript type aliases for all components defined in your OpenAPI specification — no runtime code:
 
 ```typescript
+export type UserModel = {
+  id: string
+  name: string
+  email: string
+}
+```
+
+### B. `schemas.js` / `schemas.d.ts`
+
+`schemas.js` contains the runtime validators (`parse<Name>` functions) backed by Zod.
+`schemas.d.ts` is its declaration pairing so TypeScript programs resolve only the
+parser signatures:
+
+```typescript
+// schemas.js
 import { z } from 'zod'
 
-export const User = z.object({
+const User = z.object({
   id: z.string(),
   name: z.string(),
   email: z.email()
 })
 
-export type UserModel = z.infer<typeof User>
+export const parseUser = (value) => User.parse(value)
 ```
 
-### B. `api.ts`
+```typescript
+// schemas.d.ts
+import type { UserModel } from './types';
 
-Contains the **type-safe router factory** with all API endpoints:
+export declare const parseUser: (value: unknown) => UserModel;
+```
+
+### C. `api.ts`
+
+Contains the **type-safe client factory** with all API endpoints:
 
 ```typescript
 import { f } from '@freestylejs/fetch'
-import { z } from 'zod'
-import * as Model from './models'
+import * as Schemas from './schemas'
 import { createAuthMiddleware, AuthConfig } from './auth'
 
 export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {}) => {
-    // ... middleware setup
+    const authMw = config.auth ? createAuthMiddleware(config.auth) : undefined
+    const middleware = authMw ? authMw : []
+
     return f.router({
         baseUrl: config.baseUrl || 'https://api.example.com',
         middleware
@@ -96,14 +119,14 @@ export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {
             $userId: {
                 GET: f.builder()
                     .def_json()
-                    .def_response(async ({ json }) => Model.User.parse(await json()))
+                    .def_response(async ({ json }) => Schemas.parseUser(await json()))
             }
         }
     })
 }
 ```
 
-### C. `auth.ts`
+### D. `auth.ts`
 
 Contains authentication configuration types and middleware factory:
 
@@ -121,13 +144,14 @@ export const createAuthMiddleware = (config: AuthConfig) => {
 }
 ```
 
-### D. `index.ts`
+### E. `index.ts`
 
 Re-exports all generated code for convenience:
 
 ```typescript
 export * from './api'
-export * from './models'
+export * from './types'
+export * from './schemas'
 export * from './auth'
 ```
 

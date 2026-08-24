@@ -16,8 +16,8 @@ The `create-freestyle-fetch` creates [**Zod schemas**](https://zod.dev/) for all
 All responses are automatically validated before being returned:
 
 ```typescript
-const user = await api.users.$userId.GET({
-  params: { userId: '123' }
+const user = await client.users.$userId.GET.query({
+  path: { userId: '123' }
 })
 
 // If the response doesn't match the User schema, Zod throws an error
@@ -27,7 +27,7 @@ const user = await api.users.$userId.GET({
 The validation happens in the `.def_response()` method:
 
 ```typescript
-.def_response(async ({ json }) => Model.User.parse(await json()))
+.def_response(async ({ json }) => Schemas.parseUser(await json()))
 ```
 
 ### B. Request Body Validation
@@ -37,13 +37,13 @@ Request bodies are validated using the `.def_body()` method:
 ```typescript
 POST: f.builder()
   .def_json()
-  .def_body(Model.CreateUser.parse)
+  .def_body(Schemas.parseCreateUser)
 ```
 
 When you make a request, the body is validated:
 
 ```typescript
-await api.users.POST({
+await client.users.POST.query({
   body: {
     username: 'john',
     email: 'invalid-email' // ❌ Zod error: Invalid email
@@ -67,8 +67,8 @@ GET: f.builder()
 Invalid query parameters throw errors:
 
 ```typescript
-await api.users.GET({
-  query: {
+await client.users.GET.query({
+  search: {
     page: 1,
     limit: 200 // ❌ Zod error: Number must be less than or equal to 100
   }
@@ -85,8 +85,8 @@ When validation fails, Zod throws a `ZodError`:
 import { ZodError } from 'zod'
 
 try {
-  const user = await api.users.$userId.GET({
-    params: { userId: '123' }
+  const user = await client.users.$userId.GET.query({
+    path: { userId: '123' }
   })
 } catch (error) {
   if (error instanceof ZodError) {
@@ -98,22 +98,42 @@ try {
 
 ### B. Custom Error Handling
 
-Use the fetch library's error handlers for more control:
+Use the fetch builder's error handlers for more control. Define them on the generated
+client by extending a builder before `.build()`, or handle errors at the call site with
+`try/catch`:
 
 ```typescript
-const user = await api.users.$userId.GET({
-  params: { userId: '123' }
-}).fetch({
-  onError: (error) => {
-    if (error instanceof ZodError) {
-      // Handle validation errors
-      console.error('Data validation failed:', error.flatten())
-    } else {
-      // Handle other errors
-      console.error('Request failed:', error)
-    }
+import { f } from '@freestylejs/fetch'
+import { ZodError } from 'zod'
+
+try {
+  const user = await client.users.$userId.GET.query({
+    path: { userId: '123' }
+  })
+} catch (error) {
+  if (error instanceof ZodError) {
+    // Handle validation errors
+    console.error('Data validation failed:', error.flatten())
+  } else {
+    // Handle other errors
+    console.error('Request failed:', error)
   }
-})
+}
+```
+
+For reusable handling, compose your own unit from the library's builder primitives:
+
+```typescript
+const safeGetUser = f.builder()
+  .def_url('https://api.example.com/users/$userId')
+  .def_json()
+  .def_response(async ({ json }) => Schemas.parseUser(await json()))
+  .def_unknown_err_handler(({ error }) => {
+    console.error('Network failure:', error)
+  })
+  .build()
+
+await safeGetUser.query({ path: { userId: '123' } })
 ```
 
 ## Schema Constraints
@@ -258,25 +278,32 @@ BaseEntity.and(Timestamped)
 
 ### A. Schema Caching
 
-Zod schemas are created once and reused for all requests:
+Validators are generated once and reused for all requests. Each `parse<Name>` function
+closes over a single schema instance:
 
 ```typescript
-// The schema is defined once
-export const User = z.object({
+// Generated once in schemas.js
+const User = z.object({
   id: z.string(),
   name: z.string()
 })
 
-// And reused for every request
-Model.User.parse(data) // No schema recreation
+export const parseUser = (value) => User.parse(value)
+// parseUser reuses the same schema on every call — no recreation
 ```
 
-### B. Lazy Validation
+### B. Non-throwing Validation
 
-Consider using `.safeParse()` for non-critical validations:
+Generated parsers throw on invalid data. If you need non-throwing checks, run your own
+schema with `.safeParse()`:
 
 ```typescript
-const result = Model.User.safeParse(data)
+import { z } from 'zod'
+
+const result = z.object({
+  id: z.string(),
+  name: z.string()
+}).safeParse(data)
 
 if (result.success) {
   const user = result.data

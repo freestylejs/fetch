@@ -5,71 +5,122 @@ description: Understanding the structure and usage of generated API clients.
 
 ## Overview
 
-The OpenAPI Generator creates three TypeScript files that work together to provide a complete, type-safe API client.
+The OpenAPI Generator splits the client across separate surfaces: pure TypeScript
+types, Zod-backed runtime validators, and the router/auth bindings that connect them.
+This separation keeps type checking fast while preserving full runtime validation.
 
 ## File Structure
 
-### A. models.ts
+### A. types.ts
 
-Contains all Zod schemas derived from your OpenAPI components:
+Contains pure TypeScript type aliases derived from your OpenAPI components — no runtime
+code, no imports:
 
-- **Schemas** - Converted from `components.schemas` definitions
-- **Type exports** - TypeScript types inferred from **Zod** schemas
-- **Validation** - Runtime validation using **Zod**
-
-Example generated model:
+- **Type exports** - One `<Name>Model` alias per component schema
+- **No validation** - Types only; validators live behind the schemas surface
 
 ```typescript
+export type UserModel = {
+  id: string
+  username: string
+  email: string
+  createdAt: string
+}
+```
+
+### B. schemas.js / schemas.d.ts
+
+`schemas.js` contains the runtime validators built from your OpenAPI components:
+
+- **Parsers** - An exported `parse<Name>` function per schema and operation validator
+- **Zod-backed** - Each parser validates data at runtime before returning it typed
+
+`schemas.d.ts` is its declaration pairing, so TypeScript programs see only the parser
+signatures and the types they return.
+
+```typescript
+// schemas.js — plain JavaScript, not part of type checking
 import { z } from 'zod'
 
-export const User = z.object({
+const User = z.object({
   id: z.string(),
   username: z.string(),
   email: z.email(),
   createdAt: z.iso.datetime()
 })
 
-export type UserModel = z.infer<typeof User>
+export const parseUser = (value) => User.parse(value)
 ```
-
-### B. api.ts
-
-Contains the hierarchical router mapping all API endpoints:
-
-- **Base URL** - Extracted from `servers[0].url` in the specification
-- **Nested routes** - Path segments become nested objects
-- **HTTP methods** - Each method is a pre-configured builder
-- **Type inference** - Full TypeScript support for all operations
-
-Example generated API:
 
 ```typescript
-import { f } from '@freestylejs/fetch'
-import { z } from 'zod'
-import * as Model from './models'
+// schemas.d.ts — what consumers' compilers resolve
+import type { UserModel } from './types'
 
-export const api = f.router('https://api.example.com', {
-  users: {
-    $userId: {
-      GET: f.builder()
-        .def_json()
-        .def_response(async ({ json }) => Model.User.parse(await json())),
-      
-      posts: {
-        GET: f.builder()
-          .def_json()
-          .def_searchparams(z.object({
-            page: z.number().optional(),
-            limit: z.number().optional()
-          }).parse)
-          .def_response(async ({ json }) => z.array(Model.Post).parse(await json()))
-      }
-    }
-  }
-})
+export declare const parseUser: (value: unknown) => UserModel;
 ```
 
-### C. auth.ts
+### C. domains/`<segment>`.ts + api.ts
+
+For every top-level path segment the generator emits one **plain structure
+module** under `domains/`. Each module exports an uncompiled object literal —
+`f.builder()` chains bound to `Schemas.*` parsers, nothing else:
+
+```typescript
+// domains/users.ts (generated)
+import { f } from '@freestylejs/fetch'
+import * as Schemas from '../schemas'
+
+export const usersDomain = {
+    users: {
+        $userId: {
+            GET: f.builder()
+                .def_json()
+                .def_response(async ({ json }) => Schemas.parseUser(await json()))
+        }
+    }
+}
+```
+
+`api.ts` stays the single entry point and composes the domain structures via
+spread. Spreading is pure structural composition, so your editor resolves
+exactly the same client type as a single inline tree:
+
+```typescript
+// api.ts (generated)
+import { f } from '@freestylejs/fetch'
+import { usersDomain } from './domains/users'
+import { billingDomain } from './domains/billing'
+import { createAuthMiddleware, AuthConfig } from './auth'
+
+export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {}) => {
+    const authMw = config.auth ? createAuthMiddleware(config.auth) : undefined
+    const middleware = authMw ? authMw : []
+
+    return f.router({
+        baseUrl: config.baseUrl || 'https://api.example.com',
+        middleware
+    }, {
+        ...usersDomain,
+        ...billingDomain
+    })
+}
+```
+
+- **Base URL** - Extracted from `servers[0].url` in the specification (server variables resolved)
+- **One domain per top-level segment** - Large specs split into navigable files; single-segment specs emit one domain module
+- **Type inference** - Full TypeScript support for all operations
+
+Inline schemas (query parameters, inline request/response bodies) are automatically
+promoted into named parsers on the schemas surface — generated router files never
+contain raw Zod expressions.
+
+:::tip
+The exported domain structures are plain objects, so you can recompose them with
+`f.compose(config, ...structures)` to build custom clients from parts of a
+generated API.
+:::
+
+### D. auth.ts
 
 Contains type-safe authentication configuration and middleware factory:
 
@@ -100,13 +151,14 @@ export const createAuthMiddleware = (config: AuthConfig) => {
 }
 ```
 
-### D. index.ts
+### E. index.ts
 
 Re-exports all generated code:
 
 ```typescript
 export * from './api'
-export * from './models'
+export * from './types'
+export * from './schemas'
 export * from './auth'
 ```
 
@@ -135,7 +187,7 @@ const client = createClient({
 })
 
 // Use the authenticated client
-const user = await client.users.me.GET()
+const user = await client.users.me.GET.query()
 ```
 
 ### B. Path Parameters
@@ -146,21 +198,21 @@ Dynamic path segments use the `$paramName` syntax:
 // OpenAPI: /users/{userId}
 // Generated: client.users.$userId
 
-const user = await client.users.$userId.GET({
-  params: { userId: '123' }
+const user = await client.users.$userId.GET.query({
+  path: { userId: '123' }
 })
 ```
 
 ### C. Query Parameters
 
-Query parameters are validated with Zod schemas:
+Query parameters are validated by promoted parsers on the schemas surface:
 
 ```typescript
 // OpenAPI: /users?page=1&limit=10
 // Generated with searchparams
 
-const users = await client.users.GET({
-  query: {
+const users = await client.users.GET.query({
+  search: {
     page: 1,
     limit: 10
   }
@@ -169,13 +221,13 @@ const users = await client.users.GET({
 
 ### D. Request Bodies
 
-Request bodies are validated against Zod schemas:
+Request bodies are validated against the generated parsers:
 
 ```typescript
 // OpenAPI: POST /users with body
 // Generated with def_body
 
-const newUser = await client.users.POST({
+const newUser = await client.users.POST.query({
   body: {
     username: 'john',
     email: 'john@example.com'
@@ -188,9 +240,9 @@ const newUser = await client.users.POST({
 Responses are automatically validated:
 
 ```typescript
-// Response is validated with zod at runtime
-const user = await client.users.$userId.GET({
-  params: { userId: '123' }
+// Response is validated at runtime before being returned
+const user = await client.users.$userId.GET.query({
+  path: { userId: '123' }
 })
 
 // TypeScript knows the exact shape
@@ -205,22 +257,28 @@ The generated client provides complete type inference:
 ### A. Request Types
 
 ```typescript
-// TypeScript infers the shape of params, query, and body
-client.users.$userId.GET({
-  params: { userId: '123' },  // Type: { userId: string }
-  query: { include: 'posts' } // Type: { include?: string }
+// TypeScript infers the shape of path params, search params, and body
+client.users.$userId.GET.query({
+  path: { userId: '123' },   // Type: { userId: string }
+  search: { include: 'posts' } // Type: { include?: string }
 })
 ```
 
 ### B. Response Types
 
 ```typescript
-// Response type is inferred from the Zod schema
-const user = await client.users.$userId.GET({
-  params: { userId: '123' }
+// Response type flows from the schemas surface declarations
+const user = await client.users.$userId.GET.query({
+  path: { userId: '123' }
 })
 
 // user: UserModel
+```
+
+You can also reference model types directly:
+
+```typescript
+import type { UserModel } from './types'
 ```
 
 ## Schema Conversion
@@ -255,6 +313,9 @@ The generator converts OpenAPI names to PascalCase:
 Special characters like `$` are preserved:
 
 - `$special` → `$Special`
+
+Collisions after normalization receive numeric suffixes (`User_1`). Generated exports
+follow fixed patterns: `<Name>Model` for types, `parse<Name>` for validators.
 
 ## Related
  

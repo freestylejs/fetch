@@ -21,14 +21,14 @@ This repository is structured as follows:
 ```
 packages
 ├── fetch
-├── openapi-generator
+├── create_freestyle_fetch
 └── web
 ```
 
 | Path | Description |
 | --- | --- |
 | `packages/fetch` | The core fetcher library. |
-| `packages/openapi-generator` | OpenAPI generator for the fetcher. |
+| `packages/create_freestyle_fetch` | CLI that generates type-safe API clients for the fetcher from OpenAPI specifications. |
 | `packages/web` | The `Next.js` application for the documentation website. |
 
 ## Development

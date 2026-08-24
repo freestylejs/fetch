@@ -70,8 +70,8 @@ const client = createClient({
 })
 
 // Fully typed request and response
-const user = await client.users.$userId.GET({
-  params: { userId: '123' }
+const user = await client.users.$userId.GET.query({
+  path: { userId: '123' }
 })
 
 // TypeScript knows the shape of `user`

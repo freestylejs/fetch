@@ -130,6 +130,27 @@ async function loadUser(id: string): Promise<ApiClient['users']['$userId']['GET'
 }
 ```
 
+### Composing Routers (`f.compose`)
+
+Multiple router structures can be merged into a single client with `f.compose`.
+It accepts the same first argument as `f.router` (a base URL or a common
+configuration) followed by any number of structures:
+
+```typescript
+import { f } from '@freestylejs/fetch';
+
+const api = f.compose(
+    { baseUrl: 'https://api.example.com' },
+    usersRoutes,   // { users: { ... } }
+    billingRoutes  // { billing: { ... } }
+);
+```
+
+Merging follows the `Object.assign` convention: it is a shallow copy where a
+top-level key defined by a **later structure replaces** the earlier one
+entirely. Compose structures with disjoint top-level segments so runtime
+behavior and static typing stay aligned.
+
 ### Best Practices
 
 1.  **Shared Configuration**: Create a "base builder" with common headers, middleware, and error handling, then reuse it for all routes.

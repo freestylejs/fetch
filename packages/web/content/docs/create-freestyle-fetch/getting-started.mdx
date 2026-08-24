@@ -37,9 +37,10 @@ npx create-freestyle-fetch generate \
   --output ./src/generated
 ```
 
-This command generates three files in the output directory:
+This command generates the following files in the output directory:
 
-- **`models.ts`** - **Zod** schemas for all data types
+- **`types.ts`** - Pure TypeScript type aliases for all data types
+- **`schemas.js`** / **`schemas.d.ts`** - Runtime validators (`parse<Name>` functions) with their declaration pairing
 - **`api.ts`** - Type-safe router with all API endpoints
 - **`auth.ts`** - Authentication configuration and middleware
 - **`index.ts`** - Re-exports for convenient imports
@@ -48,39 +49,39 @@ This command generates three files in the output directory:
  
  Import and use the generated API client in your application. The generated code exports a `createClient` function that you can use to initialize the client with your base URL and authentication.
  
- ```typescript
- import { createClient } from './generated'
- 
- // Initialize the client
- const client = createClient({
-   baseUrl: 'https://api.example.com',
-   auth: {
-     bearerAuth: { token: 'my-token' }
-   }
- })
- 
- // GET request with path parameters
- const user = await client.users.$userId.GET({
-   params: { userId: '123' }
- })
- 
- // POST request with request body
- const newPost = await client.posts.POST({
-   body: {
-     title: 'Hello World',
-     content: 'This is my first post'
-   }
- })
- 
- // GET request with query parameters
- const posts = await client.posts.GET({
-   query: {
-     page: 1,
-     limit: 10,
-     sort: 'created_at'
-   }
- })
- ```
+  ```typescript
+  import { createClient } from './generated'
+
+  // Initialize the client
+  const client = createClient({
+    baseUrl: 'https://api.example.com',
+    auth: {
+      bearerAuth: { token: 'my-token' }
+    }
+  })
+
+  // GET request with path parameters
+  const user = await client.users.$userId.GET.query({
+    path: { userId: '123' }
+  })
+
+  // POST request with request body
+  const newPost = await client.posts.POST.query({
+    body: {
+      title: 'Hello World',
+      content: 'This is my first post'
+    }
+  })
+
+  // GET request with query parameters
+  const posts = await client.posts.GET.query({
+    search: {
+      page: 1,
+      limit: 10,
+      sort: 'created_at'
+    }
+  })
+  ```
 
 ## Project Structure
 
@@ -90,10 +91,12 @@ After generation, your project will have:
 your-project/
 ├── src/
 │   ├── generated/
-│   │   ├── models.ts      # Zod schemas
-│   │   ├── api.ts         # API router
-│   │   ├── auth.ts        # Auth middleware
-│   │   └── index.ts       # Exports
+│   │   ├── types.ts        # Pure TypeScript type aliases
+│   │   ├── schemas.js      # Runtime validators (Zod-backed parsers)
+│   │   ├── schemas.d.ts    # Declarations for the validators
+│   │   ├── api.ts          # API router
+│   │   ├── auth.ts         # Auth middleware
+│   │   └── index.ts        # Exports
 │   └── your-code.ts       # Your application
 └── openapi.yaml           # API specification
 ```

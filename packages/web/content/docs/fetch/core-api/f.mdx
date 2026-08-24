@@ -15,4 +15,5 @@ import { f } from '@freestylejs/fetch';
 | :--- | :--- | :--- |
 | [`f.builder`](/en/docs/fetch/core-api/builder) | `() => FetchBuilder` | **Factory**. Creates a new [FetchBuilder](/en/docs/fetch/core-api/builder) instance. Start here to define a new request. |
 | [`f.router`](/en/docs/fetch/core-api/router) | `Function` | **Utility**. Creates a structured [Router](/en/docs/fetch/core-api/router) client. |
+| `f.compose` | `Function` | **Utility**. Composes multiple router structures into one router — equivalent to `f.router(config, Object.assign({}, ...structures))`; later structures override earlier top-level keys. |
 | [`f.middleware`](/en/docs/fetch/core-api/middleware) | `() => Middleware` | **Factory**. Creates a new [Middleware](/en/docs/fetch/core-api/middleware) manager instance. |
