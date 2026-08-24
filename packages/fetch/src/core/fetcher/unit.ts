@@ -32,11 +32,11 @@ const FETCH_OPTION_ALLOWED_VALUES = {
  * @description Fetch unit
  */
 export class FetchUnit<
-    $Method extends FetchMethodString,
-    $PathParams extends FetchPathParamsShape = unknown,
-    $SearchParams extends FetchSearchParamsShape = unknown,
-    $Body = unknown,
-    $Response = unknown,
+    out $Method extends FetchMethodString,
+    in out $PathParams extends FetchPathParamsShape = unknown,
+    in out $SearchParams extends FetchSearchParamsShape = unknown,
+    in out $Body = unknown,
+    out $Response = unknown,
     $ModeOptions extends FetchModeOptionsShape = DefaultFetchModeOptions,
     const $BaseUrl extends string = '',
 > {

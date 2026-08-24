@@ -26,11 +26,11 @@ import { FetchUnit } from './unit'
  * Fetch builder, returns FetchUnit when `build`
  */
 export class FetchBuilder<
-    $Method extends FetchMethodString,
-    $PathParams extends FetchPathParamsShape = unknown,
-    $SearchParams extends FetchSearchParamsShape = unknown,
-    $Body = unknown,
-    $Response = unknown,
+    out $Method extends FetchMethodString,
+    in out $PathParams extends FetchPathParamsShape = unknown,
+    in out $SearchParams extends FetchSearchParamsShape = unknown,
+    in out $Body = unknown,
+    out $Response = unknown,
     $ModeOptions extends FetchModeOptionsShape = DefaultFetchModeOptions,
     const $BaseUrl extends string = '',
 > {
