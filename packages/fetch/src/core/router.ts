@@ -209,6 +209,85 @@ export function router<
     return baseRouter
 }
 
+type ComposeStructureList = readonly BuilderStructure[]
+
+/**
+ * Static counterpart of the runtime `Object.assign({}, ...structures)` merge:
+ * later structures contribute their properties on top of earlier ones.
+ * Overlapping keys intersect at the type level, mirroring TypeScript's own
+ * spread semantics — the documented runtime contract is that the LAST
+ * structure wins outright for any top-level key it defines.
+ */
+type MergeComposeStructures<Structures extends ComposeStructureList> =
+    Structures extends readonly [infer Head, ...infer Tail]
+        ? Head &
+              MergeComposeStructures<
+                  Tail extends ComposeStructureList ? Tail : []
+              >
+        : unknown
+
+/**
+ * Compose multiple router structures into one router
+ *
+ * Equivalent to `f.router(baseUrl, Object.assign({}, ...structures))`.
+ * Merging follows the `Object.assign` convention: shallow copy, and a
+ * top-level key defined by a later structure replaces the one from an
+ * earlier structure entirely (no deep merge). Prefer composing structures
+ * with disjoint top-level segments so static typing (which intersects
+ * overlapping keys) and runtime behavior stay aligned.
+ * @param baseUrl Base url.
+ * @param structures Router structures to compose. Later structures override earlier ones.
+ */
+export function compose<
+    const RouterBaseUrl extends string,
+    const Structures extends ComposeStructureList,
+>(
+    baseUrl: RouterBaseUrl,
+    ...structures: Structures
+): BuildRouterUrlFromStructure<
+    MergeComposeStructures<Structures>,
+    RouterBaseUrl
+>
+/**
+ * Compose multiple router structures into one router
+ *
+ * Equivalent to `f.router(config, Object.assign({}, ...structures))`.
+ * Merging follows the `Object.assign` convention: shallow copy, and a
+ * top-level key defined by a later structure replaces the one from an
+ * earlier structure entirely (no deep merge). Prefer composing structures
+ * with disjoint top-level segments so static typing (which intersects
+ * overlapping keys) and runtime behavior stay aligned.
+ * @param config Common configuration.
+ * @param structures Router structures to compose. Later structures override earlier ones.
+ */
+export function compose<
+    const CommonConfig extends FetchCommonConfiguration,
+    const Structures extends ComposeStructureList,
+>(
+    config: CommonConfig,
+    ...structures: Structures
+): BuildRouterUrlFromStructure<
+    MergeComposeStructures<Structures>,
+    CommonConfig['baseUrl']
+>
+export function compose<
+    const ConfigOrBaseUrl extends string | FetchCommonConfiguration,
+    const Structures extends ComposeStructureList,
+>(configOrBaseUrl: ConfigOrBaseUrl, ...structures: Structures) {
+    let mergedStructure: Record<string, unknown> = {}
+    for (const structure of structures) {
+        mergedStructure = Object.assign(mergedStructure, structure)
+    }
+
+    if (typeof configOrBaseUrl === 'string') {
+        return new Router(mergedStructure as BuilderStructure, {
+            baseUrl: configOrBaseUrl,
+        }).routerStructure
+    }
+    return new Router(mergedStructure as BuilderStructure, configOrBaseUrl)
+        .routerStructure
+}
+
 export type IsDynamicPath<Path extends string> = Path extends `$${string}`
     ? true
     : false

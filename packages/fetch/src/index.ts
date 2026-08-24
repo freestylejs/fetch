@@ -4,7 +4,7 @@ import {
     FetchSearchParamsError,
 } from './core/error'
 import { builder, type FetchBuilder, type FetchUnitShape } from './core/fetcher'
-import { type GetRouterConfig, router } from './core/router'
+import { compose, type GetRouterConfig, router } from './core/router'
 import { type Middleware, middleware } from './utils/middleware'
 
 /**
@@ -13,10 +13,12 @@ import { type Middleware, middleware } from './utils/middleware'
 export const f: {
     builder: typeof builder
     router: typeof router
+    compose: typeof compose
     middleware: () => Middleware
 } = {
     builder,
     router,
+    compose,
     middleware,
 }
 
