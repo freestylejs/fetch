@@ -1,0 +1,98 @@
+import { z } from 'zod';
+
+const User = z.object({
+'id': z.uuid(),
+'username': z.string().regex(/^[a-zA-Z0-9_-]{3,16}$/),
+'email': z.email(),
+'profile': z.object({
+'fullName': z.string().optional(),
+'joinDate': z.iso.datetime().optional()
+}).optional(),
+'legacyId': z.number().int().optional()
+});
+
+export const parseUser = (value) => User.parse(value);
+
+const ProductInput = z.object({
+'name': z.string(),
+'description': z.string().optional(),
+'price': z.number().min(0)
+});
+
+export const parseProductInput = (value) => ProductInput.parse(value);
+
+const Product = ProductInput.and(z.object({
+'id': z.uuid().optional(),
+'imageUrl': z.url().optional(),
+'stock': z.number().int().optional()
+}));
+
+export const parseProduct = (value) => Product.parse(value);
+
+const PaginatedResponse = z.object({
+'page': z.number().int().optional(),
+'pageSize': z.number().int().optional(),
+'total': z.number().int().optional(),
+'items': z.array(z.any()).optional()
+});
+
+export const parsePaginatedResponse = (value) => PaginatedResponse.parse(value);
+
+const PaginatedProductResponse = PaginatedResponse;
+
+export const parsePaginatedProductResponse = (value) => PaginatedProductResponse.parse(value);
+
+const CreditCard = z.object({
+'methodType': z.enum(['card']),
+'cardNumber': z.string(),
+'expiry': z.string().optional(),
+'cvv': z.string().optional()
+});
+
+export const parseCreditCard = (value) => CreditCard.parse(value);
+
+const PayPal = z.object({
+'methodType': z.enum(['paypal_account']),
+'email': z.email()
+});
+
+export const parsePayPal = (value) => PayPal.parse(value);
+
+const PaymentMethod = z.discriminatedUnion('methodType', [CreditCard, PayPal]);
+
+export const parsePaymentMethod = (value) => PaymentMethod.parse(value);
+
+const CallbackPayload = z.object({
+'orderId': z.uuid().optional(),
+'status': z.enum(['PROCESSED', 'FAILED']).optional(),
+'detail': z.string().optional()
+});
+
+export const parseCallbackPayload = (value) => CallbackPayload.parse(value);
+
+const InventoryUpdatePayload = z.object({
+'productId': z.uuid().optional(),
+'newStockLevel': z.number().int().optional(),
+'timestamp': z.iso.datetime().optional()
+});
+
+export const parseInventoryUpdatePayload = (value) => InventoryUpdatePayload.parse(value);
+
+const ApiError = z.object({
+'errorCode': z.string().optional(),
+'message': z.string().optional()
+});
+
+export const parseApiError = (value) => ApiError.parse(value);
+
+export const parseSearchProductsSearchParams = (value) => z.object({
+'searchQuery': z.string().optional(),
+'tags': z.array(z.string()).optional(),
+'page': z.number().int().min(1).optional()
+}).parse(value);
+
+export const parseCreateProductBody = (value) => z.instanceof(FormData).parse(value);
+
+export const parseProcessOrderBody = (value) => z.object({
+'notificationUrl': z.url()
+}).parse(value);

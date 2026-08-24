@@ -1,0 +1,15 @@
+import type { ProductModel, ElectronicsProductModel, ClothingProductModel, OrderModel, ErrorModel, ListProductsSearchParamsModel, ListProductsResponseModel } from './types';
+
+export declare const parseProduct: (value: unknown) => ProductModel;
+
+export declare const parseElectronicsProduct: (value: unknown) => ElectronicsProductModel;
+
+export declare const parseClothingProduct: (value: unknown) => ClothingProductModel;
+
+export declare const parseOrder: (value: unknown) => OrderModel;
+
+export declare const parseError: (value: unknown) => ErrorModel;
+
+export declare const parseListProductsSearchParams: (value: unknown) => ListProductsSearchParamsModel;
+
+export declare const parseListProductsResponse: (value: unknown) => ListProductsResponseModel;

@@ -2,8 +2,9 @@
 
 /**
  * Script to regenerate test snapshots from OpenAPI specs.
- * Iterates through all JSON files in src/__tests__/__mocks__/openapi/
- * and generates code into src/__tests__/__mocks__/.gen/{filename}/
+ * Iterates through all spec files in src/__tests__/__mocks__/.openapi/
+ * and generates the split-surface client (api.ts, types.ts, schemas.js,
+ * schemas.d.ts, auth.ts, index.ts) into src/__tests__/__mocks__/.gen/{filename}/
  */
 
 import { execSync } from 'child_process'

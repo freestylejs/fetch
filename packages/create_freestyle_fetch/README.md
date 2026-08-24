@@ -35,7 +35,9 @@ const client = createClient({
 });
 
 // Use the client
-const response = await client.users.get({ search: { page: 1 } });
+const response = await client.users.$userId.GET.query({
+    path: { userId: '123' }
+});
 ```
 
 ## Common Errors

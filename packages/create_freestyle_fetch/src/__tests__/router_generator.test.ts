@@ -1,7 +1,8 @@
 import type { OpenAPIV3_1 } from 'openapi-types'
 import { describe, expect, it } from 'vitest'
 import { parsePaths } from '../path_parser'
-import { generateRouter } from '../router_generator'
+import { generateRouterSurfaces } from '../router_generator'
+import { SchemaGenerator } from '../schema_generator'
 
 describe('Router Generator Comprehensive Tests', () => {
     const baseSpec: OpenAPIV3_1.Document = {
@@ -22,7 +23,36 @@ describe('Router Generator Comprehensive Tests', () => {
         },
     }
 
-    it('should generate query parameters correctly', () => {
+    // All emitted TypeScript surfaces (api.ts + domains/*.ts) joined, so
+    // structural assertions keep covering the whole generated client.
+    const generateCode = (
+        parsedPaths: Record<string, any>,
+        spec: OpenAPIV3_1.Document,
+        generator?: SchemaGenerator
+    ) => {
+        const surfaces = generateRouterSurfaces(
+            parsedPaths,
+            spec,
+            generator ?? new SchemaGenerator(spec)
+        )
+        return [
+            surfaces.apiFileContent,
+            ...surfaces.domainFiles.map((domain) => domain.content),
+        ].join('\n')
+    }
+
+    const generate = (spec: OpenAPIV3_1.Document) => {
+        const generator = new SchemaGenerator(spec)
+        const code = generateCode(parsePaths(spec), spec, generator)
+        return {
+            code,
+            schemasJs: generator.emitSchemasJs(),
+            types: generator.emitTypes(),
+            decl: generator.emitSchemasDecl(),
+        }
+    }
+
+    it('should bind promoted searchparams parsers', () => {
         const spec: OpenAPIV3_1.Document = {
             ...baseSpec,
             paths: {
@@ -46,12 +76,19 @@ describe('Router Generator Comprehensive Tests', () => {
                 },
             },
         }
-        const parsedPaths = parsePaths(spec)
-        const code = generateRouter(parsedPaths, spec)
+        const { code, schemasJs, decl } = generate(spec)
 
         expect(code).toContain(
-            ".def_searchparams(z.object({ 'page': z.number().optional(), 'sort': z.string() }).parse)"
+            '.def_searchparams(Schemas.parseUsersGetSearchParams)'
         )
+        expect(schemasJs).toContain(
+            `export const parseUsersGetSearchParams = (value) => z.object({\n'page': z.number().optional(),\n'sort': z.string()\n}).parse(value);`
+        )
+        expect(decl).toContain(
+            'export declare const parseUsersGetSearchParams: (value: unknown) => UsersGetSearchParamsModel;'
+        )
+        // no inline zod expressions may leak into api.ts
+        expect(code).not.toContain('z.')
     })
 
     it('should generate request body with JSON ref correctly', () => {
@@ -74,10 +111,9 @@ describe('Router Generator Comprehensive Tests', () => {
                 },
             },
         }
-        const parsedPaths = parsePaths(spec)
-        const code = generateRouter(parsedPaths, spec)
+        const { code } = generate(spec)
 
-        expect(code).toContain('.def_body(Model.User.parse)')
+        expect(code).toContain('.def_body(Schemas.parseUser)')
     })
 
     it('should generate request body with FormData correctly', () => {
@@ -98,10 +134,15 @@ describe('Router Generator Comprehensive Tests', () => {
                 },
             },
         }
-        const parsedPaths = parsePaths(spec)
-        const code = generateRouter(parsedPaths, spec)
+        const { code, schemasJs, decl } = generate(spec)
 
-        expect(code).toContain('.def_body(z.instanceof(FormData).parse)')
+        expect(code).toContain('.def_body(Schemas.parseUploadPostBody)')
+        expect(schemasJs).toContain(
+            'export const parseUploadPostBody = (value) => z.instanceof(FormData).parse(value);'
+        )
+        expect(decl).toContain(
+            'export declare const parseUploadPostBody: (value: unknown) => FormData;'
+        )
     })
 
     it('should generate response with JSON ref correctly', () => {
@@ -126,15 +167,14 @@ describe('Router Generator Comprehensive Tests', () => {
                 },
             },
         }
-        const parsedPaths = parsePaths(spec)
-        const code = generateRouter(parsedPaths, spec)
+        const { code } = generate(spec)
 
         expect(code).toContain(
-            '.def_response(async ({ json }) => Model.User.parse(await json()))'
+            '.def_response(async ({ json }) => Schemas.parseUser(await json()))'
         )
     })
 
-    it('should generate response with Array of refs correctly', () => {
+    it('should promote array-of-ref responses into named parsers', () => {
         const spec: OpenAPIV3_1.Document = {
             ...baseSpec,
             paths: {
@@ -159,11 +199,19 @@ describe('Router Generator Comprehensive Tests', () => {
                 },
             },
         }
-        const parsedPaths = parsePaths(spec)
-        const code = generateRouter(parsedPaths, spec)
+        const { code, schemasJs, types, decl } = generate(spec)
 
         expect(code).toContain(
-            '.def_response(async ({ json }) => z.array(Model.User).parse(await json()))'
+            '.def_response(async ({ json }) => Schemas.parseUsersGetResponse(await json()))'
+        )
+        expect(schemasJs).toContain(
+            'export const parseUsersGetResponse = (value) => z.array(User).parse(value);'
+        )
+        expect(types).toContain(
+            'export type UsersGetResponseModel = UserModel[];'
+        )
+        expect(decl).toContain(
+            'export declare const parseUsersGetResponse: (value: unknown) => UsersGetResponseModel;'
         )
     })
 
@@ -177,7 +225,7 @@ describe('Router Generator Comprehensive Tests', () => {
             },
         }
         const parsedPaths = parsePaths(spec)
-        const code = generateRouter(parsedPaths, spec)
+        const code = generateCode(parsedPaths, spec)
 
         // Check structure nesting
         expect(code).toContain("'users': {")
@@ -214,17 +262,21 @@ describe('Router Generator Comprehensive Tests', () => {
                 },
             },
         }
-        const parsedPaths = parsePaths(spec)
-        const code = generateRouter(parsedPaths, spec)
+        const { code, schemasJs } = generate(spec)
 
         // GET should have common param
-        expect(code).toContain("'common': z.string().optional()")
-
-        expect(code).toMatch(
-            /def_searchparams\(z\.object\(\{.*'common': z\.string\(\)\.optional\(\).*\}\)\.parse\)/
+        expect(schemasJs).toContain(`'common': z.string().optional()`)
+        expect(schemasJs).toMatch(
+            /parseUsersGetSearchParams[\s\S]*?'common': z\.string\(\)\.optional\(\)/
         )
-        expect(code).toMatch(
-            /def_searchparams\(z\.object\(\{.*'specific': z\.number\(\)\.optional\(\).*\}\)\.parse\)/
+        expect(schemasJs).toMatch(
+            /parseUsersPostSearchParams[\s\S]*?'specific': z\.number\(\)\.optional\(\)/
+        )
+        expect(code).toContain(
+            '.def_searchparams(Schemas.parseUsersGetSearchParams)'
+        )
+        expect(code).toContain(
+            '.def_searchparams(Schemas.parseUsersPostSearchParams)'
         )
     })
 
@@ -234,7 +286,7 @@ describe('Router Generator Comprehensive Tests', () => {
             paths: {},
         }
         const parsedPaths = parsePaths(spec)
-        const code = generateRouter(parsedPaths, spec)
+        const code = generateCode(parsedPaths, spec)
 
         expect(code).toContain(
             'export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {}) => {'
@@ -242,7 +294,9 @@ describe('Router Generator Comprehensive Tests', () => {
         expect(code).toContain('return f.router({')
         expect(code).toContain("baseUrl: config.baseUrl || '',")
         expect(code).toContain('middleware')
-        expect(code).toContain('}, {\n\n});')
+        // empty spec: no domain modules, empty literal structure
+        expect(code).not.toContain('./domains/')
+        expect(code).toContain('}, {});')
     })
 
     it('should ignore metadata keys in path objects', () => {
@@ -257,7 +311,7 @@ describe('Router Generator Comprehensive Tests', () => {
             },
         }
         const parsedPaths = parsePaths(spec)
-        const code = generateRouter(parsedPaths, spec)
+        const code = generateCode(parsedPaths, spec)
 
         // Should not contain them as keys in the object
         expect(code).not.toMatch(/'summary':/)
@@ -285,7 +339,7 @@ describe('Router Generator Comprehensive Tests', () => {
             },
         }
         const parsedPaths = parsePaths(spec)
-        const code = generateRouter(parsedPaths, spec)
+        const code = generateCode(parsedPaths, spec)
 
         expect(code).toContain('/**')
         expect(code).toContain('* Get Users')
@@ -308,7 +362,7 @@ describe('Router Generator Comprehensive Tests', () => {
             },
         }
         const parsedPaths = parsePaths(spec)
-        const code = generateRouter(parsedPaths, spec)
+        const code = generateCode(parsedPaths, spec)
 
         expect(code).toContain("'me': {")
         expect(code).toContain("'$userId': {")
@@ -339,7 +393,7 @@ describe('Router Generator Comprehensive Tests', () => {
             },
         }
         const parsedPaths = parsePaths(spec)
-        const code = generateRouter(parsedPaths, spec)
+        const code = generateCode(parsedPaths, spec)
 
         expect(code).not.toContain('.def_searchparams')
     })
@@ -364,7 +418,7 @@ describe('Router Generator Comprehensive Tests', () => {
         }
         const parsedPaths = parsePaths(spec)
 
-        expect(() => generateRouter(parsedPaths, spec)).toThrow(
+        expect(() => generateCode(parsedPaths, spec)).toThrow(
             /Missing schema for query parameter "page"/
         )
     })

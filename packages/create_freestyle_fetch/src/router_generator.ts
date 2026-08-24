@@ -1,8 +1,13 @@
 import type { OpenAPIV3_1 } from 'openapi-types'
 import { OperationValidationError } from './errors'
-import type { OutputContext } from './schema_generator'
+import type { InlineParserKind, InlineParserWrapper } from './schema_generator'
 import { SchemaGenerator } from './schema_generator'
-import { createJSDocComment, quoteString } from './utils'
+import {
+    createJSDocComment,
+    quoteString,
+    toPascalCase,
+    toSafeIdentifier,
+} from './utils'
 
 function isReferenceObject(obj: any): obj is OpenAPIV3_1.ReferenceObject {
     return obj && '$ref' in obj
@@ -67,8 +72,29 @@ function requireModelExportName(
             'Point the $ref at a named component schema, e.g. #/components/schemas/User'
         )
     }
-    // Resolve through the collision map so api.ts references match models.ts exports.
+    // Resolve through the collision map so api.ts references match types.ts exports.
     return schemaGenerator.getExportedName(rawName)
+}
+
+/**
+ * Split-Surface: derives the deterministic operation base name used to name
+ * promoted inline parsers. Prefers operationId, falling back to a
+ * path+method derivation so specs without operationIds remain deterministic.
+ */
+function deriveOperationBase(
+    operation: OpenAPIV3_1.OperationObject,
+    method: string,
+    path: string
+): string {
+    if (operation.operationId) {
+        return toSafeIdentifier(toPascalCase(operation.operationId))
+    }
+    const segments = path
+        .split('/')
+        .filter(Boolean)
+        .map((segment) => segment.replace(/[{}]/g, ''))
+        .join('_')
+    return toSafeIdentifier(`${toPascalCase(segments)}${toPascalCase(method)}`)
 }
 
 function generateBuilder(
@@ -77,28 +103,31 @@ function generateBuilder(
     schemaGenerator: SchemaGenerator,
     method: string,
     path: string,
-    spec: OpenAPIV3_1.Document,
-    features: Set<RouterFeature>
+    spec: OpenAPIV3_1.Document
 ): string {
     let builder = 'f.builder().def_json()'
 
-    const outputContext: OutputContext = 'api'
+    const opBase = deriveOperationBase(operation, method, path)
 
     /**
-     * G-4: generates a Zod expression for an inline (non-$ref) schema in the
-     * api.ts context. Any generator failure is surfaced as an explicit
-     * OperationValidationError instead of silently dropping the schema.
+     * Promotes an inline validator into the schemas surface and returns the
+     * parser export name for api.ts binding. Generator failures surface as
+     * explicit OperationValidationError instead of silent drops (EB-G1).
      */
-    const inlineZodExpression = (
-        schema: OpenAPIV3_1.SchemaObject,
-        hint: string
+    const registerParser = (
+        kind: InlineParserKind,
+        schema: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
+        wrapper: InlineParserWrapper = 'none',
+        hintSuffix: string = kind
     ): string => {
         try {
-            return schemaGenerator.generateZodSchema(
+            return schemaGenerator.registerInlineParser({
+                kind,
+                opBase,
                 schema,
-                hint,
-                outputContext
-            )
+                wrapper,
+                hint: `${opBase} ${hintSuffix}`,
+            })
         } catch (error) {
             throw new OperationValidationError(
                 `Failed to generate inline schema expression: ${
@@ -131,29 +160,28 @@ function generateBuilder(
         (p) => !isReferenceObject(p) && p.in === 'query'
     ) as OpenAPIV3_1.ParameterObject[]
     if (queryParameters.length > 0) {
-        const queryParamsString = queryParameters
-            .map((param) => {
-                if (!param.schema) {
-                    throw new OperationValidationError(
-                        `Missing schema for query parameter "${param.name}"`,
-                        operation.operationId,
-                        method,
-                        path,
-                        'Define a schema for the query parameter'
-                    )
-                }
-                const zodType = schemaGenerator.generateZodSchema(
-                    param.schema as OpenAPIV3_1.SchemaObject,
-                    param.name,
-                    outputContext
+        const properties: Record<string, any> = {}
+        const required: string[] = []
+        for (const param of queryParameters) {
+            if (!param.schema) {
+                throw new OperationValidationError(
+                    `Missing schema for query parameter "${param.name}"`,
+                    operation.operationId,
+                    method,
+                    path,
+                    'Define a schema for the query parameter'
                 )
-                const finalType = param.required
-                    ? zodType
-                    : `${zodType}.optional()`
-                return `${quoteString(param.name)}: ${finalType}`
-            })
-            .join(', ')
-        builder += `.def_searchparams(z.object({ ${queryParamsString} }).parse)`
+            }
+            properties[param.name] = param.schema
+            if (param.required) required.push(param.name)
+        }
+        const parserName = registerParser(
+            'searchParams',
+            { type: 'object', properties, required },
+            'none',
+            'search params'
+        )
+        builder += `.def_searchparams(Schemas.${parserName})`
     }
 
     if (operation.requestBody) {
@@ -204,15 +232,12 @@ function generateBuilder(
                     method,
                     path
                 )
-                builder += `.def_body(Model.${modelName}.parse)`
+                builder += `.def_body(Schemas.parse${modelName})`
             } else {
-                // EB-G1: inline JSON bodies are reflected via an inline Zod
-                // expression instead of being dropped.
-                const expr = inlineZodExpression(
-                    jsonContent.schema,
-                    operation.operationId || `${method} ${path} body`
-                )
-                builder += `.def_body((body) => ${expr}.parse(body))`
+                // EB-G1: inline JSON bodies are promoted behind the schemas
+                // surface instead of being dropped.
+                const parserName = registerParser('body', jsonContent.schema)
+                builder += `.def_body(Schemas.${parserName})`
             }
         } else if (urlencodedContent) {
             // G-2: form-urlencoded bodies become URLSearchParams payloads.
@@ -225,22 +250,19 @@ function generateBuilder(
                     'Define a schema for the application/x-www-form-urlencoded media type'
                 )
             }
-            const baseExpr = isReferenceObject(urlencodedContent.schema)
-                ? `Model.${requireModelExportName(
-                      urlencodedContent.schema.$ref,
-                      schemaGenerator,
-                      operation,
-                      method,
-                      path
-                  )}`
-                : inlineZodExpression(
-                      urlencodedContent.schema,
-                      operation.operationId || `${method} ${path} body`
-                  )
-            features.add('urlencodedHelper')
-            builder += `.def_body((body) => new URLSearchParams(${baseExpr}.transform(toUrlSearchParams).parse(body)))`
+            const parserName = registerParser(
+                'body',
+                urlencodedContent.schema,
+                'urlSearchParams'
+            )
+            builder += `.def_body(Schemas.${parserName})`
         } else if (formContent) {
-            builder += `.def_body(z.instanceof(FormData).parse)`
+            const parserName = registerParser(
+                'body',
+                formContent.schema ?? { type: 'object' },
+                'formData'
+            )
+            builder += `.def_body(Schemas.${parserName})`
         } else if (
             requestBody.content &&
             Object.keys(requestBody.content).length > 0
@@ -294,50 +316,16 @@ function generateBuilder(
                     method,
                     path
                 )
-                builder += `.def_response(async ({ json }) => Model.${modelName}.parse(await json()))`
-            } else if (
-                schema.type === 'array' &&
-                schema.items &&
-                isReferenceObject(schema.items)
-            ) {
-                const modelName = requireModelExportName(
-                    schema.items.$ref,
-                    schemaGenerator,
-                    operation,
-                    method,
-                    path
-                )
-                builder += `.def_response(async ({ json }) => z.array(Model.${modelName}).parse(await json()))`
+                builder += `.def_response(async ({ json }) => Schemas.parse${modelName}(await json()))`
             } else {
-                // G-4: inline response schemas become explicit Zod parse
-                // expressions rather than being silently skipped.
-                const expr = inlineZodExpression(
-                    schema,
-                    operation.operationId || `${method} ${path} response`
-                )
-                builder += `.def_response(async ({ json }) => ${expr}.parse(await json()))`
+                // G-4: inline response schemas (including arrays of refs)
+                // are promoted behind the schemas surface.
+                const parserName = registerParser('response', schema)
+                builder += `.def_response(async ({ json }) => Schemas.${parserName}(await json()))`
             }
         }
     }
     return builder
-}
-
-/**
- * Optional runtime helpers that are emitted into api.ts only when at least
- * one operation needs them.
- */
-type RouterFeature = 'urlencodedHelper'
-
-const ROUTER_FEATURE_HELPERS: Record<RouterFeature, string> = {
-    // G-2: URLSearchParams only accepts string records, so parsed form values
-    // (numbers, booleans, nested objects) are stringified before encoding.
-    urlencodedHelper: `const toUrlSearchParams = (value: Record<string, unknown>): Record<string, string> =>
-	Object.fromEntries(
-		Object.entries(value).map(([key, entry]) => [
-			key,
-			typeof entry === 'string' ? entry : JSON.stringify(entry),
-		])
-	)`,
 }
 
 /**
@@ -355,10 +343,75 @@ export function resolveServerBaseUrl(spec: OpenAPIV3_1.Document): string {
     })
 }
 
-export function generateRouter(
+/** One emitted per-top-level-segment plain structure module. */
+export interface GeneratedDomainFile {
+    /** Output-relative posix path, e.g. `domains/v1.ts`. */
+    fileName: string
+    /** Exported structure const name, e.g. `v1Domain`. */
+    exportName: string
+    content: string
+}
+
+export interface RouterGenerationResult {
+    /** Content of the single entry point `api.ts`. */
+    apiFileContent: string
+    /** Plain structure modules under `domains/`, in deterministic spec order. */
+    domainFiles: GeneratedDomainFile[]
+}
+
+/**
+ * Deterministic file/export naming for domain modules with collision
+ * suffixes (`_N`) in spec order, mirroring the schema surface conventions.
+ */
+class DomainNameRegistry {
+    private readonly usedFileNames = new Set<string>()
+    private readonly usedExportNames = new Set<string>()
+
+    public register(rawSegment: string): {
+        fileName: string
+        exportName: string
+    } {
+        const fileBase =
+            toSafeIdentifier(
+                rawSegment.replace(/^\$/, '').replace(/[^A-Za-z0-9_-]/g, '_') ||
+                    '_'
+            ) || '_'
+        let fileName = `${fileBase}.ts`
+        let suffix = 1
+        while (this.usedFileNames.has(fileName)) {
+            suffix += 1
+            fileName = `${fileBase}_${suffix}.ts`
+        }
+        this.usedFileNames.add(fileName)
+
+        const pascalName = toPascalCase(rawSegment.replace(/^\$/, ''))
+        const camelDomain = `${pascalName.charAt(0).toLowerCase()}${pascalName.slice(1)}Domain`
+        const exportBase = toSafeIdentifier(camelDomain) || '_Domain'
+        let exportName = exportBase
+        let exportSuffix = 1
+        while (this.usedExportNames.has(exportName)) {
+            exportSuffix += 1
+            exportName = `${exportBase}_${exportSuffix}`
+        }
+        this.usedExportNames.add(exportName)
+
+        return { fileName: `domains/${fileName}`, exportName }
+    }
+}
+
+/**
+ * Emits the router surfaces: one plain-structure module per top-level path
+ * segment plus the `api.ts` entry point that composes them via spread.
+ *
+ * The interpreted client type is byte-identical to an inline literal:
+ * spreading object literals is pure structural composition, so
+ * `BuildRouterUrlFromStructure` sees the exact same shape.
+ */
+export function generateRouterSurfaces(
     parsedPaths: Record<string, any>,
-    spec: OpenAPIV3_1.Document
-): string {
+    spec: OpenAPIV3_1.Document,
+    schemaGenerator: SchemaGenerator = new SchemaGenerator(spec)
+): RouterGenerationResult {
     const httpMethods = new Set([
         'get',
         'put',
@@ -376,9 +429,6 @@ export function generateRouter(
         'servers',
         '$ref',
     ])
-
-    const schemaGenerator = new SchemaGenerator(spec)
-    const features = new Set<RouterFeature>()
 
     function buildRouterObject(
         pathNode: Record<string, any>,
@@ -404,8 +454,7 @@ export function generateRouter(
                         schemaGenerator,
                         key,
                         currentPath,
-                        spec,
-                        features
+                        spec
                     )}`
                 )
             } else if (
@@ -426,16 +475,64 @@ export function generateRouter(
         return parts.join(',\n')
     }
 
-    const routerObject = `{\n${buildRouterObject(parsedPaths)}\n}`
+    const registry = new DomainNameRegistry()
+    const domainFiles: GeneratedDomainFile[] = []
+    const spreadExpressions: string[] = []
+
+    for (const segment of Object.keys(parsedPaths)) {
+        const { fileName, exportName } = registry.register(segment)
+        const segmentNode = parsedPaths[segment]
+        // Segment-level JSDoc matches what the inline emitter produced.
+        const segmentJsDoc = createJSDocComment(
+            segmentNode.summary,
+            segmentNode.description
+        )
+        // The exported structure keeps its own top-level segment key, so the
+        // spread composition in api.ts reproduces the exact inline shape.
+        const structureBody = `${segmentJsDoc}${quoteString(segment)}: {\n${buildRouterObject(
+            segmentNode,
+            segment
+        )}\n}`
+        domainFiles.push({
+            fileName,
+            exportName,
+            content: `import { f } from '@freestylejs/fetch';
+import * as Schemas from '../schemas';
+
+/**
+ * Plain router structure for the '${segment.replace(/\*\//g, '* /')}' domain.
+ * Leaves are uncompiled f.builder() chains; api.ts composes them.
+ */
+export const ${exportName} = {
+${structureBody}
+};
+`,
+        })
+        spreadExpressions.push(`...${exportName}`)
+    }
+
     const baseUrl = resolveServerBaseUrl(spec)
 
-    const helperLines = [...features].map((f) => ROUTER_FEATURE_HELPERS[f])
+    // Empty-spec edge: no domain modules, empty literal structure.
+    const structureArgument =
+        spreadExpressions.length > 0
+            ? `{ ${spreadExpressions.join(', ')} }`
+            : '{}'
 
-    return `import { f } from '@freestylejs/fetch';
-import { z } from 'zod';
-import * as Model from './models';
-import { createAuthMiddleware, AuthConfig } from './auth';
-${helperLines.length ? `\n${helperLines.join('\n\n')}\n` : ''}
+    const apiImports = [`import { f } from '@freestylejs/fetch';`]
+    if (domainFiles.length > 0) {
+        for (const domain of domainFiles) {
+            apiImports.push(
+                `import { ${domain.exportName} } from './${domain.fileName.replace(/\.ts$/, '')}';`
+            )
+        }
+    }
+    apiImports.push(
+        `import { createAuthMiddleware, AuthConfig } from './auth';`
+    )
+
+    const apiFileContent = `${apiImports.join('\n')}
+
 export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {}) => {
     const authMw = config.auth ? createAuthMiddleware(config.auth) : undefined
     const middleware = authMw ? authMw : []
@@ -443,6 +540,17 @@ export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {
     return f.router({
         baseUrl: config.baseUrl || ${quoteString(baseUrl)},
         middleware
-    }, ${routerObject});
+    }, ${structureArgument});
 }`
+
+    return { apiFileContent, domainFiles }
+}
+
+export function generateRouter(
+    parsedPaths: Record<string, any>,
+    spec: OpenAPIV3_1.Document,
+    schemaGenerator: SchemaGenerator = new SchemaGenerator(spec)
+): string {
+    return generateRouterSurfaces(parsedPaths, spec, schemaGenerator)
+        .apiFileContent
 }

@@ -1,0 +1,13 @@
+import type { HellObjectModel, DeepNestedModel, IntersectionHellModel, UnionHellModel, OptionAModel, OptionBModel } from './types';
+
+export declare const parseHellObject: (value: unknown) => HellObjectModel;
+
+export declare const parseDeepNested: (value: unknown) => DeepNestedModel;
+
+export declare const parseIntersectionHell: (value: unknown) => IntersectionHellModel;
+
+export declare const parseUnionHell: (value: unknown) => UnionHellModel;
+
+export declare const parseOptionA: (value: unknown) => OptionAModel;
+
+export declare const parseOptionB: (value: unknown) => OptionBModel;

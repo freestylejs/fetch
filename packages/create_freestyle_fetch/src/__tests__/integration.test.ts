@@ -3,7 +3,7 @@ import { join, resolve } from 'path'
 import { describe, expect, it } from 'vitest'
 import { AuthGenerator } from '../auth_generator'
 import { parseOpenApiSpec, parsePaths } from '../path_parser'
-import { generateRouter } from '../router_generator'
+import { generateRouterSurfaces } from '../router_generator'
 import { SchemaGenerator } from '../schema_generator'
 
 describe('Generator', () => {
@@ -27,40 +27,57 @@ describe('Generator', () => {
         }
 
         describe(caseName, () => {
-            it(`should generate the same ${caseName}.models as the snapshot`, async () => {
+            // Split-Surface contract: one shared generator produces every
+            // surface; router generation runs first so inline validators are
+            // promoted into named parsers before types/schemas are emitted.
+            it(`should generate the same ${caseName} split-surface output as the snapshot`, async () => {
                 const spec = await parseOpenApiSpec(specPath)
-                const modelGenerator = new SchemaGenerator(spec)
+                const schemaGenerator = new SchemaGenerator(spec)
 
-                const generatedModels = modelGenerator.generateModels()
-
-                const snapshot = readFileSync(
-                    join(genDir, caseName, 'models.ts'),
-                    'utf-8'
+                const { apiFileContent, domainFiles } = generateRouterSurfaces(
+                    parsePaths(spec),
+                    spec,
+                    schemaGenerator
                 )
-                expect(generatedModels).toEqual(snapshot)
-            })
 
-            it(`should generate the same ${caseName}.api as the snapshot`, async () => {
-                const spec = await parseOpenApiSpec(specPath)
-                const parsedPaths = parsePaths(spec)
-                const generatedRouter = generateRouter(parsedPaths, spec)
+                const generated: Record<string, string> = {
+                    'api.ts': apiFileContent,
+                    'types.ts': schemaGenerator.emitTypes(),
+                    'schemas.js': schemaGenerator.emitSchemasJs(),
+                    'schemas.d.ts': schemaGenerator.emitSchemasDecl(),
+                    'auth.ts': new AuthGenerator(spec).generateFileContent(),
+                    'index.ts':
+                        "export * from './api';\nexport * from './types';\nexport * from './schemas';\nexport * from './auth';",
+                }
+                for (const domain of domainFiles) {
+                    generated[domain.fileName] = domain.content
+                }
 
-                const snapshot = readFileSync(
-                    join(genDir, caseName, 'api.ts'),
-                    'utf-8'
+                // every emitted surface must exist on disk — and vice versa
+                const snapshotFiles: string[] = []
+                const walk = (dir: string, prefix = '') => {
+                    for (const entry of readdirSync(dir)) {
+                        const full = join(dir, entry)
+                        if (statSync(full).isDirectory()) {
+                            walk(full, prefix ? `${prefix}/${entry}` : entry)
+                        } else {
+                            snapshotFiles.push(
+                                prefix ? `${prefix}/${entry}` : entry
+                            )
+                        }
+                    }
+                }
+                walk(join(genDir, caseName))
+
+                expect(Object.keys(generated).sort()).toEqual(
+                    snapshotFiles.sort()
                 )
-                expect(generatedRouter).toEqual(snapshot)
-            })
-
-            it(`should generate the same ${caseName}.auth as the snapshot`, async () => {
-                const spec = await parseOpenApiSpec(specPath)
-                const authGenerator = new AuthGenerator(spec)
-                const generatedAuth = authGenerator.generateFileContent()
-
-                const authPath = join(genDir, caseName, 'auth.ts')
-                if (existsSync(authPath)) {
-                    const snapshot = readFileSync(authPath, 'utf-8')
-                    expect(generatedAuth).toEqual(snapshot)
+                for (const fileName of Object.keys(generated)) {
+                    const snapshot = readFileSync(
+                        join(genDir, caseName, fileName),
+                        'utf-8'
+                    )
+                    expect(generated[fileName]).toEqual(snapshot)
                 }
             })
         })

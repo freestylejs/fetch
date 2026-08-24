@@ -1,0 +1,125 @@
+// Helper types for schemas
+
+export type VideoListResponseModel = {
+  'kind'?: string | undefined;
+  'etag'?: string | undefined;
+  'nextPageToken'?: string | undefined;
+  'prevPageToken'?: string | undefined;
+  'pageInfo'?: PageInfoModel | undefined;
+  'items'?: VideoModel[] | undefined;
+};
+
+export type PageInfoModel = {
+  'totalResults'?: number | undefined;
+  'resultsPerPage'?: number | undefined;
+};
+
+/**
+ * A video resource represents a YouTube video.
+ */
+export type VideoModel = {
+  'kind'?: string | undefined;
+  'etag'?: string | undefined;
+  'id'?: string | undefined;
+  'snippet'?: VideoSnippetModel | undefined;
+  'contentDetails'?: VideoContentDetailsModel | undefined;
+  'status'?: VideoStatusModel | undefined;
+  'statistics'?: VideoStatisticsModel | undefined;
+  'player'?: VideoPlayerModel | undefined;
+};
+
+export type VideoSnippetModel = {
+  'publishedAt'?: string | undefined;
+  'channelId'?: string | undefined;
+  'title'?: string | undefined;
+  'description'?: string | undefined;
+  'thumbnails'?: ThumbnailDetailsModel | undefined;
+  'channelTitle'?: string | undefined;
+  'tags'?: string[] | undefined;
+  'categoryId'?: string | undefined;
+  'liveBroadcastContent'?: 'none' | 'upcoming' | 'live' | 'completed' | undefined;
+  'localized'?: VideoLocalizationModel | undefined;
+};
+
+export type ThumbnailDetailsModel = {
+  'default'?: ThumbnailModel | undefined;
+  'medium'?: ThumbnailModel | undefined;
+  'high'?: ThumbnailModel | undefined;
+  'standard'?: ThumbnailModel | undefined;
+  'maxres'?: ThumbnailModel | undefined;
+};
+
+export type ThumbnailModel = {
+  'url'?: string | undefined;
+  'width'?: number | undefined;
+  'height'?: number | undefined;
+};
+
+export type VideoStatusModel = {
+  'uploadStatus'?: 'deleted' | 'failed' | 'processed' | 'rejected' | 'uploaded' | undefined;
+  'failureReason'?: 'codec' | 'conversion' | 'emptyFile' | 'invalidFile' | 'tooSmall' | 'uploadAborted' | undefined;
+  'rejectionReason'?: 'claim' | 'copyright' | 'duplicate' | 'inappropriate' | 'legal' | 'length' | 'termsOfUse' | 'trademark' | 'uploaderAccountClosed' | 'uploaderAccountSuspended' | undefined;
+  'privacyStatus'?: 'private' | 'public' | 'unlisted' | undefined;
+  'license'?: 'creativeCommon' | 'youtube' | undefined;
+  'embeddable'?: boolean | undefined;
+  'publicStatsViewable'?: boolean | undefined;
+  'madeForKids'?: boolean | undefined;
+};
+
+export type VideoStatisticsModel = {
+  /**
+   * Type is string because view counts can exceed 2^32.
+   */
+  'viewCount'?: string | undefined;
+  'likeCount'?: string | undefined;
+  'dislikeCount'?: string | undefined;
+  'favoriteCount'?: string | undefined;
+  'commentCount'?: string | undefined;
+};
+
+export type VideoPlayerModel = {
+  'embedHtml'?: string | undefined;
+  'embedHeight'?: number | undefined;
+  'embedWidth'?: number | undefined;
+};
+
+export type VideoContentDetailsModel = {
+  'duration'?: string | undefined;
+  'dimension'?: string | undefined;
+  'definition'?: 'hd' | 'sd' | undefined;
+  'caption'?: 'false' | 'true' | undefined;
+  'licensedContent'?: boolean | undefined;
+  'regionRestriction'?: {
+  'allowed'?: string[] | undefined;
+  'blocked'?: string[] | undefined;
+} | undefined;
+};
+
+export type VideoLocalizationModel = {
+  'title'?: string | undefined;
+  'description'?: string | undefined;
+};
+
+export type ErrorResponseModel = {
+  'error'?: {
+  'code'?: number | undefined;
+  'message'?: string | undefined;
+  'errors'?: Array<{
+  'domain'?: string | undefined;
+  'reason'?: string | undefined;
+  'message'?: string | undefined;
+}> | undefined;
+} | undefined;
+};
+
+export type YoutubeVideosListSearchParamsModel = {
+  'part': Array<'contentDetails' | 'fileDetails' | 'id' | 'liveStreamingDetails' | 'localizations' | 'player' | 'processingDetails' | 'recordingDetails' | 'snippet' | 'statistics' | 'status' | 'suggestions' | 'topicDetails'>;
+  'id'?: string[] | undefined;
+  'chart'?: 'chartUnspecified' | 'mostPopular' | undefined;
+  'maxResults'?: number | undefined;
+  'pageToken'?: string | undefined;
+};
+
+export type YoutubeVideosInsertSearchParamsModel = {
+  'part': Array<'snippet' | 'status' | 'player'>;
+};

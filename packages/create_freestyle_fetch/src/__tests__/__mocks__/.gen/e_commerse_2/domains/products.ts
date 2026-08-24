@@ -1,0 +1,30 @@
+import { f } from '@freestylejs/fetch';
+import * as Schemas from '../schemas';
+
+/**
+ * Plain router structure for the 'products' domain.
+ * Leaves are uncompiled f.builder() chains; api.ts composes them.
+ */
+export const productsDomain = {
+/**
+ * Product Collection
+ *
+ * Endpoint for searching and creating products.
+ */
+'products': {
+/**
+ * Search and filter products
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseSearchProductsSearchParams).def_response(async ({ json }) => Schemas.parsePaginatedProductResponse(await json())),
+/**
+ * Add a new product with an image
+ */
+'POST': f.builder().def_json().def_body(Schemas.parseCreateProductBody).def_response(async ({ json }) => Schemas.parseProduct(await json())),
+'$productId': {
+/**
+ * Get a single product by its ID
+ */
+'GET': f.builder().def_json().def_response(async ({ json }) => Schemas.parseProduct(await json()))
+}
+}
+};

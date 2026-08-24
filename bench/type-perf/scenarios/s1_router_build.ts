@@ -2,7 +2,7 @@
 
 import { f } from '@freestylejs/fetch'
 import { z } from 'zod'
-import * as Model from '../corpus/stripe/models'
+import * as Schemas from '../corpus/stripe/schemas'
 
 const toQuery = (value: Record<string, unknown>): Record<string, string> =>
     Object.fromEntries(
@@ -25,7 +25,7 @@ export const syntheticStripeRouter = f.router('https://api.synthetic.dev/', {
                     }).parse
                 )
                 .def_response(async ({ json }) => ({
-                    data: [Model.Account.parse(await json())],
+                    data: [Schemas.parseAccount(await json())],
                     has_more: true,
                 })),
             POST: f
@@ -42,14 +42,14 @@ export const syntheticStripeRouter = f.router('https://api.synthetic.dev/', {
                         .parse(body)
                 )
                 .def_response(async ({ json }) =>
-                    Model.Account.parse(await json())
+                    Schemas.parseAccount(await json())
                 ),
             $account: {
                 GET: f
                     .builder()
                     .def_json()
                     .def_response(async ({ json }) => ({
-                        account: Model.Account.parse(await json()),
+                        account: Schemas.parseAccount(await json()),
                     })),
                 DELETE: f
                     .builder()
@@ -84,8 +84,8 @@ export const syntheticStripeRouter = f.router('https://api.synthetic.dev/', {
                 .builder()
                 .def_json()
                 .def_response(async ({ json }) => ({
-                    available: Model.Balance.parse(await json()),
-                    pending: Model.Balance.parse(await json()),
+                    available: Schemas.parseBalance(await json()),
+                    pending: Schemas.parseBalance(await json()),
                 })),
         },
         charges: {
@@ -96,7 +96,7 @@ export const syntheticStripeRouter = f.router('https://api.synthetic.dev/', {
                     z.object({ customer: z.string().optional() }).parse
                 )
                 .def_response(async ({ json }) => ({
-                    data: [Model.Charge.parse(await json())],
+                    data: [Schemas.parseCharge(await json())],
                     has_more: false,
                 })),
             POST: f
@@ -113,7 +113,7 @@ export const syntheticStripeRouter = f.router('https://api.synthetic.dev/', {
                         .parse(body)
                 )
                 .def_response(async ({ json }) =>
-                    Model.Charge.parse(await json())
+                    Schemas.parseCharge(await json())
                 ),
         },
         customers: {
@@ -127,14 +127,14 @@ export const syntheticStripeRouter = f.router('https://api.synthetic.dev/', {
                     }).parse
                 )
                 .def_response(async ({ json }) => ({
-                    data: [Model.Customer.parse(await json())],
+                    data: [Schemas.parseCustomer(await json())],
                 })),
             $customer: {
                 GET: f
                     .builder()
                     .def_json()
                     .def_response(async ({ json }) =>
-                        Model.Customer.parse(await json())
+                        Schemas.parseCustomer(await json())
                     ),
                 PATCH: f
                     .builder()
@@ -143,14 +143,14 @@ export const syntheticStripeRouter = f.router('https://api.synthetic.dev/', {
                         z.object({ name: z.string().optional() }).parse(body)
                     )
                     .def_response(async ({ json }) =>
-                        Model.Customer.parse(await json())
+                        Schemas.parseCustomer(await json())
                     ),
                 payment_methods: {
                     GET: f
                         .builder()
                         .def_json()
                         .def_response(async ({ json }) => ({
-                            methods: Model.PaymentMethod.parse(await json()),
+                            methods: Schemas.parsePaymentMethod(await json()),
                         })),
                 },
             },
@@ -161,8 +161,8 @@ export const syntheticStripeRouter = f.router('https://api.synthetic.dev/', {
                     .builder()
                     .def_json()
                     .def_response(async ({ json }) => ({
-                        invoice: Model.Invoice.parse(await json()),
-                        refund: Model.Refund.parse(await json()),
+                        invoice: Schemas.parseInvoice(await json()),
+                        refund: Schemas.parseRefund(await json()),
                     })),
                 void: {
                     POST: f
@@ -170,7 +170,7 @@ export const syntheticStripeRouter = f.router('https://api.synthetic.dev/', {
                         .def_json()
                         .def_body((body) => new URLSearchParams())
                         .def_response(async ({ json }) =>
-                            Model.Invoice.parse(await json())
+                            Schemas.parseInvoice(await json())
                         ),
                 },
             },
@@ -186,7 +186,7 @@ export const syntheticStripeRouter = f.router('https://api.synthetic.dev/', {
                     }).parse
                 )
                 .def_response(async ({ json }) => ({
-                    data: [Model.Price.parse(await json())],
+                    data: [Schemas.parsePrice(await json())],
                     has_more: false,
                 })),
         },
@@ -197,8 +197,8 @@ export const syntheticStripeRouter = f.router('https://api.synthetic.dev/', {
                     .def_json()
                     .def_body((body) => new URLSearchParams())
                     .def_response(async ({ json }) => ({
-                        subscription: Model.Subscription.parse(await json()),
-                        refundedCharge: Model.Charge.parse(await json()),
+                        subscription: Schemas.parseSubscription(await json()),
+                        refundedCharge: Schemas.parseCharge(await json()),
                     })),
             },
         },

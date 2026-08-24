@@ -4,7 +4,7 @@ import type { FetchUnitShape } from '@freestylejs/fetch'
 import { f } from '@freestylejs/fetch'
 import { z } from 'zod'
 import type { InferFetchUnit } from '../../../packages/fetch/src/core/fetcher/unit'
-import * as Model from '../corpus/stripe/models'
+import * as Schemas from '../corpus/stripe/schemas'
 
 const toQuery = (value: Record<string, unknown>): Record<string, string> =>
     Object.fromEntries(
@@ -23,7 +23,7 @@ export const chain01 = f
     .def_body((body) =>
         z.object({ limit: z.number().int().optional() }).parse(body)
     )
-    .def_response(async ({ json }) => Model.Account.parse(await json()))
+    .def_response(async ({ json }) => Schemas.parseAccount(await json()))
 
 export const chain02 = f
     .builder()
@@ -35,7 +35,7 @@ export const chain02 = f
             )
     )
     .def_query_mode('not_throw')
-    .def_response(async ({ json }) => Model.Balance.parse(await json()))
+    .def_response(async ({ json }) => Schemas.parseBalance(await json()))
 
 export const chain03 = f
     .builder()
@@ -53,8 +53,8 @@ export const chain04 = f
         z.object({ currency: z.string(), amount: z.number().int() }).parse(body)
     )
     .def_response(async ({ json }) => ({
-        charge: Model.Charge.parse(await json()),
-        refund: Model.Refund.parse(await json()),
+        charge: Schemas.parseCharge(await json()),
+        refund: Schemas.parseRefund(await json()),
     }))
 
 export const chain05 = f
@@ -63,7 +63,7 @@ export const chain05 = f
     .def_searchparams(z.object({ starting_after: z.string().optional() }).parse)
     .def_query_mode('throw')
     .def_body((body) => new URLSearchParams())
-    .def_response(async ({ json }) => Model.Customer.parse(await json()))
+    .def_response(async ({ json }) => Schemas.parseCustomer(await json()))
 
 export const chain06 = f
     .builder()
@@ -82,7 +82,9 @@ export const chain07 = f
             })
             .parse(body)
     )
-    .def_response(async ({ json }) => Model.CheckoutSession.parse(await json()))
+    .def_response(async ({ json }) =>
+        Schemas.parseCheckoutSession(await json())
+    )
 
 export const chain08 = f
     .builder()
@@ -91,7 +93,7 @@ export const chain08 = f
         z.object({ status: z.enum(['draft', 'open', 'paid']).optional() }).parse
     )
     .def_body((body) => new URLSearchParams(z.object({}).parse(body)))
-    .def_response(async ({ json }) => Model.Invoice.parse(await json()))
+    .def_response(async ({ json }) => Schemas.parseInvoice(await json()))
 
 export const chain09 = f
     .builder()
@@ -101,7 +103,7 @@ export const chain09 = f
         z.object({ nickname: z.string().optional() }).parse(body)
     )
     .def_query_mode('not_throw')
-    .def_response(async ({ json }) => Model.Price.parse(await json()))
+    .def_response(async ({ json }) => Schemas.parsePrice(await json()))
 
 export const chain10 = f
     .builder()
@@ -110,14 +112,16 @@ export const chain10 = f
         z.object({ active: z.boolean().optional(), product: z.string() }).parse
     )
     .def_body((body) => new URLSearchParams())
-    .def_response(async ({ json }) => [Model.PaymentMethod.parse(await json())])
+    .def_response(async ({ json }) => [
+        Schemas.parsePaymentMethod(await json()),
+    ])
 
 export const chain11 = f
     .builder()
     .def_json()
     .def_body((body) => z.object({ frozen_time: z.number().int() }).parse(body))
     .def_response(async ({ json }) => ({
-        clock: Model.TestHelpersTestClock.parse(await json()),
+        clock: Schemas.parseTestHelpersTestClock(await json()),
     }))
 
 export const chain12 = f

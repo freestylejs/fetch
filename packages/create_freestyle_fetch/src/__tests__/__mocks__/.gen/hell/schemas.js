@@ -1,0 +1,44 @@
+import { z } from 'zod';
+
+const HellObject = z.object({
+'required-key': z.string(),
+'optional-key': z.string().optional(),
+'spaced key': z.number(),
+'$special$': z.boolean().optional()
+});
+
+export const parseHellObject = (value) => HellObject.parse(value);
+
+const DeepNested = z.object({
+'level1': z.object({
+'level2': z.array(z.object({
+'level3': z.enum(['deep']).optional()
+})).optional()
+}).optional()
+});
+
+export const parseDeepNested = (value) => DeepNested.parse(value);
+
+const IntersectionHell = HellObject.and(z.object({
+'extra': z.string().optional()
+}));
+
+export const parseIntersectionHell = (value) => IntersectionHell.parse(value);
+
+const OptionA = z.object({
+'type': z.enum(['A']),
+'a': z.string().optional()
+});
+
+export const parseOptionA = (value) => OptionA.parse(value);
+
+const OptionB = z.object({
+'type': z.enum(['B']),
+'b': z.number().optional()
+});
+
+export const parseOptionB = (value) => OptionB.parse(value);
+
+const UnionHell = z.discriminatedUnion('type', [OptionA, OptionB]);
+
+export const parseUnionHell = (value) => UnionHell.parse(value);

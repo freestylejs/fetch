@@ -10,10 +10,37 @@ import {
 
 /**
  * Output context for generated Zod expressions.
- * - "models": references are bare exported names (models.ts scope)
- * - "api": references are qualified as Model.<ExportedName> (api.ts scope)
+ * - "models": references are bare exported names (schemas.js scope)
+ * - "api": references are qualified as Model.<ExportedName> (legacy api scope)
  */
 export type OutputContext = 'models' | 'api'
+
+export type InlineParserKind = 'searchParams' | 'body' | 'response'
+
+export type InlineParserWrapper = 'none' | 'urlSearchParams' | 'formData'
+
+const INLINE_KIND_SUFFIX: Record<InlineParserKind, string> = {
+    searchParams: 'SearchParams',
+    body: 'Body',
+    response: 'Response',
+}
+
+interface InlineParserRegistration {
+    kind: InlineParserKind
+    wrapper: InlineParserWrapper
+    parserName: string
+    zodExpr: string
+    aliasName?: string
+    aliasTypeExpr?: string
+}
+
+const TO_URL_SEARCH_PARAMS_HELPER = `const toUrlSearchParams = (value) =>
+\tObject.fromEntries(
+\t\tObject.entries(value).map(([key, entry]) => [
+\t\t\tkey,
+\t\t\ttypeof entry === 'string' ? entry : JSON.stringify(entry),
+\t\t])
+\t)`
 
 export class SchemaGenerator {
     private spec: OpenAPIV3_1.Document
@@ -23,6 +50,10 @@ export class SchemaGenerator {
     private schemaReferences: Map<string, Set<string>> = new Map()
     private cyclicSchemas: Set<string> = new Set()
     private schemaNameMap: Map<string, string> = new Map()
+    private inlineRegistrations: InlineParserRegistration[] = []
+    private usedParserNames: Set<string> = new Set()
+    private usedAliasNames: Set<string> = new Set()
+    private parserNamespaceSeeded = false
 
     constructor(spec: OpenAPIV3_1.Document) {
         this.spec = spec
@@ -86,7 +117,7 @@ export class SchemaGenerator {
 
     /**
      * The raw schema key → exported model name collision-resolution map.
-     * Consumers generating references into models.ts must go through it.
+     * Consumers generating references into types.ts must go through it.
      */
     public getCollisionMap(): ReadonlyMap<string, string> {
         this.ensureSchemaNames()
@@ -107,117 +138,197 @@ export class SchemaGenerator {
     }
 
     /**
-     * Schemas that must NOT get an explicit `: z.ZodType<X>` annotation:
-     * - union/discriminatedUnion/intersection results (their inferred type
-     *   is not compatible with a plain ZodType<X> declaration), and
-     * - schemas referenced as members of such compositions (the annotation
-     *   erases discriminant/propValues info required by z.discriminatedUnion).
+     * Split-Surface: seeds the parser/alias name namespaces from the
+     * collision-resolved component exports so inline parser names can be
+     * assigned deterministically without ever colliding with them.
      */
-    private computeAnnotationExemptions(): Set<string> {
-        const exempt = new Set<string>()
-        const schemas = this.spec.components?.schemas
-        if (!schemas) return exempt
-
-        const isComposition = (schema: any): boolean =>
-            schema &&
-            !this.isReferenceObject(schema) &&
-            Boolean(schema.allOf || schema.oneOf || schema.anyOf)
-
-        for (const [parentName, refs] of this.schemaReferences) {
-            if (!isComposition(schemas[parentName])) continue
-            for (const ref of refs) exempt.add(ref)
+    private seedParserNamespace(): void {
+        if (this.parserNamespaceSeeded) return
+        this.ensureSchemaNames()
+        for (const key of Object.keys(this.spec.components?.schemas ?? {})) {
+            const exported = this.getSchemaName(key)
+            this.usedParserNames.add(`parse${exported}`)
+            this.usedAliasNames.add(`${exported}Model`)
         }
-        return exempt
+        this.parserNamespaceSeeded = true
     }
 
-    private shouldAnnotate(name: string, exemptions: Set<string>): boolean {
-        const schema = this.spec.components?.schemas?.[name]
-        if (!schema || this.isReferenceObject(schema)) return false
-
-        // Cyclic schemas must keep their explicit annotation: the initializer
-        // chain relies on it to break TS7022 circularity. Losing it degrades
-        // every `z.lazy(() => X)` that references them to `any`.
-        if (this.cyclicSchemas.has(name)) return true
-
-        // Composition results rely on inference (G-7).
-        if (schema.allOf || schema.oneOf || schema.anyOf) return false
-
-        return !exemptions.has(name)
+    private takeUniqueName(desired: string, used: Set<string>): string {
+        let name = desired
+        let attempt = 1
+        while (used.has(name)) {
+            name = `${desired}_${attempt}`
+            attempt++
+        }
+        used.add(name)
+        return name
     }
 
-    public generateModels(): string {
-        if (!this.spec.components || !this.spec.components.schemas) {
-            return ''
+    /**
+     * Promotes an inline (non-$ref) operation validator into a named parser
+     * living behind the schemas surface. Returns the final export name to
+     * bind in api.ts (`Schemas.<parserName>`).
+     */
+    public registerInlineParser(input: {
+        kind: InlineParserKind
+        opBase: string
+        schema: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject
+        wrapper?: InlineParserWrapper
+        hint?: string
+    }): string {
+        this.seedParserNamespace()
+        const wrapper = input.wrapper ?? 'none'
+        const suffix = INLINE_KIND_SUFFIX[input.kind]
+        const hint = input.hint ?? input.opBase
+        const parserName = this.takeUniqueName(
+            `parse${input.opBase}${suffix}`,
+            this.usedParserNames
+        )
+        const zodExpr = this.generateZodSchema(input.schema, hint, 'models')
+
+        const registration: InlineParserRegistration = {
+            kind: input.kind,
+            wrapper,
+            parserName,
+            zodExpr,
         }
-
-        this.initializeSchemaNames()
-
-        // 1. First pass: generate all schemas to populate dependency graph
-        for (const name of Object.keys(this.spec.components.schemas)) {
-            this.mapSchemaObjectToZod(name)
+        if (wrapper === 'none') {
+            registration.aliasName = this.takeUniqueName(
+                `${input.opBase}${suffix}Model`,
+                this.usedAliasNames
+            )
+            registration.aliasTypeExpr = this.mapSchemaObjectToType(
+                hint,
+                input.schema
+            )
         }
+        this.inlineRegistrations.push(registration)
+        return parserName
+    }
 
-        // 2. Detect Cycles
-        this.cyclicSchemas = this.detectCycles()
+    private renderInlineParserJs(
+        registration: InlineParserRegistration
+    ): string {
+        const { parserName, wrapper, zodExpr } = registration
+        if (wrapper === 'formData') {
+            return `export const ${parserName} = (value) => z.instanceof(FormData).parse(value);`
+        }
+        if (wrapper === 'urlSearchParams') {
+            return `export const ${parserName} = (value) => new URLSearchParams(${zodExpr}.transform(toUrlSearchParams).parse(value));`
+        }
+        return `export const ${parserName} = (value) => ${zodExpr}.parse(value);`
+    }
 
-        // 2.5. Determine which schemas must rely on type inference
-        const annotationExemptions = this.computeAnnotationExemptions()
-
-        // 3. Clear processed cache to regenerate with correct lazy/static strategies
-        this.processedSchemas.clear()
-        this.processingStack.clear()
-
-        const modelStrings: string[] = [`import { z } from 'zod';`]
-
-        // 4. Sort schemas topologically
-        const sortedSchemaNames = this.sortSchemas()
-
-        // 5. Generate Types for ALL schemas for performance
-        modelStrings.push('// Helper types for schemas')
-        for (const name of sortedSchemaNames) {
+    public emitTypes(): string {
+        this.ensureSchemaNames()
+        const parts: string[] = ['// Helper types for schemas']
+        const schemas = this.spec.components?.schemas ?? {}
+        for (const name of Object.keys(schemas)) {
             const pascalName = this.getSchemaName(name)
-            const schema = this.spec.components?.schemas?.[name]
+            const schema = schemas[name]
             const description =
                 schema && !this.isReferenceObject(schema)
                     ? schema.description
                     : undefined
             const jsDoc = createJSDocComment(undefined, description)
-
-            const typeDef = this.mapSchemaObjectToType(name)
-            modelStrings.push(
-                `${jsDoc}export type ${pascalName}Model = ${typeDef};`
+            parts.push(
+                `${jsDoc}export type ${pascalName}Model = ${this.mapSchemaObjectToType(name)};`
             )
         }
-        modelStrings.push('')
+        for (const registration of this.inlineRegistrations) {
+            if (registration.aliasName && registration.aliasTypeExpr) {
+                parts.push(
+                    `export type ${registration.aliasName} = ${registration.aliasTypeExpr};`
+                )
+            }
+        }
+        return parts.join('\n\n')
+    }
 
-        // 6. Generate Zod Schemas
-        for (const name of sortedSchemaNames) {
-            const zodSchema =
-                this.processedSchemas.get(name) ||
+    public emitSchemasJs(): string {
+        const parts: string[] = [`import { z } from 'zod';`]
+        if (
+            this.inlineRegistrations.some(
+                (r) => r.wrapper === 'urlSearchParams'
+            )
+        ) {
+            parts.push(TO_URL_SEARCH_PARAMS_HELPER)
+        }
+
+        if (this.spec.components?.schemas) {
+            // 1. First pass: populate dependency graph
+            for (const name of Object.keys(this.spec.components.schemas)) {
                 this.mapSchemaObjectToZod(name)
-            const pascalName = this.getSchemaName(name)
+            }
+            // 2. Detect cycles
+            this.cyclicSchemas = this.detectCycles()
+            // 3. Clear cache so the real pass regenerates with lazy strategies
+            this.processedSchemas.clear()
+            this.processingStack.clear()
 
-            // Use explicit type for perf, unless inference is required (G-7).
-            const schema = this.spec.components?.schemas?.[name]
-            const description =
-                schema && !this.isReferenceObject(schema)
-                    ? schema.description
-                    : undefined
-            const jsDoc = createJSDocComment(undefined, description)
-
-            const typeAnnotation = this.shouldAnnotate(
-                name,
-                annotationExemptions
-            )
-                ? `: z.ZodType<${pascalName}Model>`
-                : ''
-
-            modelStrings.push(
-                `${jsDoc}export const ${pascalName}${typeAnnotation} = ${zodSchema};`
-            )
+            // 4. Emit consts + parse functions in topological order
+            for (const name of this.sortSchemas()) {
+                const pascalName = this.getSchemaName(name)
+                const zodSchema =
+                    this.processedSchemas.get(name) ||
+                    this.mapSchemaObjectToZod(name)
+                const schema = this.spec.components?.schemas?.[name]
+                const description =
+                    schema && !this.isReferenceObject(schema)
+                        ? schema.description
+                        : undefined
+                const jsDoc = createJSDocComment(undefined, description)
+                parts.push(`${jsDoc}const ${pascalName} = ${zodSchema};`)
+                parts.push(
+                    `export const parse${pascalName} = (value) => ${pascalName}.parse(value);`
+                )
+            }
         }
 
-        return modelStrings.join('\n\n')
+        for (const registration of this.inlineRegistrations) {
+            parts.push(this.renderInlineParserJs(registration))
+        }
+        return parts.join('\n\n')
+    }
+
+    public emitSchemasDecl(): string {
+        const imports: string[] = []
+        const lines: string[] = []
+        const pushImport = (typeName: string) => {
+            if (!imports.includes(typeName)) imports.push(typeName)
+        }
+
+        const schemas = this.spec.components?.schemas ?? {}
+        for (const name of Object.keys(schemas)) {
+            const pascalName = this.getSchemaName(name)
+            const modelType = `${pascalName}Model`
+            pushImport(modelType)
+            lines.push(
+                `export declare const parse${pascalName}: (value: unknown) => ${modelType};`
+            )
+        }
+        for (const registration of this.inlineRegistrations) {
+            const { parserName, aliasName, wrapper } = registration
+            if (aliasName) {
+                pushImport(aliasName)
+                lines.push(
+                    `export declare const ${parserName}: (value: unknown) => ${aliasName};`
+                )
+            } else if (wrapper === 'urlSearchParams') {
+                lines.push(
+                    `export declare const ${parserName}: (value: unknown) => URLSearchParams;`
+                )
+            } else if (wrapper === 'formData') {
+                lines.push(
+                    `export declare const ${parserName}: (value: unknown) => FormData;`
+                )
+            }
+        }
+
+        const header = imports.length
+            ? `import type { ${imports.join(', ')} } from './types';`
+            : undefined
+        return [...(header ? [header] : []), ...lines].join('\n\n')
     }
 
     /**

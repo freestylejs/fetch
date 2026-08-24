@@ -1,5 +1,3 @@
-import { z } from 'zod';
-
 // Helper types for schemas
 
 export type EventWebhookRequestModel = {
@@ -494,157 +492,161 @@ export type ErrorResponseModel = {
 
 export type AggregatedByModel = 'day' | 'week' | 'month';
 
+export type GetSignedEventWebhookResponseModel = {
+  /**
+   * A unique string used to identify the webhook. A webhook's ID is generated programmatically and cannot be changed after creation. You can assign a natural language identifier to your webhook using the `friendly_name` property.
+   */
+  'id'?: string | undefined;
+  /**
+   * The public key you can use to verify the Twilio SendGrid signature.
+   */
+  'public_key'?: string | undefined;
+};
 
+export type UpdateSignedEventWebhookBodyModel = {
+  /**
+   * Enable or disable the webhook by setting this property to `true` or `false`, respectively.
+   */
+  'enabled': boolean;
+};
 
-export const EventWebhookRequest: z.ZodType<EventWebhookRequestModel> = z.object({
-'enabled': z.boolean().optional(),
-'url': z.string(),
-'group_resubscribe': z.boolean().optional(),
-'delivered': z.boolean().optional(),
-'group_unsubscribe': z.boolean().optional(),
-'spam_report': z.boolean().optional(),
-'bounce': z.boolean().optional(),
-'deferred': z.boolean().optional(),
-'unsubscribe': z.boolean().optional(),
-'processed': z.boolean().optional(),
-'open': z.boolean().optional(),
-'click': z.boolean().optional(),
-'dropped': z.boolean().optional(),
-'friendly_name': z.string().nullable().optional(),
-'oauth_client_id': z.string().nullable().optional(),
-'oauth_client_secret': z.string().nullable().optional(),
-'oauth_token_url': z.string().nullable().optional()
-});
+export type UpdateSignedEventWebhookResponseModel = {
+  /**
+   * A unique string used to identify the webhook. A webhook's ID is generated programmatically and cannot be changed after creation. You can assign a natural language identifier to your webhook using the `friendly_name` property.
+   */
+  'id'?: string | undefined;
+  /**
+   * The public key you can use to verify the Twilio SendGrid signature.
+   */
+  'public_key'?: string | undefined;
+};
 
-export const EventWebhookTestRequest: z.ZodType<EventWebhookTestRequestModel> = z.object({
-'id': z.string().optional(),
-'url': z.string(),
-'oauth_client_id': z.string().nullable().optional(),
-'oauth_client_secret': z.string().nullable().optional(),
-'oauth_token_url': z.string().nullable().optional()
-});
+export type ListParseSettingResponseModel = {
+  /**
+   * The list of your current inbound parse settings.
+   */
+  'result'?: ParseSettingModel[] | undefined;
+};
 
-export const EventWebhookBaseResponseProps: z.ZodType<EventWebhookBaseResponsePropsModel> = z.object({
-'enabled': z.boolean().optional(),
-'url': z.string().optional(),
-'account_status_change': z.boolean().optional(),
-'group_resubscribe': z.boolean().optional(),
-'delivered': z.boolean().optional(),
-'group_unsubscribe': z.boolean().optional(),
-'spam_report': z.boolean().optional(),
-'bounce': z.boolean().optional(),
-'deferred': z.boolean().optional(),
-'unsubscribe': z.boolean().optional(),
-'processed': z.boolean().optional(),
-'open': z.boolean().optional(),
-'click': z.boolean().optional(),
-'dropped': z.boolean().optional(),
-'friendly_name': z.string().nullable().optional(),
-'id': z.string().optional()
-});
+export type ListParseStaticSearchParamsModel = {
+  'limit'?: string | undefined;
+  'offset'?: string | undefined;
+  'aggregated_by'?: AggregatedByModel | undefined;
+  'start_date': string;
+  'end_date'?: string | undefined;
+};
 
-export const EventWebhookDateResponseProps: z.ZodType<EventWebhookDateResponsePropsModel> = z.object({
-'created_date': z.iso.datetime().nullable().optional(),
-'updated_date': z.iso.datetime().optional()
-});
+export type ListParseStaticResponseModel = Array<{
+  /**
+   * The date that the stats were collected.
+   */
+  'date': string;
+  /**
+   * The Parse Webhook usage statistics.
+   */
+  'stats': Array<{
+  'metrics'?: {
+  /**
+   * The number of emails received and parsed by the Parse Webhook.
+   */
+  'received': number;
+} | undefined;
+}>;
+}>;
 
-export const EventWebhookOauthResponseProps: z.ZodType<EventWebhookOauthResponsePropsModel> = z.object({
-'oauth_client_id': z.string().nullable().optional(),
-'oauth_token_url': z.string().nullable().optional()
-});
+export type CreateSecurityPolicyBodyModel = {
+  /**
+   * User-defined policy name
+   */
+  'name'?: string | undefined;
+  'oauth'?: {
+  'client_id'?: string | undefined;
+  'client_secret'?: string | undefined;
+  'token_url'?: string | undefined;
+  'scopes'?: string[] | undefined;
+} | undefined;
+  'signature'?: {
+  'enabled'?: boolean | undefined;
+} | undefined;
+};
 
-export const EventWebhookSignedResponseProp: z.ZodType<EventWebhookSignedResponsePropModel> = z.object({
-'public_key': z.string().optional()
-});
+export type CreateSecurityPolicyResponseModel = {
+  'policy'?: {
+  'id'?: string | undefined;
+  'name'?: string | undefined;
+  'oauth'?: {
+  'client_id'?: string | undefined;
+  'token_url'?: string | undefined;
+  'scopes'?: string[] | undefined;
+} | undefined;
+  'signature'?: {
+  'public_key'?: string | undefined;
+} | undefined;
+} | undefined;
+};
 
-export const EventWebhookUnsignedResponse: z.ZodType<EventWebhookUnsignedResponseModel> = z.object({
-'enabled': z.boolean().optional(),
-'url': z.string().optional(),
-'account_status_change': z.boolean().optional(),
-'group_resubscribe': z.boolean().optional(),
-'delivered': z.boolean().optional(),
-'group_unsubscribe': z.boolean().optional(),
-'spam_report': z.boolean().optional(),
-'bounce': z.boolean().optional(),
-'deferred': z.boolean().optional(),
-'unsubscribe': z.boolean().optional(),
-'processed': z.boolean().optional(),
-'open': z.boolean().optional(),
-'click': z.boolean().optional(),
-'dropped': z.boolean().optional(),
-'friendly_name': z.string().nullable().optional(),
-'id': z.string().optional(),
-'created_date': z.iso.datetime().nullable().optional(),
-'updated_date': z.iso.datetime().optional(),
-'oauth_client_id': z.string().nullable().optional(),
-'oauth_token_url': z.string().nullable().optional()
-});
+export type ListAllSecurityPoliciesResponseModel = {
+  'policies'?: Array<{
+  'id'?: string | undefined;
+  'name'?: string | undefined;
+  'oauth'?: {
+  'client_id'?: string | undefined;
+  'token_url'?: string | undefined;
+  'scopes'?: string[] | undefined;
+} | undefined;
+  'signature'?: {
+  'public_key'?: string | undefined;
+} | undefined;
+}> | undefined;
+};
 
-export const EventWebhookSignedResponse: z.ZodType<EventWebhookSignedResponseModel> = z.object({
-'enabled': z.boolean().optional(),
-'url': z.string().optional(),
-'account_status_change': z.boolean().optional(),
-'group_resubscribe': z.boolean().optional(),
-'delivered': z.boolean().optional(),
-'group_unsubscribe': z.boolean().optional(),
-'spam_report': z.boolean().optional(),
-'bounce': z.boolean().optional(),
-'deferred': z.boolean().optional(),
-'unsubscribe': z.boolean().optional(),
-'processed': z.boolean().optional(),
-'open': z.boolean().optional(),
-'click': z.boolean().optional(),
-'dropped': z.boolean().optional(),
-'friendly_name': z.string().nullable().optional(),
-'id': z.string().optional(),
-'created_date': z.iso.datetime().nullable().optional(),
-'updated_date': z.iso.datetime().optional(),
-'oauth_client_id': z.string().nullable().optional(),
-'oauth_token_url': z.string().nullable().optional(),
-'public_key': z.string().optional()
-});
+export type UpdateSecurityPolicyBodyModel = {
+  /**
+   * User-defined policy name
+   */
+  'name'?: string | undefined;
+  'oauth'?: {
+  'client_id'?: string | undefined;
+  'client_secret'?: string | undefined;
+  'token_url'?: string | undefined;
+  'scopes'?: string[] | undefined;
+} | undefined;
+  'signature'?: {
+  'enabled'?: boolean | undefined;
+} | undefined;
+};
 
-export const EventWebhookNoDatesResponse: z.ZodType<EventWebhookNoDatesResponseModel> = z.object({
-'enabled': z.boolean().optional(),
-'url': z.string().optional(),
-'account_status_change': z.boolean().optional(),
-'group_resubscribe': z.boolean().optional(),
-'delivered': z.boolean().optional(),
-'group_unsubscribe': z.boolean().optional(),
-'spam_report': z.boolean().optional(),
-'bounce': z.boolean().optional(),
-'deferred': z.boolean().optional(),
-'unsubscribe': z.boolean().optional(),
-'processed': z.boolean().optional(),
-'open': z.boolean().optional(),
-'click': z.boolean().optional(),
-'dropped': z.boolean().optional(),
-'friendly_name': z.string().nullable().optional(),
-'id': z.string().optional(),
-'oauth_client_id': z.string().nullable().optional(),
-'oauth_token_url': z.string().nullable().optional(),
-'public_key': z.string().optional()
-});
+export type UpdateSecurityPolicyResponseModel = {
+  'policy'?: {
+  'id'?: string | undefined;
+  'name'?: string | undefined;
+  'oauth'?: {
+  'client_id'?: string | undefined;
+  'token_url'?: string | undefined;
+  'scopes'?: string[] | undefined;
+} | undefined;
+} | undefined;
+};
 
-export const EventWebhookAllResponse: z.ZodType<EventWebhookAllResponseModel> = z.object({
-'max_allowed': z.number().optional(),
-'webhooks': z.array(EventWebhookSignedResponse).optional()
-});
+export type GetSecurityPolicyResponseModel = {
+  'policy'?: {
+  'id'?: string | undefined;
+  'name'?: string | undefined;
+  'oauth'?: {
+  'client_id'?: string | undefined;
+  'token_url'?: string | undefined;
+  'scopes'?: string[] | undefined;
+} | undefined;
+  'signature'?: {
+  'public_key'?: string | undefined;
+} | undefined;
+} | undefined;
+};
 
-export const ParseSetting: z.ZodType<ParseSettingModel> = z.object({
-'url': z.string().optional(),
-'hostname': z.string().optional(),
-'spam_check': z.boolean().optional(),
-'send_raw': z.boolean().optional()
-});
+export type DeleteSecurityPolicySearchParamsModel = {
+  'force'?: boolean | undefined;
+};
 
-export const ErrorResponse: z.ZodType<ErrorResponseModel> = z.object({
-'errors': z.array(z.object({
-'message': z.string().optional(),
-'field': z.string().nullable().optional(),
-'help': z.object({}).optional()
-})).optional(),
-'id': z.string().optional()
-});
-
-export const AggregatedBy: z.ZodType<AggregatedByModel> = z.enum(['day', 'week', 'month']);
+export type DeleteSecurityPolicyResponseModel = {
+  'policy'?: string | null | undefined;
+};

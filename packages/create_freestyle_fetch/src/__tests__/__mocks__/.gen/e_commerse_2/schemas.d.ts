@@ -1,0 +1,29 @@
+import type { UserModel, ProductInputModel, ProductModel, PaginatedResponseModel, PaginatedProductResponseModel, PaymentMethodModel, CreditCardModel, PayPalModel, CallbackPayloadModel, InventoryUpdatePayloadModel, ApiErrorModel, SearchProductsSearchParamsModel, ProcessOrderBodyModel } from './types';
+
+export declare const parseUser: (value: unknown) => UserModel;
+
+export declare const parseProductInput: (value: unknown) => ProductInputModel;
+
+export declare const parseProduct: (value: unknown) => ProductModel;
+
+export declare const parsePaginatedResponse: (value: unknown) => PaginatedResponseModel;
+
+export declare const parsePaginatedProductResponse: (value: unknown) => PaginatedProductResponseModel;
+
+export declare const parsePaymentMethod: (value: unknown) => PaymentMethodModel;
+
+export declare const parseCreditCard: (value: unknown) => CreditCardModel;
+
+export declare const parsePayPal: (value: unknown) => PayPalModel;
+
+export declare const parseCallbackPayload: (value: unknown) => CallbackPayloadModel;
+
+export declare const parseInventoryUpdatePayload: (value: unknown) => InventoryUpdatePayloadModel;
+
+export declare const parseApiError: (value: unknown) => ApiErrorModel;
+
+export declare const parseSearchProductsSearchParams: (value: unknown) => SearchProductsSearchParamsModel;
+
+export declare const parseCreateProductBody: (value: unknown) => FormData;
+
+export declare const parseProcessOrderBody: (value: unknown) => ProcessOrderBodyModel;

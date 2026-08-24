@@ -1,0 +1,21 @@
+import { f } from '@freestylejs/fetch';
+import * as Schemas from '../schemas';
+
+/**
+ * Plain router structure for the 'orders' domain.
+ * Leaves are uncompiled f.builder() chains; api.ts composes them.
+ */
+export const ordersDomain = {
+'orders': {
+'$orderId': {
+'process': {
+/**
+ * Process an order asynchronously
+ *
+ * Begins processing an order. A callback URL is invoked upon completion.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parseProcessOrderBody)
+}
+}
+}
+};

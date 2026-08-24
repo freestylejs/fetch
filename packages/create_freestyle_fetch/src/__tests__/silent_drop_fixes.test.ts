@@ -3,9 +3,27 @@ import { describe, expect, it } from 'vitest'
 import { AuthGenerator } from '../auth_generator'
 import { AuthSchemeError, OperationValidationError } from '../errors'
 import { parsePaths } from '../path_parser'
-import { generateRouter } from '../router_generator'
+import { generateRouterSurfaces } from '../router_generator'
 import { SchemaGenerator } from '../schema_generator'
 import { SpecValidator } from '../validator'
+
+// All emitted TypeScript surfaces (api.ts + domains/*.ts) joined, so
+// structural assertions keep covering the whole generated client.
+const generateCode = (
+    parsedPaths: Record<string, any>,
+    spec: OpenAPIV3_1.Document,
+    schemaGenerator?: SchemaGenerator
+) => {
+    const surfaces = generateRouterSurfaces(
+        parsedPaths,
+        spec,
+        schemaGenerator ?? new SchemaGenerator(spec)
+    )
+    return [
+        surfaces.apiFileContent,
+        ...surfaces.domainFiles.map((domain) => domain.content),
+    ].join('\n')
+}
 
 const baseSpec = (): OpenAPIV3_1.Document => ({
     openapi: '3.1.0',
@@ -50,8 +68,8 @@ describe('G-1: requestBody $ref is dereferenced through components/requestBodies
                 },
             },
         }
-        const code = generateRouter(parsePaths(s), s)
-        expect(code).toContain('.def_body(Model.User.parse)')
+        const code = generateCode(parsePaths(s), s)
+        expect(code).toContain('.def_body(Schemas.parseUser)')
     })
 
     it('throws OperationValidationError for an unresolvable requestBody $ref', () => {
@@ -66,10 +84,10 @@ describe('G-1: requestBody $ref is dereferenced through components/requestBodies
                 },
             },
         }
-        expect(() => generateRouter(parsePaths(s), s)).toThrow(
+        expect(() => generateCode(parsePaths(s), s)).toThrow(
             OperationValidationError
         )
-        expect(() => generateRouter(parsePaths(s), s)).toThrow(
+        expect(() => generateCode(parsePaths(s), s)).toThrow(
             /UserBody|Unresolvable/
         )
     })
@@ -100,15 +118,18 @@ describe('G-2: x-www-form-urlencoded bodies become URLSearchParams', () => {
                 },
             },
         }
-        const code = generateRouter(parsePaths(s), s)
-        expect(code).toContain(
-            `.def_body((body) => new URLSearchParams(z.object({
+        const generator = new SchemaGenerator(s)
+        const code = generateCode(parsePaths(s), s, generator)
+        const schemasJs = generator.emitSchemasJs()
+        expect(code).toContain('.def_body(Schemas.parseCreateTokenBody)')
+        expect(schemasJs).toContain(
+            `export const parseCreateTokenBody = (value) => new URLSearchParams(z.object({
 'grant_type': z.string()
-}).transform(toUrlSearchParams).parse(body)))`
+}).transform(toUrlSearchParams).parse(value));`
         )
-        expect(code).toContain('const toUrlSearchParams =')
+        expect(schemasJs).toContain('const toUrlSearchParams =')
         // helper emitted exactly once
-        expect(code.match(/const toUrlSearchParams =/g)).toHaveLength(1)
+        expect(schemasJs.match(/const toUrlSearchParams =/g)).toHaveLength(1)
     })
 
     it('prefers application/json over x-www-form-urlencoded', () => {
@@ -132,8 +153,8 @@ describe('G-2: x-www-form-urlencoded bodies become URLSearchParams', () => {
                 },
             },
         }
-        const code = generateRouter(parsePaths(s), s)
-        expect(code).toContain('.def_body(Model.User.parse)')
+        const code = generateCode(parsePaths(s), s)
+        expect(code).toContain('.def_body(Schemas.parseUser)')
         expect(code).not.toContain('URLSearchParams')
     })
 })
@@ -163,9 +184,9 @@ describe('G-3: response $ref is dereferenced through components/responses', () =
                 },
             },
         }
-        const code = generateRouter(parsePaths(s), s)
+        const code = generateCode(parsePaths(s), s)
         expect(code).toContain(
-            '.def_response(async ({ json }) => Model.User.parse(await json()))'
+            '.def_response(async ({ json }) => Schemas.parseUser(await json()))'
         )
     })
 
@@ -182,14 +203,14 @@ describe('G-3: response $ref is dereferenced through components/responses', () =
                 },
             },
         }
-        expect(() => generateRouter(parsePaths(s), s)).toThrow(
+        expect(() => generateCode(parsePaths(s), s)).toThrow(
             OperationValidationError
         )
     })
 })
 
-describe('G-4: inline response schemas become explicit Zod expressions', () => {
-    it('generates def_response with an inline zod expression', () => {
+describe('G-4: inline response schemas become named parsers behind the schemas surface', () => {
+    it('generates def_response bound to a promoted inline parser', () => {
         const s = baseSpec()
         s.paths = {
             '/health': {
@@ -217,12 +238,19 @@ describe('G-4: inline response schemas become explicit Zod expressions', () => {
                 },
             },
         }
-        const code = generateRouter(parsePaths(s), s)
+        const generator = new SchemaGenerator(s)
+        const code = generateCode(parsePaths(s), s, generator)
+        const schemasJs = generator.emitSchemasJs()
         expect(code).toContain(
-            `.def_response(async ({ json }) => z.object({
-'status': z.enum(['ok'])
-}).parse(await json()))`
+            '.def_response(async ({ json }) => Schemas.parseGetHealthResponse(await json()))'
         )
+        expect(schemasJs).toContain(
+            `export const parseGetHealthResponse = (value) => z.object({
+'status': z.enum(['ok'])
+}).parse(value);`
+        )
+        // no inline zod may leak into api.ts
+        expect(code).not.toContain('z.')
     })
 
     it('handles inline array-of-inline responses', () => {
@@ -246,9 +274,14 @@ describe('G-4: inline response schemas become explicit Zod expressions', () => {
                 },
             },
         }
-        const code = generateRouter(parsePaths(s), s)
+        const generator = new SchemaGenerator(s)
+        const code = generateCode(parsePaths(s), s, generator)
+        const schemasJs = generator.emitSchemasJs()
         expect(code).toContain(
-            '.def_response(async ({ json }) => z.array(z.string()).parse(await json()))'
+            '.def_response(async ({ json }) => Schemas.parseNamesGetResponse(await json()))'
+        )
+        expect(schemasJs).toContain(
+            'export const parseNamesGetResponse = (value) => z.array(z.string()).parse(value);'
         )
     })
 
@@ -275,12 +308,12 @@ describe('G-4: inline response schemas become explicit Zod expressions', () => {
                 },
             },
         }
-        expect(() => generateRouter(parsePaths(s), s)).toThrow(
+        expect(() => generateCode(parsePaths(s), s)).toThrow(
             OperationValidationError
         )
     })
 
-    it('reflects inline JSON request bodies as explicit parse expressions', () => {
+    it('reflects inline JSON request bodies as named parsers', () => {
         const s = baseSpec()
         s.paths = {
             '/webhooks': {
@@ -302,11 +335,14 @@ describe('G-4: inline response schemas become explicit Zod expressions', () => {
                 },
             },
         }
-        const code = generateRouter(parsePaths(s), s)
-        expect(code).toContain(
-            `.def_body((body) => z.object({
+        const generator = new SchemaGenerator(s)
+        const code = generateCode(parsePaths(s), s, generator)
+        const schemasJs = generator.emitSchemasJs()
+        expect(code).toContain('.def_body(Schemas.parseWebhooksPostBody)')
+        expect(schemasJs).toContain(
+            `export const parseWebhooksPostBody = (value) => z.object({
 'enabled': z.boolean()
-}).parse(body))`
+}).parse(value);`
         )
     })
 })
@@ -346,9 +382,13 @@ describe('G-9: OpenAPI 3.0 boolean nullable', () => {
                 nickname: { type: 'string', nullable: true },
             },
         } as any
-        const models = new SchemaGenerator(spec).generateModels()
-        expect(models).toContain("'nickname': z.string().nullable().optional()")
-        expect(models).toContain("'nickname'?: string | null | undefined;")
+        const generator = new SchemaGenerator(spec)
+        const schemasJs = generator.emitSchemasJs()
+        const types = generator.emitTypes()
+        expect(schemasJs).toContain(
+            "'nickname': z.string().nullable().optional()"
+        )
+        expect(types).toContain("'nickname'?: string | null | undefined;")
     })
 })
 
@@ -384,10 +424,15 @@ describe('G-13: enums with non-string members', () => {
     it('renders numeric enum members in model type unions', () => {
         const spec = baseSpec()
         spec.components!.schemas!.Code = { enum: [1, 2] } as any
-        const models = new SchemaGenerator(spec).generateModels()
-        expect(models).toContain('export type CodeModel = 1 | 2;')
-        expect(models).toContain(
-            'export const Code: z.ZodType<CodeModel> = z.union([z.literal(1), z.literal(2)]);'
+        const generator = new SchemaGenerator(spec)
+        const types = generator.emitTypes()
+        const schemasJs = generator.emitSchemasJs()
+        expect(types).toContain('export type CodeModel = 1 | 2;')
+        expect(schemasJs).toContain(
+            'const Code = z.union([z.literal(1), z.literal(2)]);'
+        )
+        expect(schemasJs).toContain(
+            'export const parseCode = (value) => Code.parse(value);'
         )
     })
 })
@@ -404,7 +449,7 @@ describe('G-10: server variable substitution and validation warning', () => {
                 },
             },
         ]
-        const code = generateRouter(parsePaths(s), s)
+        const code = generateCode(parsePaths(s), s)
         expect(code).toContain(
             "baseUrl: config.baseUrl || 'https://api.example.com/v2'"
         )
@@ -418,7 +463,7 @@ describe('G-10: server variable substitution and validation warning', () => {
                 variables: {},
             },
         ]
-        const code = generateRouter(parsePaths(s), s)
+        const code = generateCode(parsePaths(s), s)
         expect(code).toContain(
             "baseUrl: config.baseUrl || 'https://{region}.example.com'"
         )

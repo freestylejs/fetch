@@ -6,7 +6,7 @@ import type { Param } from '../../../packages/fetch/src/core/fetcher/core.type'
 import type { InferFetchUnit } from '../../../packages/fetch/src/core/fetcher/unit'
 import type { OmitNever } from '../../../packages/fetch/src/utils/types'
 import { createClient } from '../corpus/stripe/api'
-import type * as Model from '../corpus/stripe/models'
+import type * as Model from '../corpus/stripe/types'
 
 declare const eq: <Assertion extends true>() => void
 

@@ -2,8 +2,26 @@ import type { OpenAPIV3_1 } from 'openapi-types'
 import { describe, expect, it } from 'vitest'
 import { OperationValidationError } from '../errors'
 import { parsePaths } from '../path_parser'
-import { generateRouter } from '../router_generator'
+import { generateRouterSurfaces } from '../router_generator'
 import { SchemaGenerator } from '../schema_generator'
+
+// All emitted TypeScript surfaces (api.ts + domains/*.ts) joined, so
+// structural assertions keep covering the whole generated client.
+const generateCode = (
+    parsedPaths: Record<string, any>,
+    spec: OpenAPIV3_1.Document,
+    schemaGenerator?: SchemaGenerator
+) => {
+    const surfaces = generateRouterSurfaces(
+        parsedPaths,
+        spec,
+        schemaGenerator ?? new SchemaGenerator(spec)
+    )
+    return [
+        surfaces.apiFileContent,
+        ...surfaces.domainFiles.map((domain) => domain.content),
+    ].join('\n')
+}
 
 describe('router_generator edge cases', () => {
     describe('Reference Edge Cases', () => {
@@ -24,7 +42,7 @@ describe('router_generator edge cases', () => {
             }
 
             // This should not throw, even with unusual ref
-            const result = generateRouter({ users: spec.paths['/users'] }, spec)
+            const result = generateCode({ users: spec.paths['/users'] }, spec)
             expect(result).toContain('export const createClient')
         })
 
@@ -55,10 +73,10 @@ describe('router_generator edge cases', () => {
 
             // Empty modelName is a spec defect and must fail loudly instead of
             // emitting invalid code like `Model..parse`
-            expect(() => generateRouter(parsedPaths, spec)).toThrow(
+            expect(() => generateCode(parsedPaths, spec)).toThrow(
                 OperationValidationError
             )
-            expect(() => generateRouter(parsedPaths, spec)).toThrow(
+            expect(() => generateCode(parsedPaths, spec)).toThrow(
                 /Malformed \$ref/
             )
         })
@@ -91,7 +109,7 @@ describe('router_generator edge cases', () => {
                 },
             }
 
-            expect(() => generateRouter(parsedPaths, spec)).toThrow(
+            expect(() => generateCode(parsedPaths, spec)).toThrow(
                 OperationValidationError
             )
         })
@@ -125,7 +143,7 @@ describe('router_generator edge cases', () => {
                 },
             }
 
-            expect(() => generateRouter(parsedPaths, spec)).toThrow(
+            expect(() => generateCode(parsedPaths, spec)).toThrow(
                 OperationValidationError
             )
         })
@@ -153,7 +171,7 @@ describe('router_generator edge cases', () => {
                 },
             }
 
-            const result = generateRouter({ users: spec.paths['/users'] }, spec)
+            const result = generateCode({ users: spec.paths['/users'] }, spec)
             // Should process the pathParams correctly even when some are $ref
             expect(result).toContain('export const createClient')
         })
@@ -192,9 +210,11 @@ describe('router_generator edge cases', () => {
                 },
             }
 
-            const result = generateRouter(parsedPaths, spec)
+            const generator = new SchemaGenerator(spec)
+            const result = generateCode(parsedPaths, spec, generator)
+            const schemasJs = generator.emitSchemasJs()
             // Should not duplicate the 'shared' parameter
-            const sharedCount = (result.match(/'shared':/g) || []).length
+            const sharedCount = (schemasJs.match(/'shared':/g) || []).length
             expect(sharedCount).toBe(1) // Should only appear once
         })
 
@@ -221,7 +241,7 @@ describe('router_generator edge cases', () => {
                 },
             }
 
-            const result = generateRouter(parsedPaths, spec)
+            const result = generateCode(parsedPaths, spec)
             // Should handle all reference parameters
             expect(result).toContain('export const createClient')
         })
@@ -254,7 +274,7 @@ describe('router_generator edge cases', () => {
                 },
             }
 
-            const result = generateRouter(parsePaths(spec), spec)
+            const result = generateCode(parsePaths(spec), spec)
 
             // The real operation must be preserved as a nested node...
             expect(result).toContain("'delete': {\n'POST'")
@@ -280,7 +300,7 @@ describe('router_generator edge cases', () => {
                 },
             }
 
-            const result = generateRouter(parsePaths(spec), spec)
+            const result = generateCode(parsePaths(spec), spec)
             expect(result).toContain("'DELETE': f.builder()")
             // the {id} segment stays a plain node wrapping the operation
             expect(result).toContain("'$id': {\n'DELETE'")
@@ -320,9 +340,15 @@ describe('router_generator edge cases', () => {
                 },
             }
 
-            const result = generateRouter(parsePaths(spec), spec)
+            const generator = new SchemaGenerator(spec)
+            const result = generateCode(parsePaths(spec), spec, generator)
+            const schemasJs = generator.emitSchemasJs()
+            // promoted parser references the component const bare (schemas scope)
+            expect(schemasJs).toContain(
+                `'aggregated_by': AggregatedBy.optional()`
+            )
             expect(result).toContain(
-                `'aggregated_by': Model.AggregatedBy.optional()`
+                '.def_searchparams(Schemas.parseListCallsSearchParams)'
             )
         })
 
@@ -362,18 +388,19 @@ describe('router_generator edge cases', () => {
                 },
             }
 
-            const result = generateRouter(parsePaths(spec), spec)
-            // nested $ref inside an inline object param gets qualified too
-            expect(result).toContain(`'owner': Model.Owner.optional()`)
-
-            // models context stays bare
             const generator = new SchemaGenerator(spec)
-            const models = generator.generateModels()
-            expect(models).toContain(
-                'export const Owner: z.ZodType<OwnerModel> = z.object({'
+            const result = generateCode(parsePaths(spec), spec, generator)
+            const schemasJs = generator.emitSchemasJs()
+            // nested $ref inside an inline object param resolves to the
+            // component const inside the promoted parser
+            expect(schemasJs).toContain(`'owner': Owner.optional()`)
+            expect(result).toContain(
+                '.def_searchparams(Schemas.parseListItemsSearchParams)'
             )
-            // nested property refs inside models stay bare (no Model. prefix)
-            expect(models).not.toContain('Model.')
+
+            // component consts stay bare in schemas scope (no legacy prefix)
+            expect(schemasJs).not.toContain('Model.')
+            expect(schemasJs).toContain('const Owner = z.object({')
         })
     })
 
@@ -415,19 +442,19 @@ describe('router_generator edge cases', () => {
                 },
             }
 
-            // models.ts resolves "user_account"→UserAccount, "UserAccount"→UserAccount_1
+            // types.ts resolves "user_account"→UserAccount, "UserAccount"→UserAccount_1
             const generator = new SchemaGenerator(spec)
-            const models = generator.generateModels()
-            expect(models).toContain(
+            const types = generator.emitTypes()
+            expect(types).toContain(
                 "export type UserAccountModel = {\n  'id'?: string | undefined;\n}"
             )
-            expect(models).toContain(
+            expect(types).toContain(
                 "export type UserAccount_1Model = {\n  'name'?: string | undefined;\n}"
             )
 
             // api.ts must reference the same resolved export via the map
-            const result = generateRouter(parsePaths(spec), spec)
-            expect(result).toContain('Model.UserAccount_1.parse(await json())')
+            const result = generateCode(parsePaths(spec), spec, generator)
+            expect(result).toContain('Schemas.parseUserAccount_1(await json())')
 
             const exported = generator.getExportedName('UserAccount')
             expect(exported).toBe('UserAccount_1')
@@ -464,10 +491,12 @@ describe('router_generator edge cases', () => {
                 },
             }
 
-            const result = generateRouter(parsePaths(spec), spec)
-            expect(result).toContain(`'start-date': z.string().optional()`)
-            expect(result).toContain(`'page': z.number().optional()`)
-            expect(result).not.toMatch(/[^']start-date:/)
+            const generator = new SchemaGenerator(spec)
+            const result = generateCode(parsePaths(spec), spec, generator)
+            const schemasJs = generator.emitSchemasJs()
+            expect(schemasJs).toContain(`'start-date': z.string().optional()`)
+            expect(schemasJs).toContain(`'page': z.number().optional()`)
+            expect(schemasJs).not.toMatch(/[^']start-date:/)
         })
 
         it('should escape quotes and backslashes in generated strings', () => {
@@ -491,8 +520,10 @@ describe('router_generator edge cases', () => {
                 },
             }
 
-            const result = generateRouter(parsePaths(spec), spec)
-            expect(result).toContain(`'quo\\'te\\\\path':`)
+            const generator = new SchemaGenerator(spec)
+            const result = generateCode(parsePaths(spec), spec, generator)
+            const schemasJs = generator.emitSchemasJs()
+            expect(schemasJs).toContain(`'quo\\'te\\\\path':`)
         })
     })
 })

@@ -662,26 +662,30 @@ describe('SchemaGenerator', () => {
         })
     })
 
-    describe('generateModels()', () => {
-        it('should generate empty string for spec without components', () => {
+    describe('split-surface emitters (types / schemas.js / schemas.d.ts)', () => {
+        it('should emit no component surface for spec without components', () => {
             const spec: OpenAPIV3_1.Document = {
                 openapi: '3.1.0',
                 info: { title: 'Test', version: '1.0.0' },
                 paths: {},
             }
             const generator = new SchemaGenerator(spec)
-            const result = generator.generateModels()
-            expect(result).toBe('')
+            expect(generator.emitTypes()).toBe('// Helper types for schemas')
+            expect(generator.emitSchemasJs()).toBe("import { z } from 'zod';")
+            expect(generator.emitSchemasDecl()).toBe('')
         })
 
-        it('should generate empty string for spec with empty schemas', () => {
+        it('should keep the zod import inside schemas.js only', () => {
             const spec = createSpec({})
             const generator = new SchemaGenerator(spec)
-            const result = generator.generateModels()
-            expect(result).toContain("import { z } from 'zod';")
+            expect(generator.emitSchemasJs()).toContain(
+                "import { z } from 'zod';"
+            )
+            // the .d.ts type surface must never reference zod
+            expect(generator.emitSchemasDecl()).not.toContain('zod')
         })
 
-        it('should generate model exports with PascalCase names', () => {
+        it('should emit parse functions with PascalCase names', () => {
             const spec = createSpec({
                 'user-profile': {
                     type: 'object',
@@ -689,28 +693,37 @@ describe('SchemaGenerator', () => {
                 },
             })
             const generator = new SchemaGenerator(spec)
-            const result = generator.generateModels()
-            expect(result).toContain(
-                'export const UserProfile: z.ZodType<UserProfileModel> = z.object({'
+            const schemasJs = generator.emitSchemasJs()
+            expect(schemasJs).toContain('const UserProfile = z.object({')
+            expect(schemasJs).toContain("'name': z.string().optional()")
+            expect(schemasJs).toContain(
+                'export const parseUserProfile = (value) => UserProfile.parse(value);'
             )
-            expect(result).toContain("'name': z.string().optional()")
-            expect(result).toContain('});')
-            expect(result).toContain(
+            expect(generator.emitTypes()).toContain(
                 "export type UserProfileModel = {\n  'name'?: string | undefined;\n};"
+            )
+            expect(generator.emitSchemasDecl()).toContain(
+                "import type { UserProfileModel } from './types';"
+            )
+            expect(generator.emitSchemasDecl()).toContain(
+                'export declare const parseUserProfile: (value: unknown) => UserProfileModel;'
             )
         })
 
-        it('should generate imports and exports', () => {
+        it('should split primitive models across all three surfaces', () => {
             const spec = createSpec({
                 User: { type: 'string' },
             })
             const generator = new SchemaGenerator(spec)
-            const result = generator.generateModels()
-            expect(result).toContain("import { z } from 'zod';")
-            expect(result).toContain(
-                'export const User: z.ZodType<UserModel> = z.string();'
+            expect(generator.emitSchemasJs()).toContain(
+                'const User = z.string();'
             )
-            expect(result).toContain('export type UserModel = string;')
+            expect(generator.emitTypes()).toContain(
+                'export type UserModel = string;'
+            )
+            expect(generator.emitSchemasDecl()).toContain(
+                'export declare const parseUser: (value: unknown) => UserModel;'
+            )
         })
 
         it('should handle multiple schemas', () => {
@@ -722,9 +735,9 @@ describe('SchemaGenerator', () => {
                 },
             })
             const generator = new SchemaGenerator(spec)
-            const result = generator.generateModels()
-            expect(result).toContain('export const User')
-            expect(result).toContain('export const Post')
+            const result = generator.emitSchemasJs()
+            expect(result).toContain('export const parseUser')
+            expect(result).toContain('export const parsePost')
         })
     })
 
@@ -857,16 +870,14 @@ describe('SchemaGenerator', () => {
                 },
             })
             const generator = new SchemaGenerator(spec)
-            const models = generator.generateModels()
+            const schemasJs = generator.emitSchemasJs()
 
-            // G-7: discriminatedUnion results rely on inference, no ZodType annotation
-            expect(models).toContain(
-                "export const UnionHell = z.discriminatedUnion('type', [OptionA, OptionB]);"
+            expect(schemasJs).toContain(
+                "const UnionHell = z.discriminatedUnion('type', [OptionA, OptionB]);"
             )
-            // Union members must also drop the annotation so discriminant
-            // info survives into z.discriminatedUnion.
-            expect(models).toContain('export const OptionA = z.object({')
-            expect(models).toContain('export const OptionB = z.object({')
+            expect(schemasJs).toContain(
+                'export const parseUnionHell = (value) => UnionHell.parse(value);'
+            )
         })
 
         it('should annotate plain object schemas with ZodType', () => {
@@ -881,11 +892,12 @@ describe('SchemaGenerator', () => {
                 },
             })
             const generator = new SchemaGenerator(spec)
-            const models = generator.generateModels()
+            const schemasJs = generator.emitSchemasJs()
 
-            // object schemas keep their explicit type annotation
-            expect(models).toContain(
-                'export const Plain: z.ZodType<PlainModel> = z.object({'
+            // plain object schemas are emitted as consts + named parsers
+            expect(schemasJs).toContain('const Plain = z.object({')
+            expect(schemasJs).toContain(
+                'export const parsePlain = (value) => Plain.parse(value);'
             )
         })
 
@@ -1056,12 +1068,13 @@ describe('SchemaGenerator', () => {
             expect(exported).toBe('_2fa')
             expect(generator.getExportedName('2fa_disable')).toBe('_2faDisable')
 
-            const models = generator.generateModels()
-            expect(models).toContain('export type _2faModel = {')
-            expect(models).toContain(
-                'export const _2fa: z.ZodType<_2faModel> = z.object({'
+            expect(generator.emitTypes()).toContain('export type _2faModel = {')
+            expect(generator.emitSchemasJs()).toContain(
+                'const _2fa = z.object({'
             )
-            expect(models).toContain('export type _2faDisableModel = {')
+            expect(generator.emitTypes()).toContain(
+                'export type _2faDisableModel = {'
+            )
 
             // api-context references use the sanitized name too
             const refResult = generator.generateZodSchema(
@@ -1090,17 +1103,19 @@ describe('SchemaGenerator', () => {
                     },
                 },
             })
-            const models = new SchemaGenerator(spec).generateModels()
+            const generator = new SchemaGenerator(spec)
 
             // enum values
-            expect(models).toContain("z.enum(['it\\'s', 'a\\\\b'])")
+            expect(generator.emitSchemasJs()).toContain(
+                "z.enum(['it\\'s', 'a\\\\b'])"
+            )
             // type-level enum union
-            expect(models).toContain("'it\\'s' | 'a\\\\b'")
+            expect(generator.emitTypes()).toContain("'it\\'s' | 'a\\\\b'")
             // const literal
-            expect(models).toContain("z.literal('con\\'st')")
+            expect(generator.emitSchemasJs()).toContain("z.literal('con\\'st')")
             // object keys
-            expect(models).toContain("'quo\\'te'")
-            expect(models).toContain("'back\\\\slash'")
+            expect(generator.emitSchemasJs()).toContain("'quo\\'te'")
+            expect(generator.emitSchemasJs()).toContain("'back\\\\slash'")
 
             const inline = new SchemaGenerator(spec).generateZodSchema(
                 spec.components!.schemas!.Keyed as OpenAPIV3_1.SchemaObject,
@@ -1190,7 +1205,7 @@ describe('SchemaGenerator', () => {
             })
 
             const generator = new SchemaGenerator(spec)
-            const result = generator.generateModels()
+            const result = generator.emitSchemasJs()
 
             // The $defs pattern should replace z.array(z.any()) with z.array(Product)
             expect(result).toContain('Product')
@@ -1213,10 +1228,12 @@ describe('SchemaGenerator', () => {
                 },
             })
             const generator = new SchemaGenerator(spec)
-            const result = generator.generateModels()
+            const types = generator.emitTypes()
+            const schemasJs = generator.emitSchemasJs()
 
-            expect(result).toContain('/**\n * A user object\n */')
-            expect(result).toContain('/**\n   * The user name\n   */')
+            expect(types).toContain('/**\n * A user object\n */')
+            expect(types).toContain('/**\n   * The user name\n   */')
+            expect(schemasJs).toContain('/**\n * A user object\n */')
         })
 
         it('should generate JSDoc for properties', () => {
@@ -1236,7 +1253,7 @@ describe('SchemaGenerator', () => {
                 },
             })
             const generator = new SchemaGenerator(spec)
-            const result = generator.generateModels()
+            const result = generator.emitTypes()
 
             expect(result).toContain('/**\n   * The user name\n   */')
             expect(result).toContain(

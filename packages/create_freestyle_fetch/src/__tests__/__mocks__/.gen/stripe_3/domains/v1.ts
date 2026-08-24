@@ -1,0 +1,4970 @@
+import { f } from '@freestylejs/fetch';
+import * as Schemas from '../schemas';
+
+/**
+ * Plain router structure for the 'v1' domain.
+ * Leaves are uncompiled f.builder() chains; api.ts composes them.
+ */
+export const v1Domain = {
+'v1': {
+'account': {
+/**
+ * Retrieve account
+ *
+ * Retrieves the details of an account.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetAccountSearchParams).def_body(Schemas.parseGetAccountBody).def_response(async ({ json }) => Schemas.parseAccount(await json()))
+},
+'account_links': {
+/**
+ * Create an account link
+ *
+ * Creates an AccountLink object that includes a single-use Stripe URL that the platform can redirect their user to in order to take them through the Connect Onboarding flow.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostAccountLinksBody).def_response(async ({ json }) => Schemas.parseAccountLink(await json()))
+},
+'account_notices': {
+/**
+ * List AccountNotices
+ *
+ * Retrieves a list of `AccountNotice` objects. The objects are sorted in descending order by creation date, with the most-recently-created object appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetAccountNoticesSearchParams).def_body(Schemas.parseGetAccountNoticesBody).def_response(async ({ json }) => Schemas.parseGetAccountNoticesResponse(await json())),
+'$account_notice': {
+/**
+ * Retrieve an AccountNotice
+ *
+ * Retrieves an `AccountNotice` object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetAccountNoticesAccountNoticeSearchParams).def_body(Schemas.parseGetAccountNoticesAccountNoticeBody).def_response(async ({ json }) => Schemas.parseAccountNotice(await json())),
+/**
+ * Update an AccountNotice
+ *
+ * Updates an `AccountNotice` object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostAccountNoticesAccountNoticeBody).def_response(async ({ json }) => Schemas.parseAccountNotice(await json()))
+}
+},
+'account_sessions': {
+/**
+ * Create an Account Session
+ *
+ * Creates a AccountSession object that includes a single-use token that the platform can use on their front-end to grant client-side API access.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostAccountSessionsBody).def_response(async ({ json }) => Schemas.parseAccountSession(await json()))
+},
+'accounts': {
+/**
+ * List all connected accounts
+ *
+ * Returns a list of accounts connected to your platform via [Connect](/docs/connect). If you’re not a platform, the list is empty.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetAccountsSearchParams).def_body(Schemas.parseGetAccountsBody).def_response(async ({ json }) => Schemas.parseGetAccountsResponse(await json())),
+/**
+ * With [Connect](/docs/connect), you can create Stripe accounts for your users.
+ * To do this, you’ll first need to [register your platform](https://dashboard.stripe.com/account/applications/settings).
+ * 
+ * If you’ve already collected information for your connected accounts, you [can prefill that information](/docs/connect/best-practices#onboarding) when
+ * creating the account. Connect Onboarding won’t ask for the prefilled information during account onboarding.
+ * You can prefill any information on the account.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostAccountsBody).def_response(async ({ json }) => Schemas.parseAccount(await json())),
+'$account': {
+/**
+ * Delete an account
+ *
+ * With [Connect](/connect), you can delete accounts you manage.
+ * 
+ * Test-mode accounts can be deleted at any time.
+ * 
+ * Live-mode accounts that have access to the standard dashboard and Stripe is responsible for negative account balances cannot be deleted, which includes Standard accounts. All other Live-mode accounts, can be deleted when all [balances](/api/balance/balance_object) are zero.
+ * 
+ * If you want to delete your own account, use the [account information tab in your account settings](https://dashboard.stripe.com/settings/account) instead.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteAccountsAccountBody).def_response(async ({ json }) => Schemas.parseDeletedAccount(await json())),
+/**
+ * Retrieve account
+ *
+ * Retrieves the details of an account.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetAccountsAccountSearchParams).def_body(Schemas.parseGetAccountsAccountBody).def_response(async ({ json }) => Schemas.parseAccount(await json())),
+/**
+ * Update an account
+ *
+ * Updates a [connected account](/connect/accounts) by setting the values of the parameters passed. Any parameters not provided are
+ * left unchanged.
+ * 
+ * For accounts where [controller.requirement_collection](/api/accounts/object#account_object-controller-requirement_collection)
+ * is `application`, which includes Custom accounts, you can update any information on the account.
+ * 
+ * For accounts where [controller.requirement_collection](/api/accounts/object#account_object-controller-requirement_collection)
+ * is `stripe`, which includes Standard and Express accounts, you can update all information until you create
+ * an [Account Link](/api/account_links) or [Account Session](/api/account_sessions) to start Connect onboarding,
+ * after which some properties can no longer be updated.
+ * 
+ * To update your own account, use the [Dashboard](https://dashboard.stripe.com/settings/account). Refer to our
+ * [Connect](/docs/connect/updating-accounts) documentation to learn more about updating accounts.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostAccountsAccountBody).def_response(async ({ json }) => Schemas.parseAccount(await json())),
+'capabilities': {
+/**
+ * List all account capabilities
+ *
+ * Returns a list of capabilities associated with the account. The capabilities are returned sorted by creation date, with the most recent capability appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetAccountsAccountCapabilitiesSearchParams).def_body(Schemas.parseGetAccountsAccountCapabilitiesBody).def_response(async ({ json }) => Schemas.parseGetAccountsAccountCapabilitiesResponse(await json())),
+'$capability': {
+/**
+ * Retrieve an Account Capability
+ *
+ * Retrieves information about the specified Account Capability.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetAccountsAccountCapabilitiesCapabilitySearchParams).def_body(Schemas.parseGetAccountsAccountCapabilitiesCapabilityBody).def_response(async ({ json }) => Schemas.parseCapability(await json())),
+/**
+ * Update an Account Capability
+ *
+ * Updates an existing Account Capability. Request or remove a capability by updating its `requested` parameter.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostAccountsAccountCapabilitiesCapabilityBody).def_response(async ({ json }) => Schemas.parseCapability(await json()))
+}
+},
+'external_accounts': {
+/**
+ * List all external accounts
+ *
+ * List external accounts for an account.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetAccountsAccountExternalAccountsSearchParams).def_body(Schemas.parseGetAccountsAccountExternalAccountsBody).def_response(async ({ json }) => Schemas.parseGetAccountsAccountExternalAccountsResponse(await json())),
+/**
+ * Create an external account
+ *
+ * Create an external account for a given account.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostAccountsAccountExternalAccountsBody).def_response(async ({ json }) => Schemas.parseExternalAccount(await json())),
+'$id': {
+/**
+ * Delete an external account
+ *
+ * Delete a specified external account for a given account.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteAccountsAccountExternalAccountsIdBody).def_response(async ({ json }) => Schemas.parseDeletedExternalAccount(await json())),
+/**
+ * Retrieve an external account
+ *
+ * Retrieve a specified external account for a given account.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetAccountsAccountExternalAccountsIdSearchParams).def_body(Schemas.parseGetAccountsAccountExternalAccountsIdBody).def_response(async ({ json }) => Schemas.parseExternalAccount(await json())),
+/**
+ * Updates the metadata, account holder name, account holder type of a bank account belonging to
+ * a connected account and optionally sets it as the default for its currency. Other bank account
+ * details are not editable by design.
+ * 
+ * You can only update bank accounts when [account.controller.requirement_collection](/api/accounts/object#account_object-controller-requirement_collection) is `application`, which includes [Custom accounts](/connect/custom-accounts).
+ * 
+ * You can re-enable a disabled bank account by performing an update call without providing any
+ * arguments or changes.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostAccountsAccountExternalAccountsIdBody).def_response(async ({ json }) => Schemas.parseExternalAccount(await json()))
+}
+},
+'login_links': {
+/**
+ * Create a login link
+ *
+ * Creates a login link for a connected account to access the Express Dashboard.
+ * 
+ * **You can only create login links for accounts that use the [Express Dashboard](/connect/express-dashboard) and are connected to your platform**.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostAccountsAccountLoginLinksBody).def_response(async ({ json }) => Schemas.parseLoginLink(await json()))
+},
+'persons': {
+/**
+ * List all persons
+ *
+ * Returns a list of people associated with the account’s legal entity. The people are returned sorted by creation date, with the most recent people appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetAccountsAccountPersonsSearchParams).def_body(Schemas.parseGetAccountsAccountPersonsBody).def_response(async ({ json }) => Schemas.parseGetAccountsAccountPersonsResponse(await json())),
+/**
+ * Create a person
+ *
+ * Creates a new person.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostAccountsAccountPersonsBody).def_response(async ({ json }) => Schemas.parsePerson(await json())),
+'$person': {
+/**
+ * Delete a person
+ *
+ * Deletes an existing person’s relationship to the account’s legal entity. Any person with a relationship for an account can be deleted through the API, except if the person is the `account_opener`. If your integration is using the `executive` parameter, you cannot delete the only verified `executive` on file.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteAccountsAccountPersonsPersonBody).def_response(async ({ json }) => Schemas.parseDeletedPerson(await json())),
+/**
+ * Retrieve a person
+ *
+ * Retrieves an existing person.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetAccountsAccountPersonsPersonSearchParams).def_body(Schemas.parseGetAccountsAccountPersonsPersonBody).def_response(async ({ json }) => Schemas.parsePerson(await json())),
+/**
+ * Update a person
+ *
+ * Updates an existing person.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostAccountsAccountPersonsPersonBody).def_response(async ({ json }) => Schemas.parsePerson(await json()))
+}
+},
+'reject': {
+/**
+ * Reject an account
+ *
+ * With [Connect](/connect), you can reject accounts that you have flagged as suspicious.
+ * 
+ * Only accounts where your platform is liable for negative account balances, which includes Custom and Express accounts, can be rejected. Test-mode accounts can be rejected at any time. Live-mode accounts can only be rejected after all balances are zero.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostAccountsAccountRejectBody).def_response(async ({ json }) => Schemas.parseAccount(await json()))
+}
+}
+},
+'apple_pay': {
+'domains': {
+/**
+ * List apple pay domains.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetApplePayDomainsSearchParams).def_body(Schemas.parseGetApplePayDomainsBody).def_response(async ({ json }) => Schemas.parseGetApplePayDomainsResponse(await json())),
+/**
+ * Create an apple pay domain.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostApplePayDomainsBody).def_response(async ({ json }) => Schemas.parseApplePayDomain(await json())),
+'$domain': {
+/**
+ * Delete an apple pay domain.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteApplePayDomainsDomainBody).def_response(async ({ json }) => Schemas.parseDeletedApplePayDomain(await json())),
+/**
+ * Retrieve an apple pay domain.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetApplePayDomainsDomainSearchParams).def_body(Schemas.parseGetApplePayDomainsDomainBody).def_response(async ({ json }) => Schemas.parseApplePayDomain(await json()))
+}
+}
+},
+'application_fees': {
+/**
+ * List all application fees
+ *
+ * Returns a list of application fees you’ve previously collected. The application fees are returned in sorted order, with the most recent fees appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetApplicationFeesSearchParams).def_body(Schemas.parseGetApplicationFeesBody).def_response(async ({ json }) => Schemas.parseGetApplicationFeesResponse(await json())),
+'$fee': {
+'refunds': {
+'$id': {
+/**
+ * Retrieve an application fee refund
+ *
+ * By default, you can see the 10 most recent refunds stored directly on the application fee object, but you can also retrieve details about a specific refund stored on the application fee.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetApplicationFeesFeeRefundsIdSearchParams).def_body(Schemas.parseGetApplicationFeesFeeRefundsIdBody).def_response(async ({ json }) => Schemas.parseFeeRefund(await json())),
+/**
+ * Update an application fee refund
+ *
+ * Updates the specified application fee refund by setting the values of the parameters passed. Any parameters not provided will be left unchanged.
+ * 
+ * This request only accepts metadata as an argument.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostApplicationFeesFeeRefundsIdBody).def_response(async ({ json }) => Schemas.parseFeeRefund(await json()))
+}
+}
+},
+'$id': {
+/**
+ * Retrieve an application fee
+ *
+ * Retrieves the details of an application fee that your account has collected. The same information is returned when refunding the application fee.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetApplicationFeesIdSearchParams).def_body(Schemas.parseGetApplicationFeesIdBody).def_response(async ({ json }) => Schemas.parseApplicationFee(await json())),
+'refunds': {
+/**
+ * List all application fee refunds
+ *
+ * You can see a list of the refunds belonging to a specific application fee. Note that the 10 most recent refunds are always available by default on the application fee object. If you need more than those 10, you can use this API method and the `limit` and `starting_after` parameters to page through additional refunds.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetApplicationFeesIdRefundsSearchParams).def_body(Schemas.parseGetApplicationFeesIdRefundsBody).def_response(async ({ json }) => Schemas.parseGetApplicationFeesIdRefundsResponse(await json())),
+/**
+ * Create an application fee refund
+ *
+ * Refunds an application fee that has previously been collected but not yet refunded.
+ * Funds will be refunded to the Stripe account from which the fee was originally collected.
+ * 
+ * You can optionally refund only part of an application fee.
+ * You can do so multiple times, until the entire fee has been refunded.
+ * 
+ * Once entirely refunded, an application fee can’t be refunded again.
+ * This method will raise an error when called on an already-refunded application fee,
+ * or when trying to refund more money than is left on an application fee.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostApplicationFeesIdRefundsBody).def_response(async ({ json }) => Schemas.parseFeeRefund(await json()))
+}
+}
+},
+'apps': {
+'secrets': {
+/**
+ * List secrets
+ *
+ * List all secrets stored on the given scope.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetAppsSecretsSearchParams).def_body(Schemas.parseGetAppsSecretsBody).def_response(async ({ json }) => Schemas.parseGetAppsSecretsResponse(await json())),
+/**
+ * Set a Secret
+ *
+ * Create or replace a secret in the secret store.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostAppsSecretsBody).def_response(async ({ json }) => Schemas.parseAppsSecret(await json())),
+'delete': {
+/**
+ * Delete a Secret
+ *
+ * Deletes a secret from the secret store by name and scope.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostAppsSecretsDeleteBody).def_response(async ({ json }) => Schemas.parseAppsSecret(await json()))
+},
+'find': {
+/**
+ * Find a Secret
+ *
+ * Finds a secret in the secret store by name and scope.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetAppsSecretsFindSearchParams).def_body(Schemas.parseGetAppsSecretsFindBody).def_response(async ({ json }) => Schemas.parseAppsSecret(await json()))
+}
+}
+},
+'balance': {
+/**
+ * Retrieve balance
+ *
+ * Retrieves the current account balance, based on the authentication that was used to make the request.
+ *  For a sample request, see [Accounting for negative balances](/docs/connect/account-balances#accounting-for-negative-balances).
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetBalanceSearchParams).def_body(Schemas.parseGetBalanceBody).def_response(async ({ json }) => Schemas.parseBalance(await json()))
+},
+'balance_settings': {
+/**
+ * Retrieve balance settings
+ *
+ * Retrieves balance settings for a given connected account.
+ *  Related guide: [Making API calls for connected accounts](/connect/authentication)
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetBalanceSettingsSearchParams).def_body(Schemas.parseGetBalanceSettingsBody).def_response(async ({ json }) => Schemas.parseBalanceSettings(await json())),
+/**
+ * Update balance settings
+ *
+ * Updates balance settings for a given connected account.
+ *  Related guide: [Making API calls for connected accounts](/connect/authentication)
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostBalanceSettingsBody).def_response(async ({ json }) => Schemas.parseBalanceSettings(await json()))
+},
+'balance_transactions': {
+/**
+ * List all balance transactions
+ *
+ * Returns a list of transactions that have contributed to the Stripe account balance (e.g., charges, transfers, and so forth). The transactions are returned in sorted order, with the most recent transactions appearing first.
+ * 
+ * Note that this endpoint was previously called “Balance history” and used the path `/v1/balance/history`.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetBalanceTransactionsSearchParams).def_body(Schemas.parseGetBalanceTransactionsBody).def_response(async ({ json }) => Schemas.parseGetBalanceTransactionsResponse(await json())),
+'$id': {
+/**
+ * Retrieve a balance transaction
+ *
+ * Retrieves the balance transaction with the given ID.
+ * 
+ * Note that this endpoint previously used the path `/v1/balance/history/:id`.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetBalanceTransactionsIdSearchParams).def_body(Schemas.parseGetBalanceTransactionsIdBody).def_response(async ({ json }) => Schemas.parseBalanceTransaction(await json()))
+}
+},
+'billing': {
+'alerts': {
+/**
+ * List billing alerts
+ *
+ * Lists billing active and inactive alerts
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetBillingAlertsSearchParams).def_body(Schemas.parseGetBillingAlertsBody).def_response(async ({ json }) => Schemas.parseGetBillingAlertsResponse(await json())),
+/**
+ * Create a billing alert
+ *
+ * Creates a billing alert
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostBillingAlertsBody).def_response(async ({ json }) => Schemas.parseBillingAlert(await json())),
+'$id': {
+/**
+ * Retrieve a billing alert
+ *
+ * Retrieves a billing alert given an ID
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetBillingAlertsIdSearchParams).def_body(Schemas.parseGetBillingAlertsIdBody).def_response(async ({ json }) => Schemas.parseBillingAlert(await json())),
+'activate': {
+/**
+ * Activate a billing alert
+ *
+ * Reactivates this alert, allowing it to trigger again.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostBillingAlertsIdActivateBody).def_response(async ({ json }) => Schemas.parseBillingAlert(await json()))
+},
+'archive': {
+/**
+ * Archive a billing alert
+ *
+ * Archives this alert, removing it from the list view and APIs. This is non-reversible.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostBillingAlertsIdArchiveBody).def_response(async ({ json }) => Schemas.parseBillingAlert(await json()))
+},
+'deactivate': {
+/**
+ * Deactivate a billing alert
+ *
+ * Deactivates this alert, preventing it from triggering.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostBillingAlertsIdDeactivateBody).def_response(async ({ json }) => Schemas.parseBillingAlert(await json()))
+}
+}
+},
+'analytics': {
+'meter_usage': {
+/**
+ * Retrieves aggregated meter usage data
+ *
+ * Returns aggregated meter usage data for a customer within a specified time interval. The data can be grouped by various dimensions and can include multiple meters if specified.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetBillingAnalyticsMeterUsageSearchParams).def_body(Schemas.parseGetBillingAnalyticsMeterUsageBody).def_response(async ({ json }) => Schemas.parseBillingAnalyticsMeterUsage(await json()))
+}
+},
+'credit_balance_summary': {
+/**
+ * Retrieve the credit balance summary for a customer
+ *
+ * Retrieves the credit balance summary for a customer.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetBillingCreditBalanceSummarySearchParams).def_body(Schemas.parseGetBillingCreditBalanceSummaryBody).def_response(async ({ json }) => Schemas.parseBillingCreditBalanceSummary(await json()))
+},
+'credit_balance_transactions': {
+/**
+ * List credit balance transactions
+ *
+ * Retrieve a list of credit balance transactions.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetBillingCreditBalanceTransactionsSearchParams).def_body(Schemas.parseGetBillingCreditBalanceTransactionsBody).def_response(async ({ json }) => Schemas.parseGetBillingCreditBalanceTransactionsResponse(await json())),
+'$id': {
+/**
+ * Retrieve a credit balance transaction
+ *
+ * Retrieves a credit balance transaction.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetBillingCreditBalanceTransactionsIdSearchParams).def_body(Schemas.parseGetBillingCreditBalanceTransactionsIdBody).def_response(async ({ json }) => Schemas.parseBillingCreditBalanceTransaction(await json()))
+}
+},
+'credit_grants': {
+/**
+ * List credit grants
+ *
+ * Retrieve a list of credit grants.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetBillingCreditGrantsSearchParams).def_body(Schemas.parseGetBillingCreditGrantsBody).def_response(async ({ json }) => Schemas.parseGetBillingCreditGrantsResponse(await json())),
+/**
+ * Create a credit grant
+ *
+ * Creates a credit grant.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostBillingCreditGrantsBody).def_response(async ({ json }) => Schemas.parseBillingCreditGrant(await json())),
+'$id': {
+/**
+ * Retrieve a credit grant
+ *
+ * Retrieves a credit grant.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetBillingCreditGrantsIdSearchParams).def_body(Schemas.parseGetBillingCreditGrantsIdBody).def_response(async ({ json }) => Schemas.parseBillingCreditGrant(await json())),
+/**
+ * Update a credit grant
+ *
+ * Updates a credit grant.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostBillingCreditGrantsIdBody).def_response(async ({ json }) => Schemas.parseBillingCreditGrant(await json())),
+'expire': {
+/**
+ * Expire a credit grant
+ *
+ * Expires a credit grant.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostBillingCreditGrantsIdExpireBody).def_response(async ({ json }) => Schemas.parseBillingCreditGrant(await json()))
+},
+'void': {
+/**
+ * Void a credit grant
+ *
+ * Voids a credit grant.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostBillingCreditGrantsIdVoidBody).def_response(async ({ json }) => Schemas.parseBillingCreditGrant(await json()))
+}
+}
+},
+'margins': {
+/**
+ * List all margins
+ *
+ * Retrieve a list of your margins.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetBillingMarginsSearchParams).def_body(Schemas.parseGetBillingMarginsBody).def_response(async ({ json }) => Schemas.parseGetBillingMarginsResponse(await json())),
+/**
+ * Create a margin
+ *
+ * Create a margin object to be used with invoices, invoice items, and invoice line items for a customer to represent a partner discount. A margin has a `percent_off` which is the percent that will be taken off the subtotal after all items and other discounts and promotions) of any invoices for a customer. Calculation of prorations do not include any partner margins applied on the original invoice item.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostBillingMarginsBody).def_response(async ({ json }) => Schemas.parseMargin(await json())),
+'$margin': {
+/**
+ * Retrieve a margin
+ *
+ * Retrieve a margin object with the given ID.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetBillingMarginsMarginSearchParams).def_body(Schemas.parseGetBillingMarginsMarginBody).def_response(async ({ json }) => Schemas.parseMargin(await json())),
+/**
+ * Update a margin
+ *
+ * Update the specified margin object. Certain fields of the margin object are not editable.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostBillingMarginsMarginBody).def_response(async ({ json }) => Schemas.parseMargin(await json()))
+}
+},
+'meter_event_adjustments': {
+/**
+ * Create a billing meter event adjustment
+ *
+ * Creates a billing meter event adjustment.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostBillingMeterEventAdjustmentsBody).def_response(async ({ json }) => Schemas.parseBillingMeterEventAdjustment(await json()))
+},
+'meter_events': {
+/**
+ * Create a billing meter event
+ *
+ * Creates a billing meter event.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostBillingMeterEventsBody).def_response(async ({ json }) => Schemas.parseBillingMeterEvent(await json()))
+},
+'meters': {
+/**
+ * List billing meters
+ *
+ * Retrieve a list of billing meters.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetBillingMetersSearchParams).def_body(Schemas.parseGetBillingMetersBody).def_response(async ({ json }) => Schemas.parseGetBillingMetersResponse(await json())),
+/**
+ * Create a billing meter
+ *
+ * Creates a billing meter.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostBillingMetersBody).def_response(async ({ json }) => Schemas.parseBillingMeter(await json())),
+'$id': {
+/**
+ * Retrieve a billing meter
+ *
+ * Retrieves a billing meter given an ID.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetBillingMetersIdSearchParams).def_body(Schemas.parseGetBillingMetersIdBody).def_response(async ({ json }) => Schemas.parseBillingMeter(await json())),
+/**
+ * Update a billing meter
+ *
+ * Updates a billing meter.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostBillingMetersIdBody).def_response(async ({ json }) => Schemas.parseBillingMeter(await json())),
+'deactivate': {
+/**
+ * Deactivate a billing meter
+ *
+ * When a meter is deactivated, no more meter events will be accepted for this meter. You can’t attach a deactivated meter to a price.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostBillingMetersIdDeactivateBody).def_response(async ({ json }) => Schemas.parseBillingMeter(await json()))
+},
+'event_summaries': {
+/**
+ * List billing meter event summaries
+ *
+ * Retrieve a list of billing meter event summaries.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetBillingMetersIdEventSummariesSearchParams).def_body(Schemas.parseGetBillingMetersIdEventSummariesBody).def_response(async ({ json }) => Schemas.parseGetBillingMetersIdEventSummariesResponse(await json()))
+},
+'reactivate': {
+/**
+ * Reactivate a billing meter
+ *
+ * When a meter is reactivated, events for this meter can be accepted and you can attach the meter to a price.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostBillingMetersIdReactivateBody).def_response(async ({ json }) => Schemas.parseBillingMeter(await json()))
+}
+}
+}
+},
+'billing_portal': {
+'configurations': {
+/**
+ * List portal configurations
+ *
+ * Returns a list of configurations that describe the functionality of the customer portal.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetBillingPortalConfigurationsSearchParams).def_body(Schemas.parseGetBillingPortalConfigurationsBody).def_response(async ({ json }) => Schemas.parseGetBillingPortalConfigurationsResponse(await json())),
+/**
+ * Create a portal configuration
+ *
+ * Creates a configuration that describes the functionality and behavior of a PortalSession
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostBillingPortalConfigurationsBody).def_response(async ({ json }) => Schemas.parseBillingPortalConfiguration(await json())),
+'$configuration': {
+/**
+ * Retrieve a portal configuration
+ *
+ * Retrieves a configuration that describes the functionality of the customer portal.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetBillingPortalConfigurationsConfigurationSearchParams).def_body(Schemas.parseGetBillingPortalConfigurationsConfigurationBody).def_response(async ({ json }) => Schemas.parseBillingPortalConfiguration(await json())),
+/**
+ * Update a portal configuration
+ *
+ * Updates a configuration that describes the functionality of the customer portal.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostBillingPortalConfigurationsConfigurationBody).def_response(async ({ json }) => Schemas.parseBillingPortalConfiguration(await json()))
+}
+},
+'sessions': {
+/**
+ * Create a portal session
+ *
+ * Creates a session of the customer portal.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostBillingPortalSessionsBody).def_response(async ({ json }) => Schemas.parseBillingPortalSession(await json()))
+}
+},
+'capital': {
+'financing_offers': {
+/**
+ * List financing offers
+ *
+ * Retrieves the financing offers available for Connected accounts that belong to your platform.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCapitalFinancingOffersSearchParams).def_body(Schemas.parseGetCapitalFinancingOffersBody).def_response(async ({ json }) => Schemas.parseGetCapitalFinancingOffersResponse(await json())),
+'$financing_offer': {
+/**
+ * Retrieve a given financing offer
+ *
+ * Get the details of the financing offer
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCapitalFinancingOffersFinancingOfferSearchParams).def_body(Schemas.parseGetCapitalFinancingOffersFinancingOfferBody).def_response(async ({ json }) => Schemas.parseCapitalFinancingOffer(await json())),
+'mark_delivered': {
+/**
+ * Mark that a financing offer has been delivered
+ *
+ * Acknowledges that platform has received and delivered the financing_offer to
+ * the intended merchant recipient.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostCapitalFinancingOffersFinancingOfferMarkDeliveredBody).def_response(async ({ json }) => Schemas.parseCapitalFinancingOffer(await json()))
+}
+}
+},
+'financing_summary': {
+/**
+ * Retrieve financing summary
+ *
+ * Retrieve the financing state for the account that was authenticated in the request.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCapitalFinancingSummarySearchParams).def_body(Schemas.parseGetCapitalFinancingSummaryBody).def_response(async ({ json }) => Schemas.parseCapitalFinancingSummary(await json()))
+},
+'financing_transactions': {
+/**
+ * List all financing transactions
+ *
+ * Returns a list of financing transactions. The transactions are returned in sorted order,
+ * with the most recent transactions appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCapitalFinancingTransactionsSearchParams).def_body(Schemas.parseGetCapitalFinancingTransactionsBody).def_response(async ({ json }) => Schemas.parseGetCapitalFinancingTransactionsResponse(await json())),
+'$financing_transaction': {
+/**
+ * Retrieve a given financing transaction
+ *
+ * Retrieves a financing transaction for a financing offer.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCapitalFinancingTransactionsFinancingTransactionSearchParams).def_body(Schemas.parseGetCapitalFinancingTransactionsFinancingTransactionBody).def_response(async ({ json }) => Schemas.parseCapitalFinancingTransaction(await json()))
+}
+}
+},
+'charges': {
+/**
+ * List all charges
+ *
+ * Returns a list of charges you’ve previously created. The charges are returned in sorted order, with the most recent charges appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetChargesSearchParams).def_body(Schemas.parseGetChargesBody).def_response(async ({ json }) => Schemas.parseGetChargesResponse(await json())),
+/**
+ * This method is no longer recommended—use the [Payment Intents API](/docs/api/payment_intents)
+ * to initiate a new payment instead. Confirmation of the PaymentIntent creates the `Charge`
+ * object used to request payment.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostChargesBody).def_response(async ({ json }) => Schemas.parseCharge(await json())),
+'search': {
+/**
+ * Search charges
+ *
+ * Search for charges you’ve previously created using Stripe’s [Search Query Language](/docs/search#search-query-language).
+ * Don’t use search in read-after-write flows where strict consistency is necessary. Under normal operating
+ * conditions, data is searchable in less than a minute. Occasionally, propagation of new or updated data can be up
+ * to an hour behind during outages. Search functionality is not available to merchants in India.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetChargesSearchSearchParams).def_body(Schemas.parseGetChargesSearchBody).def_response(async ({ json }) => Schemas.parseGetChargesSearchResponse(await json()))
+},
+'$charge': {
+/**
+ * Retrieve a charge
+ *
+ * Retrieves the details of a charge that has previously been created. Supply the unique charge ID that was returned from your previous request, and Stripe will return the corresponding charge information. The same information is returned when creating or refunding the charge.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetChargesChargeSearchParams).def_body(Schemas.parseGetChargesChargeBody).def_response(async ({ json }) => Schemas.parseCharge(await json())),
+/**
+ * Update a charge
+ *
+ * Updates the specified charge by setting the values of the parameters passed. Any parameters not provided will be left unchanged.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostChargesChargeBody).def_response(async ({ json }) => Schemas.parseCharge(await json())),
+'capture': {
+/**
+ * Capture a payment
+ *
+ * Capture the payment of an existing, uncaptured charge that was created with the `capture` option set to false.
+ * 
+ * Uncaptured payments expire a set number of days after they are created ([7 by default](/docs/charges/placing-a-hold)), after which they are marked as refunded and capture attempts will fail.
+ * 
+ * Don’t use this method to capture a PaymentIntent-initiated charge. Use [Capture a PaymentIntent](/docs/api/payment_intents/capture).
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostChargesChargeCaptureBody).def_response(async ({ json }) => Schemas.parseCharge(await json()))
+},
+'refunds': {
+/**
+ * List all refunds
+ *
+ * You can see a list of the refunds belonging to a specific charge. Note that the 10 most recent refunds are always available by default on the charge object. If you need more than those 10, you can use this API method and the `limit` and `starting_after` parameters to page through additional refunds.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetChargesChargeRefundsSearchParams).def_body(Schemas.parseGetChargesChargeRefundsBody).def_response(async ({ json }) => Schemas.parseGetChargesChargeRefundsResponse(await json())),
+'$refund': {
+/**
+ * Retrieves the details of an existing refund.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetChargesChargeRefundsRefundSearchParams).def_body(Schemas.parseGetChargesChargeRefundsRefundBody).def_response(async ({ json }) => Schemas.parseRefund(await json()))
+}
+}
+}
+},
+'checkout': {
+'sessions': {
+/**
+ * List all Checkout Sessions
+ *
+ * Returns a list of Checkout Sessions.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCheckoutSessionsSearchParams).def_body(Schemas.parseGetCheckoutSessionsBody).def_response(async ({ json }) => Schemas.parseGetCheckoutSessionsResponse(await json())),
+/**
+ * Create a Checkout Session
+ *
+ * Creates a Checkout Session object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostCheckoutSessionsBody).def_response(async ({ json }) => Schemas.parseCheckoutSession(await json())),
+'$session': {
+/**
+ * Retrieve a Checkout Session
+ *
+ * Retrieves a Checkout Session object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCheckoutSessionsSessionSearchParams).def_body(Schemas.parseGetCheckoutSessionsSessionBody).def_response(async ({ json }) => Schemas.parseCheckoutSession(await json())),
+/**
+ * Update a Checkout Session
+ *
+ * Updates a Checkout Session object.
+ * 
+ * Related guide: [Dynamically update Checkout](/payments/checkout/dynamic-updates)
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostCheckoutSessionsSessionBody).def_response(async ({ json }) => Schemas.parseCheckoutSession(await json())),
+'expire': {
+/**
+ * Expire a Checkout Session
+ *
+ * A Checkout Session can be expired when it is in one of these statuses: `open` 
+ * 
+ * After it expires, a customer can’t complete a Checkout Session and customers loading the Checkout Session see a message saying the Checkout Session is expired.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostCheckoutSessionsSessionExpireBody).def_response(async ({ json }) => Schemas.parseCheckoutSession(await json()))
+},
+'line_items': {
+/**
+ * Retrieve a Checkout Session's line items
+ *
+ * When retrieving a Checkout Session, there is an includable **line_items** property containing the first handful of those items. There is also a URL where you can retrieve the full (paginated) list of line items.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCheckoutSessionsSessionLineItemsSearchParams).def_body(Schemas.parseGetCheckoutSessionsSessionLineItemsBody).def_response(async ({ json }) => Schemas.parseGetCheckoutSessionsSessionLineItemsResponse(await json()))
+}
+}
+}
+},
+'climate': {
+'orders': {
+/**
+ * List orders
+ *
+ * Lists all Climate order objects. The orders are returned sorted by creation date, with the
+ * most recently created orders appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetClimateOrdersSearchParams).def_body(Schemas.parseGetClimateOrdersBody).def_response(async ({ json }) => Schemas.parseGetClimateOrdersResponse(await json())),
+/**
+ * Create an order
+ *
+ * Creates a Climate order object for a given Climate product. The order will be processed immediately
+ * after creation and payment will be deducted your Stripe balance.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostClimateOrdersBody).def_response(async ({ json }) => Schemas.parseClimateOrder(await json())),
+'$order': {
+/**
+ * Retrieve an order
+ *
+ * Retrieves the details of a Climate order object with the given ID.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetClimateOrdersOrderSearchParams).def_body(Schemas.parseGetClimateOrdersOrderBody).def_response(async ({ json }) => Schemas.parseClimateOrder(await json())),
+/**
+ * Update an order
+ *
+ * Updates the specified order by setting the values of the parameters passed.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostClimateOrdersOrderBody).def_response(async ({ json }) => Schemas.parseClimateOrder(await json())),
+'cancel': {
+/**
+ * Cancel an order
+ *
+ * Cancels a Climate order. You can cancel an order within 24 hours of creation. Stripe refunds the
+ * reservation `amount_subtotal`, but not the `amount_fees` for user-triggered cancellations. Frontier
+ * might cancel reservations if suppliers fail to deliver. If Frontier cancels the reservation, Stripe
+ * provides 90 days advance notice and refunds the `amount_total`.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostClimateOrdersOrderCancelBody).def_response(async ({ json }) => Schemas.parseClimateOrder(await json()))
+}
+}
+},
+'products': {
+/**
+ * List products
+ *
+ * Lists all available Climate product objects.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetClimateProductsSearchParams).def_body(Schemas.parseGetClimateProductsBody).def_response(async ({ json }) => Schemas.parseGetClimateProductsResponse(await json())),
+'$product': {
+/**
+ * Retrieve a product
+ *
+ * Retrieves the details of a Climate product with the given ID.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetClimateProductsProductSearchParams).def_body(Schemas.parseGetClimateProductsProductBody).def_response(async ({ json }) => Schemas.parseClimateProduct(await json()))
+}
+},
+'suppliers': {
+/**
+ * List suppliers
+ *
+ * Lists all available Climate supplier objects.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetClimateSuppliersSearchParams).def_body(Schemas.parseGetClimateSuppliersBody).def_response(async ({ json }) => Schemas.parseGetClimateSuppliersResponse(await json())),
+'$supplier': {
+/**
+ * Retrieve a supplier
+ *
+ * Retrieves a Climate supplier object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetClimateSuppliersSupplierSearchParams).def_body(Schemas.parseGetClimateSuppliersSupplierBody).def_response(async ({ json }) => Schemas.parseClimateSupplier(await json()))
+}
+}
+},
+'confirmation_tokens': {
+'$confirmation_token': {
+/**
+ * Retrieve a ConfirmationToken
+ *
+ * Retrieves an existing ConfirmationToken object
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetConfirmationTokensConfirmationTokenSearchParams).def_body(Schemas.parseGetConfirmationTokensConfirmationTokenBody).def_response(async ({ json }) => Schemas.parseConfirmationToken(await json()))
+}
+},
+'country_specs': {
+/**
+ * List Country Specs
+ *
+ * Lists all Country Spec objects available in the API.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCountrySpecsSearchParams).def_body(Schemas.parseGetCountrySpecsBody).def_response(async ({ json }) => Schemas.parseGetCountrySpecsResponse(await json())),
+'$country': {
+/**
+ * Retrieve a Country Spec
+ *
+ * Returns a Country Spec for a given Country code.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCountrySpecsCountrySearchParams).def_body(Schemas.parseGetCountrySpecsCountryBody).def_response(async ({ json }) => Schemas.parseCountrySpec(await json()))
+}
+},
+'coupons': {
+/**
+ * List all coupons
+ *
+ * Returns a list of your coupons.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCouponsSearchParams).def_body(Schemas.parseGetCouponsBody).def_response(async ({ json }) => Schemas.parseGetCouponsResponse(await json())),
+/**
+ * Create a coupon
+ *
+ * You can create coupons easily via the [coupon management](https://dashboard.stripe.com/coupons) page of the Stripe dashboard. Coupon creation is also accessible via the API if you need to create coupons on the fly.
+ * 
+ * A coupon has either a `percent_off` or an `amount_off` and `currency`. If you set an `amount_off`, that amount will be subtracted from any invoice’s subtotal. For example, an invoice with a subtotal of 100 will have a final total of 0 if a coupon with an `amount_off` of 200 is applied to it and an invoice with a subtotal of 300 will have a final total of 100 if a coupon with an `amount_off` of 200 is applied to it.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostCouponsBody).def_response(async ({ json }) => Schemas.parseCoupon(await json())),
+'$coupon': {
+/**
+ * Delete a coupon
+ *
+ * You can delete coupons via the [coupon management](https://dashboard.stripe.com/coupons) page of the Stripe dashboard. However, deleting a coupon does not affect any customers who have already applied the coupon; it means that new customers can’t redeem the coupon. You can also delete coupons via the API.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteCouponsCouponBody).def_response(async ({ json }) => Schemas.parseDeletedCoupon(await json())),
+/**
+ * Retrieve a coupon
+ *
+ * Retrieves the coupon with the given ID.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCouponsCouponSearchParams).def_body(Schemas.parseGetCouponsCouponBody).def_response(async ({ json }) => Schemas.parseCoupon(await json())),
+/**
+ * Update a coupon
+ *
+ * Updates the metadata of a coupon. Other coupon details (currency, duration, amount_off) are, by design, not editable.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostCouponsCouponBody).def_response(async ({ json }) => Schemas.parseCoupon(await json()))
+}
+},
+'credit_notes': {
+/**
+ * List all credit notes
+ *
+ * Returns a list of credit notes.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCreditNotesSearchParams).def_body(Schemas.parseGetCreditNotesBody).def_response(async ({ json }) => Schemas.parseGetCreditNotesResponse(await json())),
+/**
+ * Create a credit note
+ *
+ * Issue a credit note to adjust the amount of a finalized invoice. A credit note will first reduce the invoice’s `amount_remaining` (and `amount_due`), but not below zero.
+ * This amount is indicated by the credit note’s `pre_payment_amount`. The excess amount is indicated by `post_payment_amount`, and it can result in any combination of the following:
+ * 
+ * - Refunds: create a new refund (using `refund_amount`) or link existing refunds (using `refunds`).
+ * 
+ * - Customer balance credit: credit the customer’s balance (using `credit_amount`) which will be automatically applied to their next invoice when it’s finalized.
+ * 
+ * - Outside of Stripe credit: record the amount that is or will be credited outside of Stripe (using `out_of_band_amount`).
+ * 
+ * The sum of refunds, customer balance credits, and outside of Stripe credits must equal the `post_payment_amount`.
+ * 
+ * You may issue multiple credit notes for an invoice. Each credit note may increment the invoice’s `pre_payment_credit_notes_amount`,
+ * `post_payment_credit_notes_amount`, or both, depending on the invoice’s `amount_remaining` at the time of credit note creation.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostCreditNotesBody).def_response(async ({ json }) => Schemas.parseCreditNote(await json())),
+'preview': {
+/**
+ * Preview a credit note
+ *
+ * Get a preview of a credit note without creating it.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCreditNotesPreviewSearchParams).def_body(Schemas.parseGetCreditNotesPreviewBody).def_response(async ({ json }) => Schemas.parseCreditNote(await json())),
+'lines': {
+/**
+ * Retrieve a credit note preview's line items
+ *
+ * When retrieving a credit note preview, you’ll get a **lines** property containing the first handful of those items. This URL you can retrieve the full (paginated) list of line items.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCreditNotesPreviewLinesSearchParams).def_body(Schemas.parseGetCreditNotesPreviewLinesBody).def_response(async ({ json }) => Schemas.parseGetCreditNotesPreviewLinesResponse(await json()))
+}
+},
+'$credit_note': {
+'lines': {
+/**
+ * Retrieve a credit note's line items
+ *
+ * When retrieving a credit note, you’ll get a **lines** property containing the first handful of those items. There is also a URL where you can retrieve the full (paginated) list of line items.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCreditNotesCreditNoteLinesSearchParams).def_body(Schemas.parseGetCreditNotesCreditNoteLinesBody).def_response(async ({ json }) => Schemas.parseGetCreditNotesCreditNoteLinesResponse(await json()))
+}
+},
+'$id': {
+/**
+ * Retrieve a credit note
+ *
+ * Retrieves the credit note object with the given identifier.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCreditNotesIdSearchParams).def_body(Schemas.parseGetCreditNotesIdBody).def_response(async ({ json }) => Schemas.parseCreditNote(await json())),
+/**
+ * Update a credit note
+ *
+ * Updates an existing credit note.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostCreditNotesIdBody).def_response(async ({ json }) => Schemas.parseCreditNote(await json())),
+'void': {
+/**
+ * Void a credit note
+ *
+ * Marks a credit note as void. Learn more about [voiding credit notes](/docs/billing/invoices/credit-notes#voiding).
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostCreditNotesIdVoidBody).def_response(async ({ json }) => Schemas.parseCreditNote(await json()))
+}
+}
+},
+'customer_sessions': {
+/**
+ * Create a Customer Session
+ *
+ * Creates a Customer Session object that includes a single-use client secret that you can use on your front-end to grant client-side API access for certain customer resources.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostCustomerSessionsBody).def_response(async ({ json }) => Schemas.parseCustomerSession(await json()))
+},
+'customers': {
+/**
+ * List all customers
+ *
+ * Returns a list of your customers. The customers are returned sorted by creation date, with the most recent customers appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCustomersSearchParams).def_body(Schemas.parseGetCustomersBody).def_response(async ({ json }) => Schemas.parseGetCustomersResponse(await json())),
+/**
+ * Create a customer
+ *
+ * Creates a new customer object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostCustomersBody).def_response(async ({ json }) => Schemas.parseCustomer(await json())),
+'search': {
+/**
+ * Search customers
+ *
+ * Search for customers you’ve previously created using Stripe’s [Search Query Language](/docs/search#search-query-language).
+ * Don’t use search in read-after-write flows where strict consistency is necessary. Under normal operating
+ * conditions, data is searchable in less than a minute. Occasionally, propagation of new or updated data can be up
+ * to an hour behind during outages. Search functionality is not available to merchants in India.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCustomersSearchSearchParams).def_body(Schemas.parseGetCustomersSearchBody).def_response(async ({ json }) => Schemas.parseGetCustomersSearchResponse(await json()))
+},
+'$customer': {
+/**
+ * Delete a customer
+ *
+ * Permanently deletes a customer. It cannot be undone. Also immediately cancels any active subscriptions on the customer.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteCustomersCustomerBody).def_response(async ({ json }) => Schemas.parseDeletedCustomer(await json())),
+/**
+ * Retrieve a customer
+ *
+ * Retrieves a Customer object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCustomersCustomerSearchParams).def_body(Schemas.parseGetCustomersCustomerBody).def_response(async ({ json }) => Schemas.parseGetCustomersCustomerResponse(await json())),
+/**
+ * Update a customer
+ *
+ * Updates the specified customer by setting the values of the parameters passed. Any parameters not provided will be left unchanged. For example, if you pass the **source** parameter, that becomes the customer’s active source (e.g., a card) to be used for all charges in the future. When you update a customer to a new valid card source by passing the **source** parameter: for each of the customer’s current subscriptions, if the subscription bills automatically and is in the `past_due` state, then the latest open invoice for the subscription with automatic collection enabled will be retried. This retry will not count as an automatic retry, and will not affect the next regularly scheduled payment for the invoice. Changing the **default_source** for a customer will not trigger this behavior.
+ * 
+ * This request accepts mostly the same arguments as the customer creation call.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostCustomersCustomerBody).def_response(async ({ json }) => Schemas.parseCustomer(await json())),
+'balance_transactions': {
+/**
+ * List customer balance transactions
+ *
+ * Returns a list of transactions that updated the customer’s [balances](/docs/billing/customer/balance).
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCustomersCustomerBalanceTransactionsSearchParams).def_body(Schemas.parseGetCustomersCustomerBalanceTransactionsBody).def_response(async ({ json }) => Schemas.parseGetCustomersCustomerBalanceTransactionsResponse(await json())),
+/**
+ * Create a customer balance transaction
+ *
+ * Creates an immutable transaction that updates the customer’s credit [balance](/docs/billing/customer/balance).
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostCustomersCustomerBalanceTransactionsBody).def_response(async ({ json }) => Schemas.parseCustomerBalanceTransaction(await json())),
+'$transaction': {
+/**
+ * Retrieve a customer balance transaction
+ *
+ * Retrieves a specific customer balance transaction that updated the customer’s [balances](/docs/billing/customer/balance).
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCustomersCustomerBalanceTransactionsTransactionSearchParams).def_body(Schemas.parseGetCustomersCustomerBalanceTransactionsTransactionBody).def_response(async ({ json }) => Schemas.parseCustomerBalanceTransaction(await json())),
+/**
+ * Update a customer credit balance transaction
+ *
+ * Most credit balance transaction fields are immutable, but you may update its `description` and `metadata`.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostCustomersCustomerBalanceTransactionsTransactionBody).def_response(async ({ json }) => Schemas.parseCustomerBalanceTransaction(await json()))
+}
+},
+'cash_balance': {
+/**
+ * Retrieve a cash balance
+ *
+ * Retrieves a customer’s cash balance.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCustomersCustomerCashBalanceSearchParams).def_body(Schemas.parseGetCustomersCustomerCashBalanceBody).def_response(async ({ json }) => Schemas.parseCashBalance(await json())),
+/**
+ * Update a cash balance's settings
+ *
+ * Changes the settings on a customer’s cash balance.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostCustomersCustomerCashBalanceBody).def_response(async ({ json }) => Schemas.parseCashBalance(await json()))
+},
+'cash_balance_transactions': {
+/**
+ * List cash balance transactions
+ *
+ * Returns a list of transactions that modified the customer’s [cash balance](/docs/payments/customer-balance).
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCustomersCustomerCashBalanceTransactionsSearchParams).def_body(Schemas.parseGetCustomersCustomerCashBalanceTransactionsBody).def_response(async ({ json }) => Schemas.parseGetCustomersCustomerCashBalanceTransactionsResponse(await json())),
+'$transaction': {
+/**
+ * Retrieve a cash balance transaction
+ *
+ * Retrieves a specific cash balance transaction, which updated the customer’s [cash balance](/docs/payments/customer-balance).
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCustomersCustomerCashBalanceTransactionsTransactionSearchParams).def_body(Schemas.parseGetCustomersCustomerCashBalanceTransactionsTransactionBody).def_response(async ({ json }) => Schemas.parseCustomerCashBalanceTransaction(await json()))
+}
+},
+'discount': {
+/**
+ * Delete a customer discount
+ *
+ * Removes the currently applied discount on a customer.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteCustomersCustomerDiscountBody).def_response(async ({ json }) => Schemas.parseDeletedDiscount(await json()))
+},
+'funding_instructions': {
+/**
+ * Create or retrieve funding instructions for a customer cash balance
+ *
+ * Retrieve funding instructions for a customer cash balance. If funding instructions do not yet exist for the customer, new
+ * funding instructions will be created. If funding instructions have already been created for a given customer, the same
+ * funding instructions will be retrieved. In other words, we will return the same funding instructions each time.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostCustomersCustomerFundingInstructionsBody).def_response(async ({ json }) => Schemas.parseFundingInstructions(await json()))
+},
+'payment_methods': {
+/**
+ * List a Customer's PaymentMethods
+ *
+ * Returns a list of PaymentMethods for a given Customer
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCustomersCustomerPaymentMethodsSearchParams).def_body(Schemas.parseGetCustomersCustomerPaymentMethodsBody).def_response(async ({ json }) => Schemas.parseGetCustomersCustomerPaymentMethodsResponse(await json())),
+'$payment_method': {
+/**
+ * Retrieve a Customer's PaymentMethod
+ *
+ * Retrieves a PaymentMethod object for a given Customer.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCustomersCustomerPaymentMethodsPaymentMethodSearchParams).def_body(Schemas.parseGetCustomersCustomerPaymentMethodsPaymentMethodBody).def_response(async ({ json }) => Schemas.parsePaymentMethod(await json()))
+}
+},
+'sources': {
+/**
+ * List sources for a specified customer.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCustomersCustomerSourcesSearchParams).def_body(Schemas.parseGetCustomersCustomerSourcesBody).def_response(async ({ json }) => Schemas.parseGetCustomersCustomerSourcesResponse(await json())),
+/**
+ * Create a card
+ *
+ * When you create a new credit card, you must specify a customer or recipient on which to create it.
+ * 
+ * If the card’s owner has no default card, then the new card will become the default.
+ * However, if the owner already has a default, then it will not change.
+ * To change the default, you should [update the customer](/docs/api#update_customer) to have a new `default_source`.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostCustomersCustomerSourcesBody).def_response(async ({ json }) => Schemas.parsePaymentSource(await json())),
+'$id': {
+/**
+ * Delete a customer source
+ *
+ * Delete a specified source for a given customer.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteCustomersCustomerSourcesIdBody).def_response(async ({ json }) => Schemas.parseDeleteCustomersCustomerSourcesIdResponse(await json())),
+/**
+ * Retrieve a specified source for a given customer.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCustomersCustomerSourcesIdSearchParams).def_body(Schemas.parseGetCustomersCustomerSourcesIdBody).def_response(async ({ json }) => Schemas.parsePaymentSource(await json())),
+/**
+ * Update a specified source for a given customer.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostCustomersCustomerSourcesIdBody).def_response(async ({ json }) => Schemas.parsePostCustomersCustomerSourcesIdResponse(await json())),
+'verify': {
+/**
+ * Verify a bank account
+ *
+ * Verify a specified bank account for a given customer.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostCustomersCustomerSourcesIdVerifyBody).def_response(async ({ json }) => Schemas.parseBankAccount(await json()))
+}
+}
+},
+'tax_ids': {
+/**
+ * List all Customer tax IDs
+ *
+ * Returns a list of tax IDs for a customer.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCustomersCustomerTaxIdsSearchParams).def_body(Schemas.parseGetCustomersCustomerTaxIdsBody).def_response(async ({ json }) => Schemas.parseGetCustomersCustomerTaxIdsResponse(await json())),
+/**
+ * Create a Customer tax ID
+ *
+ * Creates a new `tax_id` object for a customer.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostCustomersCustomerTaxIdsBody).def_response(async ({ json }) => Schemas.parseTaxId(await json())),
+'$id': {
+/**
+ * Delete a Customer tax ID
+ *
+ * Deletes an existing `tax_id` object.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteCustomersCustomerTaxIdsIdBody).def_response(async ({ json }) => Schemas.parseDeletedTaxId(await json())),
+/**
+ * Retrieve a Customer tax ID
+ *
+ * Retrieves the `tax_id` object with the given identifier.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetCustomersCustomerTaxIdsIdSearchParams).def_body(Schemas.parseGetCustomersCustomerTaxIdsIdBody).def_response(async ({ json }) => Schemas.parseTaxId(await json()))
+}
+}
+}
+},
+'disputes': {
+/**
+ * List all disputes
+ *
+ * Returns a list of your disputes.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetDisputesSearchParams).def_body(Schemas.parseGetDisputesBody).def_response(async ({ json }) => Schemas.parseGetDisputesResponse(await json())),
+'$dispute': {
+/**
+ * Retrieve a dispute
+ *
+ * Retrieves the dispute with the given ID.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetDisputesDisputeSearchParams).def_body(Schemas.parseGetDisputesDisputeBody).def_response(async ({ json }) => Schemas.parseDispute(await json())),
+/**
+ * Update a dispute
+ *
+ * When you get a dispute, contacting your customer is always the best first step. If that doesn’t work, you can submit evidence to help us resolve the dispute in your favor. You can do this in your [dashboard](https://dashboard.stripe.com/disputes), but if you prefer, you can use the API to submit evidence programmatically.
+ * 
+ * Depending on your dispute type, different evidence fields will give you a better chance of winning your dispute. To figure out which evidence fields to provide, see our [guide to dispute types](/docs/disputes/categories).
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostDisputesDisputeBody).def_response(async ({ json }) => Schemas.parseDispute(await json())),
+'close': {
+/**
+ * Close a dispute
+ *
+ * Closing the dispute for a charge indicates that you do not have any evidence to submit and are essentially dismissing the dispute, acknowledging it as lost.
+ * 
+ * The status of the dispute will change from `needs_response` to `lost`. *Closing a dispute is irreversible*.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostDisputesDisputeCloseBody).def_response(async ({ json }) => Schemas.parseDispute(await json()))
+}
+}
+},
+'entitlements': {
+'active_entitlements': {
+/**
+ * List all active entitlements
+ *
+ * Retrieve a list of active entitlements for a customer
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetEntitlementsActiveEntitlementsSearchParams).def_body(Schemas.parseGetEntitlementsActiveEntitlementsBody).def_response(async ({ json }) => Schemas.parseGetEntitlementsActiveEntitlementsResponse(await json())),
+'$id': {
+/**
+ * Retrieve an active entitlement
+ *
+ * Retrieve an active entitlement
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetEntitlementsActiveEntitlementsIdSearchParams).def_body(Schemas.parseGetEntitlementsActiveEntitlementsIdBody).def_response(async ({ json }) => Schemas.parseEntitlementsActiveEntitlement(await json()))
+}
+},
+'features': {
+/**
+ * List all features
+ *
+ * Retrieve a list of features
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetEntitlementsFeaturesSearchParams).def_body(Schemas.parseGetEntitlementsFeaturesBody).def_response(async ({ json }) => Schemas.parseGetEntitlementsFeaturesResponse(await json())),
+/**
+ * Create a feature
+ *
+ * Creates a feature
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostEntitlementsFeaturesBody).def_response(async ({ json }) => Schemas.parseEntitlementsFeature(await json())),
+'$id': {
+/**
+ * Retrieve a feature
+ *
+ * Retrieves a feature
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetEntitlementsFeaturesIdSearchParams).def_body(Schemas.parseGetEntitlementsFeaturesIdBody).def_response(async ({ json }) => Schemas.parseEntitlementsFeature(await json())),
+/**
+ * Updates a feature
+ *
+ * Update a feature’s metadata or permanently deactivate it.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostEntitlementsFeaturesIdBody).def_response(async ({ json }) => Schemas.parseEntitlementsFeature(await json()))
+}
+}
+},
+'ephemeral_keys': {
+/**
+ * Create an ephemeral key
+ *
+ * Creates a short-lived API key for a given resource.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostEphemeralKeysBody).def_response(async ({ json }) => Schemas.parseEphemeralKey(await json())),
+'$key': {
+/**
+ * Immediately invalidate an ephemeral key
+ *
+ * Invalidates a short-lived API key for a given resource.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteEphemeralKeysKeyBody).def_response(async ({ json }) => Schemas.parseEphemeralKey(await json()))
+}
+},
+'events': {
+/**
+ * List all events
+ *
+ * List events, going back up to 30 days. Each event data is rendered according to Stripe API version at its creation time, specified in [event object](https://docs.stripe.com/api/events/object) `api_version` attribute (not according to your current Stripe API version or `Stripe-Version` header).
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetEventsSearchParams).def_body(Schemas.parseGetEventsBody).def_response(async ({ json }) => Schemas.parseGetEventsResponse(await json())),
+'$id': {
+/**
+ * Retrieve an event
+ *
+ * Retrieves the details of an event if it was created in the last 30 days. Supply the unique identifier of the event, which you might have received in a webhook.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetEventsIdSearchParams).def_body(Schemas.parseGetEventsIdBody).def_response(async ({ json }) => Schemas.parseEvent(await json()))
+}
+},
+'exchange_rates': {
+/**
+ * List all exchange rates
+ *
+ * [Deprecated] The `ExchangeRate` APIs are deprecated. Please use the [FX Quotes API](https://docs.stripe.com/payments/currencies/localize-prices/fx-quotes-api) instead.
+ * 
+ * Returns a list of objects that contain the rates at which foreign currencies are converted to one another. Only shows the currencies for which Stripe supports.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetExchangeRatesSearchParams).def_body(Schemas.parseGetExchangeRatesBody).def_response(async ({ json }) => Schemas.parseGetExchangeRatesResponse(await json())),
+'$rate_id': {
+/**
+ * Retrieve an exchange rate
+ *
+ * [Deprecated] The `ExchangeRate` APIs are deprecated. Please use the [FX Quotes API](https://docs.stripe.com/payments/currencies/localize-prices/fx-quotes-api) instead.
+ * 
+ * Retrieves the exchange rates from the given currency to every supported currency.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetExchangeRatesRateIdSearchParams).def_body(Schemas.parseGetExchangeRatesRateIdBody).def_response(async ({ json }) => Schemas.parseExchangeRate(await json()))
+}
+},
+'external_accounts': {
+/**
+ * List all external accounts
+ *
+ * List external accounts for an account.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetExternalAccountsSearchParams).def_body(Schemas.parseGetExternalAccountsBody).def_response(async ({ json }) => Schemas.parseGetExternalAccountsResponse(await json())),
+/**
+ * Create an external account
+ *
+ * Create an external account for a given connected account.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostExternalAccountsBody).def_response(async ({ json }) => Schemas.parseExternalAccount(await json())),
+'$id': {
+/**
+ * Delete an external account
+ *
+ * Delete a specified external account for a given account.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteExternalAccountsIdBody).def_response(async ({ json }) => Schemas.parseDeletedExternalAccount(await json())),
+/**
+ * Retrieve an external account
+ *
+ * Retrieve a specified external account for a given account.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetExternalAccountsIdSearchParams).def_body(Schemas.parseGetExternalAccountsIdBody).def_response(async ({ json }) => Schemas.parseExternalAccount(await json())),
+/**
+ * Updates the metadata, account holder name, account holder type of a bank account belonging to
+ * a connected account and optionally sets it as the default for its currency. Other bank account
+ * details are not editable by design.
+ * 
+ * You can only update bank accounts when [account.controller.requirement_collection](/api/accounts/object#account_object-controller-requirement_collection) is `application`, which includes [Custom accounts](/connect/custom-accounts).
+ * 
+ * You can re-enable a disabled bank account by performing an update call without providing any
+ * arguments or changes.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostExternalAccountsIdBody).def_response(async ({ json }) => Schemas.parseExternalAccount(await json()))
+}
+},
+'file_links': {
+/**
+ * List all file links
+ *
+ * Returns a list of file links.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetFileLinksSearchParams).def_body(Schemas.parseGetFileLinksBody).def_response(async ({ json }) => Schemas.parseGetFileLinksResponse(await json())),
+/**
+ * Create a file link
+ *
+ * Creates a new file link object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostFileLinksBody).def_response(async ({ json }) => Schemas.parseFileLink(await json())),
+'$link': {
+/**
+ * Retrieve a file link
+ *
+ * Retrieves the file link with the given ID.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetFileLinksLinkSearchParams).def_body(Schemas.parseGetFileLinksLinkBody).def_response(async ({ json }) => Schemas.parseFileLink(await json())),
+/**
+ * Update a file link
+ *
+ * Updates an existing file link object. Expired links can no longer be updated.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostFileLinksLinkBody).def_response(async ({ json }) => Schemas.parseFileLink(await json()))
+}
+},
+'files': {
+/**
+ * List all files
+ *
+ * Returns a list of the files that your account has access to. Stripe sorts and returns the files by their creation dates, placing the most recently created files at the top.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetFilesSearchParams).def_body(Schemas.parseGetFilesBody).def_response(async ({ json }) => Schemas.parseGetFilesResponse(await json())),
+/**
+ * Create a file
+ *
+ * To upload a file to Stripe, you need to send a request of type `multipart/form-data`. Include the file you want to upload in the request, and the parameters for creating a file.
+ * 
+ * All of Stripe’s officially supported Client libraries support sending `multipart/form-data`.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostFilesBody).def_response(async ({ json }) => Schemas.parseFile(await json())),
+'$file': {
+/**
+ * Retrieve a file
+ *
+ * Retrieves the details of an existing file object. After you supply a unique file ID, Stripe returns the corresponding file object. Learn how to [access file contents](/docs/file-upload#download-file-contents).
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetFilesFileSearchParams).def_body(Schemas.parseGetFilesFileBody).def_response(async ({ json }) => Schemas.parseFile(await json()))
+}
+},
+'financial_connections': {
+'accounts': {
+/**
+ * List Accounts
+ *
+ * Returns a list of Financial Connections `Account` objects.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetFinancialConnectionsAccountsSearchParams).def_body(Schemas.parseGetFinancialConnectionsAccountsBody).def_response(async ({ json }) => Schemas.parseGetFinancialConnectionsAccountsResponse(await json())),
+'$account': {
+/**
+ * Retrieve an Account
+ *
+ * Retrieves the details of an Financial Connections `Account`.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetFinancialConnectionsAccountsAccountSearchParams).def_body(Schemas.parseGetFinancialConnectionsAccountsAccountBody).def_response(async ({ json }) => Schemas.parseFinancialConnectionsAccount(await json())),
+'disconnect': {
+/**
+ * Disconnect an Account
+ *
+ * Disables your access to a Financial Connections `Account`. You will no longer be able to access data associated with the account (e.g. balances, transactions).
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostFinancialConnectionsAccountsAccountDisconnectBody).def_response(async ({ json }) => Schemas.parseFinancialConnectionsAccount(await json()))
+},
+'inferred_balances': {
+/**
+ * List Account's inferred balances
+ *
+ * Lists the recorded inferred balances for a Financial Connections `Account`.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetFinancialConnectionsAccountsAccountInferredBalancesSearchParams).def_body(Schemas.parseGetFinancialConnectionsAccountsAccountInferredBalancesBody).def_response(async ({ json }) => Schemas.parseGetFinancialConnectionsAccountsAccountInferredBalancesResponse(await json()))
+},
+'owners': {
+/**
+ * List Account Owners
+ *
+ * Lists all owners for a given `Account`
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetFinancialConnectionsAccountsAccountOwnersSearchParams).def_body(Schemas.parseGetFinancialConnectionsAccountsAccountOwnersBody).def_response(async ({ json }) => Schemas.parseGetFinancialConnectionsAccountsAccountOwnersResponse(await json()))
+},
+'refresh': {
+/**
+ * Refresh Account data
+ *
+ * Refreshes the data associated with a Financial Connections `Account`.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostFinancialConnectionsAccountsAccountRefreshBody).def_response(async ({ json }) => Schemas.parseFinancialConnectionsAccount(await json()))
+},
+'subscribe': {
+/**
+ * Subscribe to data refreshes for an Account
+ *
+ * Subscribes to periodic refreshes of data associated with a Financial Connections `Account`. When the account status is active, data is typically refreshed once a day.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostFinancialConnectionsAccountsAccountSubscribeBody).def_response(async ({ json }) => Schemas.parseFinancialConnectionsAccount(await json()))
+},
+'unsubscribe': {
+/**
+ * Unsubscribe from data refreshes for an Account
+ *
+ * Unsubscribes from periodic refreshes of data associated with a Financial Connections `Account`.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostFinancialConnectionsAccountsAccountUnsubscribeBody).def_response(async ({ json }) => Schemas.parseFinancialConnectionsAccount(await json()))
+}
+}
+},
+'institutions': {
+/**
+ * List Institutions
+ *
+ * Returns a list of Financial Connections `Institution` objects.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetFinancialConnectionsInstitutionsSearchParams).def_body(Schemas.parseGetFinancialConnectionsInstitutionsBody).def_response(async ({ json }) => Schemas.parseGetFinancialConnectionsInstitutionsResponse(await json())),
+'$institution': {
+/**
+ * Retrieve an Institution
+ *
+ * Retrieves the details of a Financial Connections `Institution`.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetFinancialConnectionsInstitutionsInstitutionSearchParams).def_body(Schemas.parseGetFinancialConnectionsInstitutionsInstitutionBody).def_response(async ({ json }) => Schemas.parseFinancialConnectionsInstitution(await json()))
+}
+},
+'sessions': {
+/**
+ * Create a Session
+ *
+ * To launch the Financial Connections authorization flow, create a `Session`. The session’s `client_secret` can be used to launch the flow using Stripe.js.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostFinancialConnectionsSessionsBody).def_response(async ({ json }) => Schemas.parseFinancialConnectionsSession(await json())),
+'$session': {
+/**
+ * Retrieve a Session
+ *
+ * Retrieves the details of a Financial Connections `Session`
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetFinancialConnectionsSessionsSessionSearchParams).def_body(Schemas.parseGetFinancialConnectionsSessionsSessionBody).def_response(async ({ json }) => Schemas.parseFinancialConnectionsSession(await json()))
+}
+},
+'transactions': {
+/**
+ * List Transactions
+ *
+ * Returns a list of Financial Connections `Transaction` objects.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetFinancialConnectionsTransactionsSearchParams).def_body(Schemas.parseGetFinancialConnectionsTransactionsBody).def_response(async ({ json }) => Schemas.parseGetFinancialConnectionsTransactionsResponse(await json())),
+'$transaction': {
+/**
+ * Retrieve a Transaction
+ *
+ * Retrieves the details of a Financial Connections `Transaction`
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetFinancialConnectionsTransactionsTransactionSearchParams).def_body(Schemas.parseGetFinancialConnectionsTransactionsTransactionBody).def_response(async ({ json }) => Schemas.parseFinancialConnectionsTransaction(await json()))
+}
+}
+},
+'forwarding': {
+'requests': {
+/**
+ * List all ForwardingRequests
+ *
+ * Lists all ForwardingRequest objects.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetForwardingRequestsSearchParams).def_body(Schemas.parseGetForwardingRequestsBody).def_response(async ({ json }) => Schemas.parseGetForwardingRequestsResponse(await json())),
+/**
+ * Create a ForwardingRequest
+ *
+ * Creates a ForwardingRequest object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostForwardingRequestsBody).def_response(async ({ json }) => Schemas.parseForwardingRequest(await json())),
+'$id': {
+/**
+ * Retrieve a ForwardingRequest
+ *
+ * Retrieves a ForwardingRequest object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetForwardingRequestsIdSearchParams).def_body(Schemas.parseGetForwardingRequestsIdBody).def_response(async ({ json }) => Schemas.parseForwardingRequest(await json()))
+}
+}
+},
+'fx_quotes': {
+/**
+ * List active FX Quotes
+ *
+ * Returns a list of FX quotes that have been issued. The FX quotes are returned in sorted order, with the most recent FX quotes appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetFxQuotesSearchParams).def_body(Schemas.parseGetFxQuotesBody).def_response(async ({ json }) => Schemas.parseGetFxQuotesResponse(await json())),
+/**
+ * Create an FX Quote
+ *
+ * Creates an FX Quote object
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostFxQuotesBody).def_response(async ({ json }) => Schemas.parseFxQuote(await json())),
+'$id': {
+/**
+ * Retrieve an FX Quote
+ *
+ * Retrieve an FX Quote object
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetFxQuotesIdSearchParams).def_body(Schemas.parseGetFxQuotesIdBody).def_response(async ({ json }) => Schemas.parseFxQuote(await json()))
+}
+},
+'identity': {
+'verification_reports': {
+/**
+ * List VerificationReports
+ *
+ * List all verification reports.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIdentityVerificationReportsSearchParams).def_body(Schemas.parseGetIdentityVerificationReportsBody).def_response(async ({ json }) => Schemas.parseGetIdentityVerificationReportsResponse(await json())),
+'$report': {
+/**
+ * Retrieve a VerificationReport
+ *
+ * Retrieves an existing VerificationReport
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIdentityVerificationReportsReportSearchParams).def_body(Schemas.parseGetIdentityVerificationReportsReportBody).def_response(async ({ json }) => Schemas.parseIdentityVerificationReport(await json()))
+}
+},
+'verification_sessions': {
+/**
+ * List VerificationSessions
+ *
+ * Returns a list of VerificationSessions
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIdentityVerificationSessionsSearchParams).def_body(Schemas.parseGetIdentityVerificationSessionsBody).def_response(async ({ json }) => Schemas.parseGetIdentityVerificationSessionsResponse(await json())),
+/**
+ * Create a VerificationSession
+ *
+ * Creates a VerificationSession object.
+ * 
+ * After the VerificationSession is created, display a verification modal using the session `client_secret` or send your users to the session’s `url`.
+ * 
+ * If your API key is in test mode, verification checks won’t actually process, though everything else will occur as if in live mode.
+ * 
+ * Related guide: [Verify your users’ identity documents](/docs/identity/verify-identity-documents)
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIdentityVerificationSessionsBody).def_response(async ({ json }) => Schemas.parseIdentityVerificationSession(await json())),
+'$session': {
+/**
+ * Retrieve a VerificationSession
+ *
+ * Retrieves the details of a VerificationSession that was previously created.
+ * 
+ * When the session status is `requires_input`, you can use this method to retrieve a valid
+ * `client_secret` or `url` to allow re-submission.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIdentityVerificationSessionsSessionSearchParams).def_body(Schemas.parseGetIdentityVerificationSessionsSessionBody).def_response(async ({ json }) => Schemas.parseIdentityVerificationSession(await json())),
+/**
+ * Update a VerificationSession
+ *
+ * Updates a VerificationSession object.
+ * 
+ * When the session status is `requires_input`, you can use this method to update the
+ * verification check and options.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIdentityVerificationSessionsSessionBody).def_response(async ({ json }) => Schemas.parseIdentityVerificationSession(await json())),
+'cancel': {
+/**
+ * Cancel a VerificationSession
+ *
+ * A VerificationSession object can be canceled when it is in `requires_input` [status](/docs/identity/how-sessions-work).
+ * 
+ * Once canceled, future submission attempts are disabled. This cannot be undone. [Learn more](/docs/identity/verification-sessions#cancel).
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIdentityVerificationSessionsSessionCancelBody).def_response(async ({ json }) => Schemas.parseIdentityVerificationSession(await json()))
+},
+'redact': {
+/**
+ * Redact a VerificationSession
+ *
+ * Redact a VerificationSession to remove all collected information from Stripe. This will redact
+ * the VerificationSession and all objects related to it, including VerificationReports, Events,
+ * request logs, etc.
+ * 
+ * A VerificationSession object can be redacted when it is in `requires_input` or `verified`
+ * [status](/docs/identity/how-sessions-work). Redacting a VerificationSession in `requires_action`
+ * state will automatically cancel it.
+ * 
+ * The redaction process may take up to four days. When the redaction process is in progress, the
+ * VerificationSession’s `redaction.status` field will be set to `processing`; when the process is
+ * finished, it will change to `redacted` and an `identity.verification_session.redacted` event
+ * will be emitted.
+ * 
+ * Redaction is irreversible. Redacted objects are still accessible in the Stripe API, but all the
+ * fields that contain personal data will be replaced by the string `[redacted]` or a similar
+ * placeholder. The `metadata` field will also be erased. Redacted objects cannot be updated or
+ * used for any purpose.
+ * 
+ * [Learn more](/docs/identity/verification-sessions#redact).
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIdentityVerificationSessionsSessionRedactBody).def_response(async ({ json }) => Schemas.parseIdentityVerificationSession(await json()))
+}
+}
+}
+},
+'invoice_payments': {
+/**
+ * List all payments for an invoice
+ *
+ * When retrieving an invoice, there is an includable payments property containing the first handful of those items. There is also a URL where you can retrieve the full (paginated) list of payments.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetInvoicePaymentsSearchParams).def_body(Schemas.parseGetInvoicePaymentsBody).def_response(async ({ json }) => Schemas.parseGetInvoicePaymentsResponse(await json())),
+'$invoice_payment': {
+/**
+ * Retrieve an InvoicePayment
+ *
+ * Retrieves the invoice payment with the given ID.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetInvoicePaymentsInvoicePaymentSearchParams).def_body(Schemas.parseGetInvoicePaymentsInvoicePaymentBody).def_response(async ({ json }) => Schemas.parseInvoicePayment(await json()))
+}
+},
+'invoice_rendering_templates': {
+/**
+ * List all invoice rendering templates
+ *
+ * List all templates, ordered by creation date, with the most recently created template appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetInvoiceRenderingTemplatesSearchParams).def_body(Schemas.parseGetInvoiceRenderingTemplatesBody).def_response(async ({ json }) => Schemas.parseGetInvoiceRenderingTemplatesResponse(await json())),
+'$template': {
+/**
+ * Retrieve an invoice rendering template
+ *
+ * Retrieves an invoice rendering template with the given ID. It by default returns the latest version of the template. Optionally, specify a version to see previous versions.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetInvoiceRenderingTemplatesTemplateSearchParams).def_body(Schemas.parseGetInvoiceRenderingTemplatesTemplateBody).def_response(async ({ json }) => Schemas.parseInvoiceRenderingTemplate(await json())),
+'archive': {
+/**
+ * Archive an invoice rendering template
+ *
+ * Updates the status of an invoice rendering template to ‘archived’ so no new Stripe objects (customers, invoices, etc.) can reference it. The template can also no longer be updated. However, if the template is already set on a Stripe object, it will continue to be applied on invoices generated by it.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostInvoiceRenderingTemplatesTemplateArchiveBody).def_response(async ({ json }) => Schemas.parseInvoiceRenderingTemplate(await json()))
+},
+'unarchive': {
+/**
+ * Unarchive an invoice rendering template
+ *
+ * Unarchive an invoice rendering template so it can be used on new Stripe objects again.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostInvoiceRenderingTemplatesTemplateUnarchiveBody).def_response(async ({ json }) => Schemas.parseInvoiceRenderingTemplate(await json()))
+}
+}
+},
+'invoiceitems': {
+/**
+ * List all invoice items
+ *
+ * Returns a list of your invoice items. Invoice items are returned sorted by creation date, with the most recently created invoice items appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetInvoiceitemsSearchParams).def_body(Schemas.parseGetInvoiceitemsBody).def_response(async ({ json }) => Schemas.parseGetInvoiceitemsResponse(await json())),
+/**
+ * Create an invoice item
+ *
+ * Creates an item to be added to a draft invoice (up to 250 items per invoice). If no invoice is specified, the item will be on the next invoice created for the customer specified.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostInvoiceitemsBody).def_response(async ({ json }) => Schemas.parseInvoiceitem(await json())),
+'$invoiceitem': {
+/**
+ * Delete an invoice item
+ *
+ * Deletes an invoice item, removing it from an invoice. Deleting invoice items is only possible when they’re not attached to invoices, or if it’s attached to a draft invoice.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteInvoiceitemsInvoiceitemBody).def_response(async ({ json }) => Schemas.parseDeletedInvoiceitem(await json())),
+/**
+ * Retrieve an invoice item
+ *
+ * Retrieves the invoice item with the given ID.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetInvoiceitemsInvoiceitemSearchParams).def_body(Schemas.parseGetInvoiceitemsInvoiceitemBody).def_response(async ({ json }) => Schemas.parseInvoiceitem(await json())),
+/**
+ * Update an invoice item
+ *
+ * Updates the amount or description of an invoice item on an upcoming invoice. Updating an invoice item is only possible before the invoice it’s attached to is closed.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostInvoiceitemsInvoiceitemBody).def_response(async ({ json }) => Schemas.parseInvoiceitem(await json()))
+}
+},
+'invoices': {
+/**
+ * List all invoices
+ *
+ * You can list all invoices, or list the invoices for a specific customer. The invoices are returned sorted by creation date, with the most recently created invoices appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetInvoicesSearchParams).def_body(Schemas.parseGetInvoicesBody).def_response(async ({ json }) => Schemas.parseGetInvoicesResponse(await json())),
+/**
+ * Create an invoice
+ *
+ * This endpoint creates a draft invoice for a given customer. The invoice remains a draft until you [finalize](#finalize_invoice) the invoice, which allows you to [pay](#pay_invoice) or [send](#send_invoice) the invoice to your customers.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostInvoicesBody).def_response(async ({ json }) => Schemas.parseInvoice(await json())),
+'create_preview': {
+/**
+ * Create a preview invoice
+ *
+ * At any time, you can preview the upcoming invoice for a subscription or subscription schedule. This will show you all the charges that are pending, including subscription renewal charges, invoice item charges, etc. It will also show you any discounts that are applicable to the invoice.
+ * 
+ * You can also preview the effects of creating or updating a subscription or subscription schedule, including a preview of any prorations that will take place. To ensure that the actual proration is calculated exactly the same as the previewed proration, you should pass the `subscription_details.proration_date` parameter when doing the actual subscription update.
+ * 
+ * The recommended way to get only the prorations being previewed on the invoice is to consider line items where `parent.subscription_item_details.proration` is `true`.
+ * 
+ * Note that when you are viewing an upcoming invoice, you are simply viewing a preview – the invoice has not yet been created. As such, the upcoming invoice will not show up in invoice listing calls, and you cannot use the API to pay or edit the invoice. If you want to change the amount that your customer will be billed, you can add, remove, or update pending invoice items, or update the customer’s discount.
+ * 
+ * Note: Currency conversion calculations use the latest exchange rates. Exchange rates may vary between the time of the preview and the time of the actual invoice creation. [Learn more](https://docs.stripe.com/currencies/conversions)
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostInvoicesCreatePreviewBody).def_response(async ({ json }) => Schemas.parseInvoice(await json()))
+},
+'search': {
+/**
+ * Search invoices
+ *
+ * Search for invoices you’ve previously created using Stripe’s [Search Query Language](/docs/search#search-query-language).
+ * Don’t use search in read-after-write flows where strict consistency is necessary. Under normal operating
+ * conditions, data is searchable in less than a minute. Occasionally, propagation of new or updated data can be up
+ * to an hour behind during outages. Search functionality is not available to merchants in India.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetInvoicesSearchSearchParams).def_body(Schemas.parseGetInvoicesSearchBody).def_response(async ({ json }) => Schemas.parseGetInvoicesSearchResponse(await json()))
+},
+'$invoice': {
+/**
+ * Delete a draft invoice
+ *
+ * Permanently deletes a one-off invoice draft. This cannot be undone. Attempts to delete invoices that are no longer in a draft state will fail; once an invoice has been finalized or if an invoice is for a subscription, it must be [voided](#void_invoice).
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteInvoicesInvoiceBody).def_response(async ({ json }) => Schemas.parseDeletedInvoice(await json())),
+/**
+ * Retrieve an invoice
+ *
+ * Retrieves the invoice with the given ID.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetInvoicesInvoiceSearchParams).def_body(Schemas.parseGetInvoicesInvoiceBody).def_response(async ({ json }) => Schemas.parseInvoice(await json())),
+/**
+ * Update an invoice
+ *
+ * Draft invoices are fully editable. Once an invoice is [finalized](/docs/billing/invoices/workflow#finalized),
+ * monetary values, as well as `collection_method`, become uneditable.
+ * 
+ * If you would like to stop the Stripe Billing engine from automatically finalizing, reattempting payments on,
+ * sending reminders for, or [automatically reconciling](/docs/billing/invoices/reconciliation) invoices, pass
+ * `auto_advance=false`.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostInvoicesInvoiceBody).def_response(async ({ json }) => Schemas.parseInvoice(await json())),
+'add_lines': {
+/**
+ * Bulk add invoice line items
+ *
+ * Adds multiple line items to an invoice. This is only possible when an invoice is still a draft.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostInvoicesInvoiceAddLinesBody).def_response(async ({ json }) => Schemas.parseInvoice(await json()))
+},
+'attach_payment': {
+/**
+ * Attach a payment to an Invoice
+ *
+ * Attaches a PaymentIntent or an Out of Band Payment to the invoice, adding it to the list of `payments`.
+ * 
+ * For the PaymentIntent, when the PaymentIntent’s status changes to `succeeded`, the payment is credited
+ * to the invoice, increasing its `amount_paid`. When the invoice is fully paid, the
+ * invoice’s status becomes `paid`.
+ * 
+ * If the PaymentIntent’s status is already `succeeded` when it’s attached, it’s
+ * credited to the invoice immediately.
+ * 
+ * See: [Partial payments](/docs/invoicing/partial-payments) to learn more.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostInvoicesInvoiceAttachPaymentBody).def_response(async ({ json }) => Schemas.parseInvoice(await json()))
+},
+'finalize': {
+/**
+ * Finalize an invoice
+ *
+ * Stripe automatically finalizes drafts before sending and attempting payment on invoices. However, if you’d like to finalize a draft invoice manually, you can do so using this method.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostInvoicesInvoiceFinalizeBody).def_response(async ({ json }) => Schemas.parseInvoice(await json()))
+},
+'lines': {
+/**
+ * Retrieve an invoice's line items
+ *
+ * When retrieving an invoice, you’ll get a **lines** property containing the total count of line items and the first handful of those items. There is also a URL where you can retrieve the full (paginated) list of line items.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetInvoicesInvoiceLinesSearchParams).def_body(Schemas.parseGetInvoicesInvoiceLinesBody).def_response(async ({ json }) => Schemas.parseGetInvoicesInvoiceLinesResponse(await json())),
+'$line_item_id': {
+/**
+ * Update an invoice's line item
+ *
+ * Updates an invoice’s line item. Some fields, such as `tax_amounts`, only live on the invoice line item,
+ * so they can only be updated through this endpoint. Other fields, such as `amount`, live on both the invoice
+ * item and the invoice line item, so updates on this endpoint will propagate to the invoice item as well.
+ * Updating an invoice’s line item is only possible before the invoice is finalized.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostInvoicesInvoiceLinesLineItemIdBody).def_response(async ({ json }) => Schemas.parseLineItem(await json()))
+}
+},
+'mark_uncollectible': {
+/**
+ * Mark an invoice as uncollectible
+ *
+ * Marking an invoice as uncollectible is useful for keeping track of bad debts that can be written off for accounting purposes.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostInvoicesInvoiceMarkUncollectibleBody).def_response(async ({ json }) => Schemas.parseInvoice(await json()))
+},
+'pay': {
+/**
+ * Pay an invoice
+ *
+ * Stripe automatically creates and then attempts to collect payment on invoices for customers on subscriptions according to your [subscriptions settings](https://dashboard.stripe.com/account/billing/automatic). However, if you’d like to attempt payment on an invoice out of the normal collection schedule or for some other reason, you can do so.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostInvoicesInvoicePayBody).def_response(async ({ json }) => Schemas.parseInvoice(await json()))
+},
+'remove_lines': {
+/**
+ * Bulk remove invoice line items
+ *
+ * Removes multiple line items from an invoice. This is only possible when an invoice is still a draft.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostInvoicesInvoiceRemoveLinesBody).def_response(async ({ json }) => Schemas.parseInvoice(await json()))
+},
+'send': {
+/**
+ * Send an invoice for manual payment
+ *
+ * Stripe will automatically send invoices to customers according to your [subscriptions settings](https://dashboard.stripe.com/account/billing/automatic). However, if you’d like to manually send an invoice to your customer out of the normal schedule, you can do so. When sending invoices that have already been paid, there will be no reference to the payment in the email.
+ * 
+ * Requests made in test-mode result in no emails being sent, despite sending an `invoice.sent` event.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostInvoicesInvoiceSendBody).def_response(async ({ json }) => Schemas.parseInvoice(await json()))
+},
+'update_lines': {
+/**
+ * Bulk update invoice line items
+ *
+ * Updates multiple line items on an invoice. This is only possible when an invoice is still a draft.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostInvoicesInvoiceUpdateLinesBody).def_response(async ({ json }) => Schemas.parseInvoice(await json()))
+},
+'void': {
+/**
+ * Void an invoice
+ *
+ * Mark a finalized invoice as void. This cannot be undone. Voiding an invoice is similar to [deletion](#delete_invoice), however it only applies to finalized invoices and maintains a papertrail where the invoice can still be found.
+ * 
+ * Consult with local regulations to determine whether and how an invoice might be amended, canceled, or voided in the jurisdiction you’re doing business in. You might need to [issue another invoice](#create_invoice) or [credit note](#create_credit_note) instead. Stripe recommends that you consult with your legal counsel for advice specific to your business.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostInvoicesInvoiceVoidBody).def_response(async ({ json }) => Schemas.parseInvoice(await json()))
+}
+}
+},
+'issuing': {
+'authorizations': {
+/**
+ * List all authorizations
+ *
+ * Returns a list of Issuing `Authorization` objects. The objects are sorted in descending order by creation date, with the most recently created object appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingAuthorizationsSearchParams).def_body(Schemas.parseGetIssuingAuthorizationsBody).def_response(async ({ json }) => Schemas.parseGetIssuingAuthorizationsResponse(await json())),
+'$authorization': {
+/**
+ * Retrieve an authorization
+ *
+ * Retrieves an Issuing `Authorization` object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingAuthorizationsAuthorizationSearchParams).def_body(Schemas.parseGetIssuingAuthorizationsAuthorizationBody).def_response(async ({ json }) => Schemas.parseIssuingAuthorization(await json())),
+/**
+ * Update an authorization
+ *
+ * Updates the specified Issuing `Authorization` object by setting the values of the parameters passed. Any parameters not provided will be left unchanged.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIssuingAuthorizationsAuthorizationBody).def_response(async ({ json }) => Schemas.parseIssuingAuthorization(await json())),
+'approve': {
+/**
+ * Approve an authorization
+ *
+ * [Deprecated] Approves a pending Issuing `Authorization` object. This request should be made within the timeout window of the [real-time authorization](/docs/issuing/controls/real-time-authorizations) flow. 
+ * This method is deprecated. Instead, [respond directly to the webhook request to approve an authorization](/docs/issuing/controls/real-time-authorizations#authorization-handling).
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIssuingAuthorizationsAuthorizationApproveBody).def_response(async ({ json }) => Schemas.parseIssuingAuthorization(await json()))
+},
+'decline': {
+/**
+ * Decline an authorization
+ *
+ * [Deprecated] Declines a pending Issuing `Authorization` object. This request should be made within the timeout window of the [real time authorization](/docs/issuing/controls/real-time-authorizations) flow.
+ * This method is deprecated. Instead, [respond directly to the webhook request to decline an authorization](/docs/issuing/controls/real-time-authorizations#authorization-handling).
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIssuingAuthorizationsAuthorizationDeclineBody).def_response(async ({ json }) => Schemas.parseIssuingAuthorization(await json()))
+}
+}
+},
+'cardholders': {
+/**
+ * List all cardholders
+ *
+ * Returns a list of Issuing `Cardholder` objects. The objects are sorted in descending order by creation date, with the most recently created object appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingCardholdersSearchParams).def_body(Schemas.parseGetIssuingCardholdersBody).def_response(async ({ json }) => Schemas.parseGetIssuingCardholdersResponse(await json())),
+/**
+ * Create a cardholder
+ *
+ * Creates a new Issuing `Cardholder` object that can be issued cards.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIssuingCardholdersBody).def_response(async ({ json }) => Schemas.parseIssuingCardholder(await json())),
+'$cardholder': {
+/**
+ * Retrieve a cardholder
+ *
+ * Retrieves an Issuing `Cardholder` object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingCardholdersCardholderSearchParams).def_body(Schemas.parseGetIssuingCardholdersCardholderBody).def_response(async ({ json }) => Schemas.parseIssuingCardholder(await json())),
+/**
+ * Update a cardholder
+ *
+ * Updates the specified Issuing `Cardholder` object by setting the values of the parameters passed. Any parameters not provided will be left unchanged.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIssuingCardholdersCardholderBody).def_response(async ({ json }) => Schemas.parseIssuingCardholder(await json()))
+}
+},
+'cards': {
+/**
+ * List all cards
+ *
+ * Returns a list of Issuing `Card` objects. The objects are sorted in descending order by creation date, with the most recently created object appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingCardsSearchParams).def_body(Schemas.parseGetIssuingCardsBody).def_response(async ({ json }) => Schemas.parseGetIssuingCardsResponse(await json())),
+/**
+ * Create a card
+ *
+ * Creates an Issuing `Card` object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIssuingCardsBody).def_response(async ({ json }) => Schemas.parseIssuingCard(await json())),
+'$card': {
+/**
+ * Retrieve a card
+ *
+ * Retrieves an Issuing `Card` object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingCardsCardSearchParams).def_body(Schemas.parseGetIssuingCardsCardBody).def_response(async ({ json }) => Schemas.parseIssuingCard(await json())),
+/**
+ * Update a card
+ *
+ * Updates the specified Issuing `Card` object by setting the values of the parameters passed. Any parameters not provided will be left unchanged.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIssuingCardsCardBody).def_response(async ({ json }) => Schemas.parseIssuingCard(await json()))
+}
+},
+'credit_underwriting_records': {
+/**
+ * List all records
+ *
+ * Retrieves a list of `CreditUnderwritingRecord` objects. The objects are sorted in descending order by creation date, with the most-recently-created object appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingCreditUnderwritingRecordsSearchParams).def_body(Schemas.parseGetIssuingCreditUnderwritingRecordsBody).def_response(async ({ json }) => Schemas.parseGetIssuingCreditUnderwritingRecordsResponse(await json())),
+'create_from_application': {
+/**
+ * Create from an application
+ *
+ * Creates a `CreditUnderwritingRecord` object with information about a credit application submission.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIssuingCreditUnderwritingRecordsCreateFromApplicationBody).def_response(async ({ json }) => Schemas.parseIssuingCreditUnderwritingRecord(await json()))
+},
+'create_from_proactive_review': {
+/**
+ * Create from a proactive review
+ *
+ * Creates a `CreditUnderwritingRecord` object from an underwriting decision coming from a proactive review of an existing accountholder.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIssuingCreditUnderwritingRecordsCreateFromProactiveReviewBody).def_response(async ({ json }) => Schemas.parseIssuingCreditUnderwritingRecord(await json()))
+},
+'$credit_underwriting_record': {
+/**
+ * Retrieve a record
+ *
+ * Retrieves a `CreditUnderwritingRecord` object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingCreditUnderwritingRecordsCreditUnderwritingRecordSearchParams).def_body(Schemas.parseGetIssuingCreditUnderwritingRecordsCreditUnderwritingRecordBody).def_response(async ({ json }) => Schemas.parseIssuingCreditUnderwritingRecord(await json())),
+'correct': {
+/**
+ * Correct an erroneous record
+ *
+ * Update a `CreditUnderwritingRecord` object to correct mistakes.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIssuingCreditUnderwritingRecordsCreditUnderwritingRecordCorrectBody).def_response(async ({ json }) => Schemas.parseIssuingCreditUnderwritingRecord(await json()))
+},
+'report_decision': {
+/**
+ * Report a decision
+ *
+ * Update a `CreditUnderwritingRecord` object from a decision made on a credit application.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIssuingCreditUnderwritingRecordsCreditUnderwritingRecordReportDecisionBody).def_response(async ({ json }) => Schemas.parseIssuingCreditUnderwritingRecord(await json()))
+}
+}
+},
+'dispute_settlement_details': {
+/**
+ * List all dispute settlement details
+ *
+ * Returns a list of Issuing `DisputeSettlementDetail` objects. The objects are sorted in descending order by creation date, with the most recently created object appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingDisputeSettlementDetailsSearchParams).def_body(Schemas.parseGetIssuingDisputeSettlementDetailsBody).def_response(async ({ json }) => Schemas.parseGetIssuingDisputeSettlementDetailsResponse(await json())),
+'$dispute_settlement_detail': {
+/**
+ * Retrieve a dispute settlement detail
+ *
+ * Retrieves an Issuing `DisputeSettlementDetail` object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingDisputeSettlementDetailsDisputeSettlementDetailSearchParams).def_body(Schemas.parseGetIssuingDisputeSettlementDetailsDisputeSettlementDetailBody).def_response(async ({ json }) => Schemas.parseIssuingDisputeSettlementDetail(await json()))
+}
+},
+'disputes': {
+/**
+ * List all disputes
+ *
+ * Returns a list of Issuing `Dispute` objects. The objects are sorted in descending order by creation date, with the most recently created object appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingDisputesSearchParams).def_body(Schemas.parseGetIssuingDisputesBody).def_response(async ({ json }) => Schemas.parseGetIssuingDisputesResponse(await json())),
+/**
+ * Create a dispute
+ *
+ * Creates an Issuing `Dispute` object. Individual pieces of evidence within the `evidence` object are optional at this point. Stripe only validates that required evidence is present during submission. Refer to [Dispute reasons and evidence](/docs/issuing/purchases/disputes#dispute-reasons-and-evidence) for more details about evidence requirements.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIssuingDisputesBody).def_response(async ({ json }) => Schemas.parseIssuingDispute(await json())),
+'$dispute': {
+/**
+ * Retrieve a dispute
+ *
+ * Retrieves an Issuing `Dispute` object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingDisputesDisputeSearchParams).def_body(Schemas.parseGetIssuingDisputesDisputeBody).def_response(async ({ json }) => Schemas.parseIssuingDispute(await json())),
+/**
+ * Update a dispute
+ *
+ * Updates the specified Issuing `Dispute` object by setting the values of the parameters passed. Any parameters not provided will be left unchanged. Properties on the `evidence` object can be unset by passing in an empty string.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIssuingDisputesDisputeBody).def_response(async ({ json }) => Schemas.parseIssuingDispute(await json())),
+'submit': {
+/**
+ * Submit a dispute
+ *
+ * Submits an Issuing `Dispute` to the card network. Stripe validates that all evidence fields required for the dispute’s reason are present. For more details, see [Dispute reasons and evidence](/docs/issuing/purchases/disputes#dispute-reasons-and-evidence).
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIssuingDisputesDisputeSubmitBody).def_response(async ({ json }) => Schemas.parseIssuingDispute(await json()))
+}
+}
+},
+'fraud_liability_debits': {
+/**
+ * List all fraud liability debits
+ *
+ * Returns a list of Issuing `FraudLiabilityDebit` objects. The objects are sorted in descending order by creation date, with the most recently created object appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingFraudLiabilityDebitsSearchParams).def_body(Schemas.parseGetIssuingFraudLiabilityDebitsBody).def_response(async ({ json }) => Schemas.parseGetIssuingFraudLiabilityDebitsResponse(await json())),
+'$fraud_liability_debit': {
+/**
+ * Retrieve an Issuing fraud liability debit
+ *
+ * Retrieves an Issuing `FraudLiabilityDebit` object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingFraudLiabilityDebitsFraudLiabilityDebitSearchParams).def_body(Schemas.parseGetIssuingFraudLiabilityDebitsFraudLiabilityDebitBody).def_response(async ({ json }) => Schemas.parseIssuingFraudLiabilityDebit(await json()))
+}
+},
+'personalization_designs': {
+/**
+ * List all personalization designs
+ *
+ * Returns a list of personalization design objects. The objects are sorted in descending order by creation date, with the most recently created object appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingPersonalizationDesignsSearchParams).def_body(Schemas.parseGetIssuingPersonalizationDesignsBody).def_response(async ({ json }) => Schemas.parseGetIssuingPersonalizationDesignsResponse(await json())),
+/**
+ * Create a personalization design
+ *
+ * Creates a personalization design object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIssuingPersonalizationDesignsBody).def_response(async ({ json }) => Schemas.parseIssuingPersonalizationDesign(await json())),
+'$personalization_design': {
+/**
+ * Retrieve a personalization design
+ *
+ * Retrieves a personalization design object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingPersonalizationDesignsPersonalizationDesignSearchParams).def_body(Schemas.parseGetIssuingPersonalizationDesignsPersonalizationDesignBody).def_response(async ({ json }) => Schemas.parseIssuingPersonalizationDesign(await json())),
+/**
+ * Update a personalization design
+ *
+ * Updates a card personalization object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIssuingPersonalizationDesignsPersonalizationDesignBody).def_response(async ({ json }) => Schemas.parseIssuingPersonalizationDesign(await json()))
+}
+},
+'physical_bundles': {
+/**
+ * List all physical bundles
+ *
+ * Returns a list of physical bundle objects. The objects are sorted in descending order by creation date, with the most recently created object appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingPhysicalBundlesSearchParams).def_body(Schemas.parseGetIssuingPhysicalBundlesBody).def_response(async ({ json }) => Schemas.parseGetIssuingPhysicalBundlesResponse(await json())),
+'$physical_bundle': {
+/**
+ * Retrieve a physical bundle
+ *
+ * Retrieves a physical bundle object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingPhysicalBundlesPhysicalBundleSearchParams).def_body(Schemas.parseGetIssuingPhysicalBundlesPhysicalBundleBody).def_response(async ({ json }) => Schemas.parseIssuingPhysicalBundle(await json()))
+}
+},
+'tokens': {
+/**
+ * List all issuing tokens for card
+ *
+ * Lists all Issuing `Token` objects for a given card.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingTokensSearchParams).def_body(Schemas.parseGetIssuingTokensBody).def_response(async ({ json }) => Schemas.parseGetIssuingTokensResponse(await json())),
+'$token': {
+/**
+ * Retrieve an issuing token
+ *
+ * Retrieves an Issuing `Token` object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingTokensTokenSearchParams).def_body(Schemas.parseGetIssuingTokensTokenBody).def_response(async ({ json }) => Schemas.parseIssuingToken(await json())),
+/**
+ * Update a token status
+ *
+ * Attempts to update the specified Issuing `Token` object to the status specified.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIssuingTokensTokenBody).def_response(async ({ json }) => Schemas.parseIssuingToken(await json()))
+}
+},
+'transactions': {
+/**
+ * List all transactions
+ *
+ * Returns a list of Issuing `Transaction` objects. The objects are sorted in descending order by creation date, with the most recently created object appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingTransactionsSearchParams).def_body(Schemas.parseGetIssuingTransactionsBody).def_response(async ({ json }) => Schemas.parseGetIssuingTransactionsResponse(await json())),
+'$transaction': {
+/**
+ * Retrieve a transaction
+ *
+ * Retrieves an Issuing `Transaction` object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetIssuingTransactionsTransactionSearchParams).def_body(Schemas.parseGetIssuingTransactionsTransactionBody).def_response(async ({ json }) => Schemas.parseIssuingTransaction(await json())),
+/**
+ * Update a transaction
+ *
+ * Updates the specified Issuing `Transaction` object by setting the values of the parameters passed. Any parameters not provided will be left unchanged.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostIssuingTransactionsTransactionBody).def_response(async ({ json }) => Schemas.parseIssuingTransaction(await json()))
+}
+}
+},
+'mandates': {
+/**
+ * List of Mandates for a PaymentMethod
+ *
+ * Retrieves a list of Mandates for a given PaymentMethod.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetMandatesSearchParams).def_body(Schemas.parseGetMandatesBody).def_response(async ({ json }) => Schemas.parseGetMandatesResponse(await json())),
+'$mandate': {
+/**
+ * Retrieve a Mandate
+ *
+ * Retrieves a Mandate object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetMandatesMandateSearchParams).def_body(Schemas.parseGetMandatesMandateBody).def_response(async ({ json }) => Schemas.parseMandate(await json()))
+}
+},
+'orders': {
+/**
+ * List all orders
+ *
+ * Returns a list of your orders. The orders are returned sorted by creation date, with the most recently created orders appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetOrdersSearchParams).def_body(Schemas.parseGetOrdersBody).def_response(async ({ json }) => Schemas.parseGetOrdersResponse(await json())),
+/**
+ * Create an order
+ *
+ * Creates a new `open` order object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostOrdersBody).def_response(async ({ json }) => Schemas.parseOrder(await json())),
+'$id': {
+/**
+ * Retrieve an order
+ *
+ * Retrieves the details of an existing order. Supply the unique order ID from either an order creation request or the order list, and Stripe will return the corresponding order information.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetOrdersIdSearchParams).def_body(Schemas.parseGetOrdersIdBody).def_response(async ({ json }) => Schemas.parseOrder(await json())),
+/**
+ * Update an order
+ *
+ * Updates the specific order by setting the values of the parameters passed. Any parameters not provided will be left unchanged.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostOrdersIdBody).def_response(async ({ json }) => Schemas.parseOrder(await json())),
+'cancel': {
+/**
+ * Cancel an order
+ *
+ * Cancels the order as well as the payment intent if one is attached.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostOrdersIdCancelBody).def_response(async ({ json }) => Schemas.parseOrder(await json()))
+},
+'line_items': {
+/**
+ * Retrieve an order's line items
+ *
+ * When retrieving an order, there is an includable **line_items** property containing the first handful of those items. There is also a URL where you can retrieve the full (paginated) list of line items.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetOrdersIdLineItemsSearchParams).def_body(Schemas.parseGetOrdersIdLineItemsBody).def_response(async ({ json }) => Schemas.parseGetOrdersIdLineItemsResponse(await json()))
+},
+'reopen': {
+/**
+ * Reopen an order
+ *
+ * Reopens a `submitted` order.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostOrdersIdReopenBody).def_response(async ({ json }) => Schemas.parseOrder(await json()))
+},
+'submit': {
+/**
+ * Submit an order
+ *
+ * Submitting an Order transitions the status to `processing` and creates a PaymentIntent object so the order can be paid. If the Order has an `amount_total` of 0, no PaymentIntent object will be created. Once the order is submitted, its contents cannot be changed, unless the [reopen](#reopen_order) method is called.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostOrdersIdSubmitBody).def_response(async ({ json }) => Schemas.parseOrder(await json()))
+}
+}
+},
+'payment_attempt_records': {
+/**
+ * List Payment Attempt Records
+ *
+ * List all the Payment Attempt Records attached to the specified Payment Record.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPaymentAttemptRecordsSearchParams).def_body(Schemas.parseGetPaymentAttemptRecordsBody).def_response(async ({ json }) => Schemas.parseGetPaymentAttemptRecordsResponse(await json())),
+'$id': {
+/**
+ * Retrieve a Payment Attempt Record
+ *
+ * Retrieves a Payment Attempt Record with the given ID
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPaymentAttemptRecordsIdSearchParams).def_body(Schemas.parseGetPaymentAttemptRecordsIdBody).def_response(async ({ json }) => Schemas.parsePaymentAttemptRecord(await json()))
+}
+},
+'payment_intents': {
+/**
+ * List all PaymentIntents
+ *
+ * Returns a list of PaymentIntents.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPaymentIntentsSearchParams).def_body(Schemas.parseGetPaymentIntentsBody).def_response(async ({ json }) => Schemas.parseGetPaymentIntentsResponse(await json())),
+/**
+ * Create a PaymentIntent
+ *
+ * Creates a PaymentIntent object.
+ * 
+ * After the PaymentIntent is created, attach a payment method and [confirm](/docs/api/payment_intents/confirm)
+ * to continue the payment. Learn more about the available payment flows
+ * with the Payment Intents API.
+ * 
+ * When you use `confirm=true` during creation, it’s equivalent to creating
+ * and confirming the PaymentIntent in the same call. You can use any parameters
+ * available in the [confirm API](/docs/api/payment_intents/confirm) when you supply
+ * `confirm=true`.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentIntentsBody).def_response(async ({ json }) => Schemas.parsePaymentIntent(await json())),
+'search': {
+/**
+ * Search PaymentIntents
+ *
+ * Search for PaymentIntents you’ve previously created using Stripe’s [Search Query Language](/docs/search#search-query-language).
+ * Don’t use search in read-after-write flows where strict consistency is necessary. Under normal operating
+ * conditions, data is searchable in less than a minute. Occasionally, propagation of new or updated data can be up
+ * to an hour behind during outages. Search functionality is not available to merchants in India.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPaymentIntentsSearchSearchParams).def_body(Schemas.parseGetPaymentIntentsSearchBody).def_response(async ({ json }) => Schemas.parseGetPaymentIntentsSearchResponse(await json()))
+},
+'$intent': {
+/**
+ * Retrieve a PaymentIntent
+ *
+ * Retrieves the details of a PaymentIntent that has previously been created. 
+ * 
+ * You can retrieve a PaymentIntent client-side using a publishable key when the `client_secret` is in the query string. 
+ * 
+ * If you retrieve a PaymentIntent with a publishable key, it only returns a subset of properties. Refer to the [payment intent](#payment_intent_object) object reference for more details.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPaymentIntentsIntentSearchParams).def_body(Schemas.parseGetPaymentIntentsIntentBody).def_response(async ({ json }) => Schemas.parsePaymentIntent(await json())),
+/**
+ * Update a PaymentIntent
+ *
+ * Updates properties on a PaymentIntent object without confirming.
+ * 
+ * Depending on which properties you update, you might need to confirm the
+ * PaymentIntent again. For example, updating the `payment_method`
+ * always requires you to confirm the PaymentIntent again. If you prefer to
+ * update and confirm at the same time, we recommend updating properties through
+ * the [confirm API](/docs/api/payment_intents/confirm) instead.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentIntentsIntentBody).def_response(async ({ json }) => Schemas.parsePaymentIntent(await json())),
+'amount_details_line_items': {
+/**
+ * List all PaymentIntent LineItems
+ *
+ * Lists all LineItems of a given PaymentIntent.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPaymentIntentsIntentAmountDetailsLineItemsSearchParams).def_body(Schemas.parseGetPaymentIntentsIntentAmountDetailsLineItemsBody).def_response(async ({ json }) => Schemas.parseGetPaymentIntentsIntentAmountDetailsLineItemsResponse(await json()))
+},
+'apply_customer_balance': {
+/**
+ * Reconcile a customer_balance PaymentIntent
+ *
+ * Manually reconcile the remaining amount for a `customer_balance` PaymentIntent.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentIntentsIntentApplyCustomerBalanceBody).def_response(async ({ json }) => Schemas.parsePaymentIntent(await json()))
+},
+'cancel': {
+/**
+ * Cancel a PaymentIntent
+ *
+ * You can cancel a PaymentIntent object when it’s in one of these statuses: `requires_payment_method`, `requires_capture`, `requires_confirmation`, `requires_action` or, [in rare cases](/docs/payments/intents), `processing`. 
+ * 
+ * After it’s canceled, no additional charges are made by the PaymentIntent and any operations on the PaymentIntent fail with an error. For PaymentIntents with a `status` of `requires_capture`, the remaining `amount_capturable` is automatically refunded. 
+ * 
+ * You can’t cancel the PaymentIntent for a Checkout Session. [Expire the Checkout Session](/docs/api/checkout/sessions/expire) instead.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentIntentsIntentCancelBody).def_response(async ({ json }) => Schemas.parsePaymentIntent(await json()))
+},
+'capture': {
+/**
+ * Capture a PaymentIntent
+ *
+ * Capture the funds of an existing uncaptured PaymentIntent when its status is `requires_capture`.
+ * 
+ * Uncaptured PaymentIntents are cancelled a set number of days (7 by default) after their creation.
+ * 
+ * Learn more about [separate authorization and capture](/docs/payments/capture-later).
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentIntentsIntentCaptureBody).def_response(async ({ json }) => Schemas.parsePaymentIntent(await json()))
+},
+'confirm': {
+/**
+ * Confirm a PaymentIntent
+ *
+ * Confirm that your customer intends to pay with current or provided
+ * payment method. Upon confirmation, the PaymentIntent will attempt to initiate
+ * a payment.
+ * 
+ * If the selected payment method requires additional authentication steps, the
+ * PaymentIntent will transition to the `requires_action` status and
+ * suggest additional actions via `next_action`. If payment fails,
+ * the PaymentIntent transitions to the `requires_payment_method` status or the
+ * `canceled` status if the confirmation limit is reached. If
+ * payment succeeds, the PaymentIntent will transition to the `succeeded`
+ * status (or `requires_capture`, if `capture_method` is set to `manual`).
+ * 
+ * If the `confirmation_method` is `automatic`, payment may be attempted
+ * using our [client SDKs](/docs/stripe-js/reference#stripe-handle-card-payment)
+ * and the PaymentIntent’s [client_secret](#payment_intent_object-client_secret).
+ * After `next_action`s are handled by the client, no additional
+ * confirmation is required to complete the payment.
+ * 
+ * If the `confirmation_method` is `manual`, all payment attempts must be
+ * initiated using a secret key.
+ * 
+ * If any actions are required for the payment, the PaymentIntent will
+ * return to the `requires_confirmation` state
+ * after those actions are completed. Your server needs to then
+ * explicitly re-confirm the PaymentIntent to initiate the next payment
+ * attempt.
+ * 
+ * There is a variable upper limit on how many times a PaymentIntent can be confirmed.
+ * After this limit is reached, any further calls to this endpoint will
+ * transition the PaymentIntent to the `canceled` state.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentIntentsIntentConfirmBody).def_response(async ({ json }) => Schemas.parsePaymentIntent(await json()))
+},
+'decrement_authorization': {
+/**
+ * Decrement an authorization
+ *
+ * Perform a decremental authorization on an eligible
+ * [PaymentIntent](/docs/api/payment_intents/object). To be eligible, the
+ * PaymentIntent’s status must be `requires_capture` and
+ * [decremental_authorization.status](/docs/api/charges/object#charge_object-payment_method_details-card-decremental_authorization)
+ * must be `available`.
+ * 
+ * Decremental authorizations decrease the authorized amount on your customer’s card
+ * to the new, lower `amount` provided. A single PaymentIntent can call this endpoint multiple times to further decrease the authorized amount.
+ * 
+ * After decrement, the PaymentIntent object
+ * returns with the updated
+ * [amount](/docs/api/payment_intents/object#payment_intent_object-amount).
+ * The PaymentIntent will now be capturable up to the new authorized amount.
+ * 
+ * Each PaymentIntent can have a maximum of 10 decremental or incremental authorization attempts, including declines.
+ * After it’s fully captured, a PaymentIntent can no longer be decremented.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentIntentsIntentDecrementAuthorizationBody).def_response(async ({ json }) => Schemas.parsePaymentIntent(await json()))
+},
+'increment_authorization': {
+/**
+ * Increment an authorization
+ *
+ * Perform an incremental authorization on an eligible
+ * [PaymentIntent](/docs/api/payment_intents/object). To be eligible, the
+ * PaymentIntent’s status must be `requires_capture` and
+ * [incremental_authorization_supported](/docs/api/charges/object#charge_object-payment_method_details-card_present-incremental_authorization_supported)
+ * must be `true`.
+ * 
+ * Incremental authorizations attempt to increase the authorized amount on
+ * your customer’s card to the new, higher `amount` provided. Similar to the
+ * initial authorization, incremental authorizations can be declined. A
+ * single PaymentIntent can call this endpoint multiple times to further
+ * increase the authorized amount.
+ * 
+ * If the incremental authorization succeeds, the PaymentIntent object
+ * returns with the updated
+ * [amount](/docs/api/payment_intents/object#payment_intent_object-amount).
+ * If the incremental authorization fails, a
+ * [card_declined](/docs/error-codes#card-declined) error returns, and no other
+ * fields on the PaymentIntent or Charge update. The PaymentIntent
+ * object remains capturable for the previously authorized amount.
+ * 
+ * Each PaymentIntent can have a maximum of 10 incremental authorization attempts, including declines.
+ * After it’s captured, a PaymentIntent can no longer be incremented.
+ * 
+ * Learn more about [incremental authorizations](/docs/terminal/features/incremental-authorizations).
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentIntentsIntentIncrementAuthorizationBody).def_response(async ({ json }) => Schemas.parsePaymentIntent(await json()))
+},
+'verify_microdeposits': {
+/**
+ * Verify microdeposits on a PaymentIntent
+ *
+ * Verifies microdeposits on a PaymentIntent object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentIntentsIntentVerifyMicrodepositsBody).def_response(async ({ json }) => Schemas.parsePaymentIntent(await json()))
+}
+}
+},
+'payment_links': {
+/**
+ * List all payment links
+ *
+ * Returns a list of your payment links.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPaymentLinksSearchParams).def_body(Schemas.parseGetPaymentLinksBody).def_response(async ({ json }) => Schemas.parseGetPaymentLinksResponse(await json())),
+/**
+ * Create a payment link
+ *
+ * Creates a payment link.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentLinksBody).def_response(async ({ json }) => Schemas.parsePaymentLink(await json())),
+'$payment_link': {
+/**
+ * Retrieve payment link
+ *
+ * Retrieve a payment link.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPaymentLinksPaymentLinkSearchParams).def_body(Schemas.parseGetPaymentLinksPaymentLinkBody).def_response(async ({ json }) => Schemas.parsePaymentLink(await json())),
+/**
+ * Update a payment link
+ *
+ * Updates a payment link.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentLinksPaymentLinkBody).def_response(async ({ json }) => Schemas.parsePaymentLink(await json())),
+'line_items': {
+/**
+ * Retrieve a payment link's line items
+ *
+ * When retrieving a payment link, there is an includable **line_items** property containing the first handful of those items. There is also a URL where you can retrieve the full (paginated) list of line items.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPaymentLinksPaymentLinkLineItemsSearchParams).def_body(Schemas.parseGetPaymentLinksPaymentLinkLineItemsBody).def_response(async ({ json }) => Schemas.parseGetPaymentLinksPaymentLinkLineItemsResponse(await json()))
+}
+}
+},
+'payment_method_configurations': {
+/**
+ * List payment method configurations
+ *
+ * List payment method configurations
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPaymentMethodConfigurationsSearchParams).def_body(Schemas.parseGetPaymentMethodConfigurationsBody).def_response(async ({ json }) => Schemas.parseGetPaymentMethodConfigurationsResponse(await json())),
+/**
+ * Create a payment method configuration
+ *
+ * Creates a payment method configuration
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentMethodConfigurationsBody).def_response(async ({ json }) => Schemas.parsePaymentMethodConfiguration(await json())),
+'$configuration': {
+/**
+ * Retrieve payment method configuration
+ *
+ * Retrieve payment method configuration
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPaymentMethodConfigurationsConfigurationSearchParams).def_body(Schemas.parseGetPaymentMethodConfigurationsConfigurationBody).def_response(async ({ json }) => Schemas.parsePaymentMethodConfiguration(await json())),
+/**
+ * Update payment method configuration
+ *
+ * Update payment method configuration
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentMethodConfigurationsConfigurationBody).def_response(async ({ json }) => Schemas.parsePaymentMethodConfiguration(await json()))
+}
+},
+'payment_method_domains': {
+/**
+ * List payment method domains
+ *
+ * Lists the details of existing payment method domains.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPaymentMethodDomainsSearchParams).def_body(Schemas.parseGetPaymentMethodDomainsBody).def_response(async ({ json }) => Schemas.parseGetPaymentMethodDomainsResponse(await json())),
+/**
+ * Create a payment method domain
+ *
+ * Creates a payment method domain.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentMethodDomainsBody).def_response(async ({ json }) => Schemas.parsePaymentMethodDomain(await json())),
+'$payment_method_domain': {
+/**
+ * Retrieve a payment method domain
+ *
+ * Retrieves the details of an existing payment method domain.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPaymentMethodDomainsPaymentMethodDomainSearchParams).def_body(Schemas.parseGetPaymentMethodDomainsPaymentMethodDomainBody).def_response(async ({ json }) => Schemas.parsePaymentMethodDomain(await json())),
+/**
+ * Update a payment method domain
+ *
+ * Updates an existing payment method domain.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentMethodDomainsPaymentMethodDomainBody).def_response(async ({ json }) => Schemas.parsePaymentMethodDomain(await json())),
+'validate': {
+/**
+ * Validate an existing payment method domain
+ *
+ * Some payment methods might require additional steps to register a domain. If the requirements weren’t satisfied when the domain was created, the payment method will be inactive on the domain.
+ * The payment method doesn’t appear in Elements or Embedded Checkout for this domain until it is active.
+ * 
+ * To activate a payment method on an existing payment method domain, complete the required registration steps specific to the payment method, and then validate the payment method domain with this endpoint.
+ * 
+ * Related guides: [Payment method domains](/docs/payments/payment-methods/pmd-registration).
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentMethodDomainsPaymentMethodDomainValidateBody).def_response(async ({ json }) => Schemas.parsePaymentMethodDomain(await json()))
+}
+}
+},
+'payment_methods': {
+/**
+ * List PaymentMethods
+ *
+ * Returns a list of PaymentMethods for Treasury flows. If you want to list the PaymentMethods attached to a Customer for payments, you should use the [List a Customer’s PaymentMethods](/docs/api/payment_methods/customer_list) API instead.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPaymentMethodsSearchParams).def_body(Schemas.parseGetPaymentMethodsBody).def_response(async ({ json }) => Schemas.parseGetPaymentMethodsResponse(await json())),
+/**
+ * Shares a PaymentMethod
+ *
+ * Creates a PaymentMethod object. Read the [Stripe.js reference](/docs/stripe-js/reference#stripe-create-payment-method) to learn how to create PaymentMethods via Stripe.js.
+ * 
+ * Instead of creating a PaymentMethod directly, we recommend using the [PaymentIntents](/docs/payments/accept-a-payment) API to accept a payment immediately or the [SetupIntent](/docs/payments/save-and-reuse) API to collect payment method details ahead of a future payment.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentMethodsBody).def_response(async ({ json }) => Schemas.parsePaymentMethod(await json())),
+'$payment_method': {
+/**
+ * Retrieve a PaymentMethod
+ *
+ * Retrieves a PaymentMethod object attached to the StripeAccount. To retrieve a payment method attached to a Customer, you should use [Retrieve a Customer’s PaymentMethods](/docs/api/payment_methods/customer)
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPaymentMethodsPaymentMethodSearchParams).def_body(Schemas.parseGetPaymentMethodsPaymentMethodBody).def_response(async ({ json }) => Schemas.parsePaymentMethod(await json())),
+/**
+ * Update a PaymentMethod
+ *
+ * Updates a PaymentMethod object. A PaymentMethod must be attached to a customer to be updated.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentMethodsPaymentMethodBody).def_response(async ({ json }) => Schemas.parsePaymentMethod(await json())),
+'attach': {
+/**
+ * Attach a PaymentMethod to a Customer
+ *
+ * Attaches a PaymentMethod object to a Customer.
+ * 
+ * To attach a new PaymentMethod to a customer for future payments, we recommend you use a [SetupIntent](/docs/api/setup_intents)
+ * or a PaymentIntent with [setup_future_usage](/docs/api/payment_intents/create#create_payment_intent-setup_future_usage).
+ * These approaches will perform any necessary steps to set up the PaymentMethod for future payments. Using the `/v1/payment_methods/:id/attach`
+ * endpoint without first using a SetupIntent or PaymentIntent with `setup_future_usage` does not optimize the PaymentMethod for
+ * future use, which makes later declines and payment friction more likely.
+ * See [Optimizing cards for future payments](/docs/payments/payment-intents#future-usage) for more information about setting up
+ * future payments.
+ * 
+ * To use this PaymentMethod as the default for invoice or subscription payments,
+ * set [`invoice_settings.default_payment_method`](/docs/api/customers/update#update_customer-invoice_settings-default_payment_method),
+ * on the Customer to the PaymentMethod’s ID.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentMethodsPaymentMethodAttachBody).def_response(async ({ json }) => Schemas.parsePaymentMethod(await json()))
+},
+'detach': {
+/**
+ * Detach a PaymentMethod from a Customer
+ *
+ * Detaches a PaymentMethod object from a Customer. After a PaymentMethod is detached, it can no longer be used for a payment or re-attached to a Customer.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentMethodsPaymentMethodDetachBody).def_response(async ({ json }) => Schemas.parsePaymentMethod(await json()))
+}
+}
+},
+'payment_records': {
+'report_payment': {
+/**
+ * Report a payment
+ *
+ * Report a new Payment Record. You may report a Payment Record as it is
+ *  initialized and later report updates through the other report_* methods, or report Payment
+ *  Records in a terminal state directly, through this method.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentRecordsReportPaymentBody).def_response(async ({ json }) => Schemas.parsePaymentRecord(await json()))
+},
+'$id': {
+/**
+ * Retrieve a Payment Record
+ *
+ * Retrieves a Payment Record with the given ID
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPaymentRecordsIdSearchParams).def_body(Schemas.parseGetPaymentRecordsIdBody).def_response(async ({ json }) => Schemas.parsePaymentRecord(await json())),
+'report_payment_attempt': {
+/**
+ * Report a payment attempt
+ *
+ * Report a new payment attempt on the specified Payment Record. A new payment
+ *  attempt can only be specified if all other payment attempts are canceled or failed.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentRecordsIdReportPaymentAttemptBody).def_response(async ({ json }) => Schemas.parsePaymentRecord(await json()))
+},
+'report_payment_attempt_canceled': {
+/**
+ * Report payment attempt canceled
+ *
+ * Report that the most recent payment attempt on the specified Payment Record
+ *  was canceled.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentRecordsIdReportPaymentAttemptCanceledBody).def_response(async ({ json }) => Schemas.parsePaymentRecord(await json()))
+},
+'report_payment_attempt_failed': {
+/**
+ * Report payment attempt failed
+ *
+ * Report that the most recent payment attempt on the specified Payment Record
+ *  failed or errored.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentRecordsIdReportPaymentAttemptFailedBody).def_response(async ({ json }) => Schemas.parsePaymentRecord(await json()))
+},
+'report_payment_attempt_guaranteed': {
+/**
+ * Report payment attempt guaranteed
+ *
+ * Report that the most recent payment attempt on the specified Payment Record
+ *  was guaranteed.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentRecordsIdReportPaymentAttemptGuaranteedBody).def_response(async ({ json }) => Schemas.parsePaymentRecord(await json()))
+},
+'report_payment_attempt_informational': {
+/**
+ * Report payment attempt informational
+ *
+ * Report informational updates on the specified Payment Record.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentRecordsIdReportPaymentAttemptInformationalBody).def_response(async ({ json }) => Schemas.parsePaymentRecord(await json()))
+},
+'report_refund': {
+/**
+ * Report a refund
+ *
+ * Report that the most recent payment attempt on the specified Payment Record
+ *  was refunded.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPaymentRecordsIdReportRefundBody).def_response(async ({ json }) => Schemas.parsePaymentRecord(await json()))
+}
+}
+},
+'payouts': {
+/**
+ * List all payouts
+ *
+ * Returns a list of existing payouts sent to third-party bank accounts or payouts that Stripe sent to you. The payouts return in sorted order, with the most recently created payouts appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPayoutsSearchParams).def_body(Schemas.parseGetPayoutsBody).def_response(async ({ json }) => Schemas.parseGetPayoutsResponse(await json())),
+/**
+ * Create a payout
+ *
+ * To send funds to your own bank account, create a new payout object. Your [Stripe balance](#balance) must cover the payout amount. If it doesn’t, you receive an “Insufficient Funds” error.
+ * 
+ * If your API key is in test mode, money won’t actually be sent, though every other action occurs as if you’re in live mode.
+ * 
+ * If you create a manual payout on a Stripe account that uses multiple payment source types, you need to specify the source type balance that the payout draws from. The [balance object](#balance_object) details available and pending amounts by source type.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPayoutsBody).def_response(async ({ json }) => Schemas.parsePayout(await json())),
+'$payout': {
+/**
+ * Retrieve a payout
+ *
+ * Retrieves the details of an existing payout. Supply the unique payout ID from either a payout creation request or the payout list. Stripe returns the corresponding payout information.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPayoutsPayoutSearchParams).def_body(Schemas.parseGetPayoutsPayoutBody).def_response(async ({ json }) => Schemas.parsePayout(await json())),
+/**
+ * Update a payout
+ *
+ * Updates the specified payout by setting the values of the parameters you pass. We don’t change parameters that you don’t provide. This request only accepts the metadata as arguments.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPayoutsPayoutBody).def_response(async ({ json }) => Schemas.parsePayout(await json())),
+'cancel': {
+/**
+ * Cancel a payout
+ *
+ * You can cancel a previously created payout if its status is `pending`. Stripe refunds the funds to your available balance. You can’t cancel automatic Stripe payouts.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPayoutsPayoutCancelBody).def_response(async ({ json }) => Schemas.parsePayout(await json()))
+},
+'reverse': {
+/**
+ * Reverse a payout
+ *
+ * Reverses a payout by debiting the destination bank account. At this time, you can only reverse payouts for connected accounts to US and Canadian bank accounts. If the payout is manual and in the `pending` status, use `/v1/payouts/:id/cancel` instead.
+ * 
+ * By requesting a reversal through `/v1/payouts/:id/reverse`, you confirm that the authorized signatory of the selected bank account authorizes the debit on the bank account and that no other authorization is required.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPayoutsPayoutReverseBody).def_response(async ({ json }) => Schemas.parsePayout(await json()))
+}
+}
+},
+'plans': {
+/**
+ * List all plans
+ *
+ * Returns a list of your plans.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPlansSearchParams).def_body(Schemas.parseGetPlansBody).def_response(async ({ json }) => Schemas.parseGetPlansResponse(await json())),
+/**
+ * Create a plan
+ *
+ * You can now model subscriptions more flexibly using the [Prices API](#prices). It replaces the Plans API and is backwards compatible to simplify your migration.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPlansBody).def_response(async ({ json }) => Schemas.parsePlan(await json())),
+'$plan': {
+/**
+ * Delete a plan
+ *
+ * Deleting plans means new subscribers can’t be added. Existing subscribers aren’t affected.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeletePlansPlanBody).def_response(async ({ json }) => Schemas.parseDeletedPlan(await json())),
+/**
+ * Retrieve a plan
+ *
+ * Retrieves the plan with the given ID.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPlansPlanSearchParams).def_body(Schemas.parseGetPlansPlanBody).def_response(async ({ json }) => Schemas.parsePlan(await json())),
+/**
+ * Update a plan
+ *
+ * Updates the specified plan by setting the values of the parameters passed. Any parameters not provided are left unchanged. By design, you cannot change a plan’s ID, amount, currency, or billing cycle.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPlansPlanBody).def_response(async ({ json }) => Schemas.parsePlan(await json()))
+}
+},
+'prices': {
+/**
+ * List all prices
+ *
+ * Returns a list of your active prices, excluding [inline prices](/docs/products-prices/pricing-models#inline-pricing). For the list of inactive prices, set `active` to false.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPricesSearchParams).def_body(Schemas.parseGetPricesBody).def_response(async ({ json }) => Schemas.parseGetPricesResponse(await json())),
+/**
+ * Create a price
+ *
+ * Creates a new [Price](https://docs.stripe.com/api/prices) for an existing [Product](https://docs.stripe.com/api/products). The Price can be recurring or one-time.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPricesBody).def_response(async ({ json }) => Schemas.parsePrice(await json())),
+'search': {
+/**
+ * Search prices
+ *
+ * Search for prices you’ve previously created using Stripe’s [Search Query Language](/docs/search#search-query-language).
+ * Don’t use search in read-after-write flows where strict consistency is necessary. Under normal operating
+ * conditions, data is searchable in less than a minute. Occasionally, propagation of new or updated data can be up
+ * to an hour behind during outages. Search functionality is not available to merchants in India.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPricesSearchSearchParams).def_body(Schemas.parseGetPricesSearchBody).def_response(async ({ json }) => Schemas.parseGetPricesSearchResponse(await json()))
+},
+'$price': {
+/**
+ * Retrieve a price
+ *
+ * Retrieves the price with the given ID.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPricesPriceSearchParams).def_body(Schemas.parseGetPricesPriceBody).def_response(async ({ json }) => Schemas.parsePrice(await json())),
+/**
+ * Update a price
+ *
+ * Updates the specified price by setting the values of the parameters passed. Any parameters not provided are left unchanged.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPricesPriceBody).def_response(async ({ json }) => Schemas.parsePrice(await json()))
+}
+},
+'privacy': {
+'redaction_jobs': {
+/**
+ * List all redaction jobs
+ *
+ * Returns a list of redaction jobs.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPrivacyRedactionJobsSearchParams).def_body(Schemas.parseGetPrivacyRedactionJobsBody).def_response(async ({ json }) => Schemas.parseGetPrivacyRedactionJobsResponse(await json())),
+/**
+ * Create a redaction job
+ *
+ * Creates a redaction job. When a job is created, it will start to validate.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPrivacyRedactionJobsBody).def_response(async ({ json }) => Schemas.parsePrivacyRedactionJob(await json())),
+'$job': {
+/**
+ * Retrieve a redaction job
+ *
+ * Retrieves the details of a previously created redaction job.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPrivacyRedactionJobsJobSearchParams).def_body(Schemas.parseGetPrivacyRedactionJobsJobBody).def_response(async ({ json }) => Schemas.parsePrivacyRedactionJob(await json())),
+/**
+ * Update a redaction job
+ *
+ * Updates the properties of a redaction job without running or canceling the job.
+ * 
+ * If the job to update is in a `failed` status, it will not automatically start to validate. Once you applied all of the changes, use the validate API to start validation again.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPrivacyRedactionJobsJobBody).def_response(async ({ json }) => Schemas.parsePrivacyRedactionJob(await json())),
+'cancel': {
+/**
+ * Cancel a redaction job
+ *
+ * You can cancel a redaction job when it’s in one of these statuses: `ready`, `failed`.
+ * 
+ * Canceling the redaction job will abandon its attempt to redact the configured objects. A canceled job cannot be used again.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPrivacyRedactionJobsJobCancelBody).def_response(async ({ json }) => Schemas.parsePrivacyRedactionJob(await json()))
+},
+'run': {
+/**
+ * Run a redaction job
+ *
+ * Run a redaction job in a `ready` status.
+ * 
+ * When you run a job, the configured objects will be redacted asynchronously. This action is irreversible and cannot be canceled once started.
+ * 
+ * The status of the job will move to `redacting`. Once all of the objects are redacted, the status will become `succeeded`. If the job’s `validation_behavior` is set to `fix`, the automatic fixes will be applied to objects at this step.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPrivacyRedactionJobsJobRunBody).def_response(async ({ json }) => Schemas.parsePrivacyRedactionJob(await json()))
+},
+'validate': {
+/**
+ * Validate a redaction job
+ *
+ * Validate a redaction job when it is in a `failed` status.
+ * 
+ * When a job is created, it automatically begins to validate on the configured objects’ eligibility for redaction. Use this to validate the job again after its validation errors are resolved or the job’s `validation_behavior` is changed.
+ * 
+ * The status of the job will move to `validating`. Once all of the objects are validated, the status of the job will become `ready`. If there are any validation errors preventing the job from running, the status will become `failed`.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPrivacyRedactionJobsJobValidateBody).def_response(async ({ json }) => Schemas.parsePrivacyRedactionJob(await json()))
+},
+'validation_errors': {
+/**
+ * List all validation errors
+ *
+ * Returns a list of validation errors for the specified redaction job.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPrivacyRedactionJobsJobValidationErrorsSearchParams).def_body(Schemas.parseGetPrivacyRedactionJobsJobValidationErrorsBody).def_response(async ({ json }) => Schemas.parseGetPrivacyRedactionJobsJobValidationErrorsResponse(await json()))
+}
+}
+}
+},
+'products': {
+/**
+ * List all products
+ *
+ * Returns a list of your products. The products are returned sorted by creation date, with the most recently created products appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetProductsSearchParams).def_body(Schemas.parseGetProductsBody).def_response(async ({ json }) => Schemas.parseGetProductsResponse(await json())),
+/**
+ * Create a product
+ *
+ * Creates a new product object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostProductsBody).def_response(async ({ json }) => Schemas.parseProduct(await json())),
+'search': {
+/**
+ * Search products
+ *
+ * Search for products you’ve previously created using Stripe’s [Search Query Language](/docs/search#search-query-language).
+ * Don’t use search in read-after-write flows where strict consistency is necessary. Under normal operating
+ * conditions, data is searchable in less than a minute. Occasionally, propagation of new or updated data can be up
+ * to an hour behind during outages. Search functionality is not available to merchants in India.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetProductsSearchSearchParams).def_body(Schemas.parseGetProductsSearchBody).def_response(async ({ json }) => Schemas.parseGetProductsSearchResponse(await json()))
+},
+'$id': {
+/**
+ * Delete a product
+ *
+ * Delete a product. Deleting a product is only possible if it has no prices associated with it. Additionally, deleting a product with `type=good` is only possible if it has no SKUs associated with it.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteProductsIdBody).def_response(async ({ json }) => Schemas.parseDeletedProduct(await json())),
+/**
+ * Retrieve a product
+ *
+ * Retrieves the details of an existing product. Supply the unique product ID from either a product creation request or the product list, and Stripe will return the corresponding product information.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetProductsIdSearchParams).def_body(Schemas.parseGetProductsIdBody).def_response(async ({ json }) => Schemas.parseProduct(await json())),
+/**
+ * Update a product
+ *
+ * Updates the specific product by setting the values of the parameters passed. Any parameters not provided will be left unchanged.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostProductsIdBody).def_response(async ({ json }) => Schemas.parseProduct(await json()))
+},
+'$product': {
+'features': {
+/**
+ * List all features attached to a product
+ *
+ * Retrieve a list of features for a product
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetProductsProductFeaturesSearchParams).def_body(Schemas.parseGetProductsProductFeaturesBody).def_response(async ({ json }) => Schemas.parseGetProductsProductFeaturesResponse(await json())),
+/**
+ * Attach a feature to a product
+ *
+ * Creates a product_feature, which represents a feature attachment to a product
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostProductsProductFeaturesBody).def_response(async ({ json }) => Schemas.parseProductFeature(await json())),
+'$id': {
+/**
+ * Remove a feature from a product
+ *
+ * Deletes the feature attachment to a product
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteProductsProductFeaturesIdBody).def_response(async ({ json }) => Schemas.parseDeletedProductFeature(await json())),
+/**
+ * Retrieve a product_feature
+ *
+ * Retrieves a product_feature, which represents a feature attachment to a product
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetProductsProductFeaturesIdSearchParams).def_body(Schemas.parseGetProductsProductFeaturesIdBody).def_response(async ({ json }) => Schemas.parseProductFeature(await json()))
+}
+}
+}
+},
+'promotion_codes': {
+/**
+ * List all promotion codes
+ *
+ * Returns a list of your promotion codes.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPromotionCodesSearchParams).def_body(Schemas.parseGetPromotionCodesBody).def_response(async ({ json }) => Schemas.parseGetPromotionCodesResponse(await json())),
+/**
+ * Create a promotion code
+ *
+ * A promotion code points to an underlying promotion. You can optionally restrict the code to a specific customer, redemption limit, and expiration date.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPromotionCodesBody).def_response(async ({ json }) => Schemas.parsePromotionCode(await json())),
+'$promotion_code': {
+/**
+ * Retrieve a promotion code
+ *
+ * Retrieves the promotion code with the given ID. In order to retrieve a promotion code by the customer-facing `code` use [list](/docs/api/promotion_codes/list) with the desired `code`.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetPromotionCodesPromotionCodeSearchParams).def_body(Schemas.parseGetPromotionCodesPromotionCodeBody).def_response(async ({ json }) => Schemas.parsePromotionCode(await json())),
+/**
+ * Update a promotion code
+ *
+ * Updates the specified promotion code by setting the values of the parameters passed. Most fields are, by design, not editable.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostPromotionCodesPromotionCodeBody).def_response(async ({ json }) => Schemas.parsePromotionCode(await json()))
+}
+},
+'quotes': {
+/**
+ * List all quotes
+ *
+ * Returns a list of your quotes.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetQuotesSearchParams).def_body(Schemas.parseGetQuotesBody).def_response(async ({ json }) => Schemas.parseGetQuotesResponse(await json())),
+/**
+ * Create a quote
+ *
+ * A quote models prices and services for a customer. Default options for `header`, `description`, `footer`, and `expires_at` can be set in the dashboard via the [quote template](https://dashboard.stripe.com/settings/billing/quote).
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostQuotesBody).def_response(async ({ json }) => Schemas.parseQuote(await json())),
+'$quote': {
+/**
+ * Retrieve a quote
+ *
+ * Retrieves the quote with the given ID.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetQuotesQuoteSearchParams).def_body(Schemas.parseGetQuotesQuoteBody).def_response(async ({ json }) => Schemas.parseQuote(await json())),
+/**
+ * Update a quote
+ *
+ * A quote models prices and services for a customer.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostQuotesQuoteBody).def_response(async ({ json }) => Schemas.parseQuote(await json())),
+'accept': {
+/**
+ * Accept a quote
+ *
+ * Accepts the specified quote.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostQuotesQuoteAcceptBody).def_response(async ({ json }) => Schemas.parseQuote(await json()))
+},
+'cancel': {
+/**
+ * Cancel a quote
+ *
+ * Cancels the quote.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostQuotesQuoteCancelBody).def_response(async ({ json }) => Schemas.parseQuote(await json()))
+},
+'computed_upfront_line_items': {
+/**
+ * Retrieve a quote's upfront line items
+ *
+ * When retrieving a quote, there is an includable [**computed.upfront.line_items**](https://stripe.com/docs/api/quotes/object#quote_object-computed-upfront-line_items) property containing the first handful of those items. There is also a URL where you can retrieve the full (paginated) list of upfront line items.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetQuotesQuoteComputedUpfrontLineItemsSearchParams).def_body(Schemas.parseGetQuotesQuoteComputedUpfrontLineItemsBody).def_response(async ({ json }) => Schemas.parseGetQuotesQuoteComputedUpfrontLineItemsResponse(await json()))
+},
+'finalize': {
+/**
+ * Finalize a quote
+ *
+ * Finalizes the quote.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostQuotesQuoteFinalizeBody).def_response(async ({ json }) => Schemas.parseQuote(await json()))
+},
+'line_items': {
+/**
+ * Retrieve a quote's line items
+ *
+ * When retrieving a quote, there is an includable **line_items** property containing the first handful of those items. There is also a URL where you can retrieve the full (paginated) list of line items.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetQuotesQuoteLineItemsSearchParams).def_body(Schemas.parseGetQuotesQuoteLineItemsBody).def_response(async ({ json }) => Schemas.parseGetQuotesQuoteLineItemsResponse(await json()))
+},
+'lines': {
+/**
+ * Retrieve a quote's lines
+ *
+ * Retrieves a paginated list of lines for a quote. These lines describe changes that will be used to create new subscription schedules or update existing subscription schedules when the quote is accepted.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetQuotesQuoteLinesSearchParams).def_body(Schemas.parseGetQuotesQuoteLinesBody).def_response(async ({ json }) => Schemas.parseGetQuotesQuoteLinesResponse(await json()))
+},
+'mark_draft': {
+/**
+ * Convert a quote to draft
+ *
+ * Converts a stale quote to draft.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostQuotesQuoteMarkDraftBody).def_response(async ({ json }) => Schemas.parseQuote(await json()))
+},
+'mark_stale': {
+/**
+ * Convert a quote to stale
+ *
+ * Converts a draft or open quote to stale.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostQuotesQuoteMarkStaleBody).def_response(async ({ json }) => Schemas.parseQuote(await json()))
+},
+'pdf': {
+/**
+ * Download quote PDF
+ *
+ * Download the PDF for a finalized quote. Explanation for special handling can be found [here](https://docs.stripe.com/quotes/overview#quote_pdf)
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetQuotesQuotePdfSearchParams).def_body(Schemas.parseGetQuotesQuotePdfBody)
+},
+'preview_invoices': {
+/**
+ * Retrieve a quote's preview invoices
+ *
+ * Preview the invoices that would be generated by accepting the quote.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetQuotesQuotePreviewInvoicesSearchParams).def_body(Schemas.parseGetQuotesQuotePreviewInvoicesBody).def_response(async ({ json }) => Schemas.parseGetQuotesQuotePreviewInvoicesResponse(await json())),
+'$preview_invoice': {
+'lines': {
+/**
+ * Retrieve a quote's preview invoice line items
+ *
+ * Preview the invoice line items that would be generated by accepting the quote.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetQuotesQuotePreviewInvoicesPreviewInvoiceLinesSearchParams).def_body(Schemas.parseGetQuotesQuotePreviewInvoicesPreviewInvoiceLinesBody).def_response(async ({ json }) => Schemas.parseGetQuotesQuotePreviewInvoicesPreviewInvoiceLinesResponse(await json()))
+}
+}
+},
+'preview_subscription_schedules': {
+/**
+ * Retrieve a quote's preview schedules
+ *
+ * Preview the schedules that would be generated by accepting the quote
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetQuotesQuotePreviewSubscriptionSchedulesSearchParams).def_body(Schemas.parseGetQuotesQuotePreviewSubscriptionSchedulesBody).def_response(async ({ json }) => Schemas.parseGetQuotesQuotePreviewSubscriptionSchedulesResponse(await json()))
+},
+'reestimate': {
+/**
+ * Reestimate a quote
+ *
+ * Recompute the upcoming invoice estimate for the quote.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostQuotesQuoteReestimateBody).def_response(async ({ json }) => Schemas.parseQuote(await json()))
+}
+}
+},
+'radar': {
+'early_fraud_warnings': {
+/**
+ * List all early fraud warnings
+ *
+ * Returns a list of early fraud warnings.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetRadarEarlyFraudWarningsSearchParams).def_body(Schemas.parseGetRadarEarlyFraudWarningsBody).def_response(async ({ json }) => Schemas.parseGetRadarEarlyFraudWarningsResponse(await json())),
+'$early_fraud_warning': {
+/**
+ * Retrieve an early fraud warning
+ *
+ * Retrieves the details of an early fraud warning that has previously been created. 
+ * 
+ * Please refer to the [early fraud warning](#early_fraud_warning_object) object reference for more details.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetRadarEarlyFraudWarningsEarlyFraudWarningSearchParams).def_body(Schemas.parseGetRadarEarlyFraudWarningsEarlyFraudWarningBody).def_response(async ({ json }) => Schemas.parseRadarEarlyFraudWarning(await json()))
+}
+},
+'value_list_items': {
+/**
+ * List all value list items
+ *
+ * Returns a list of `ValueListItem` objects. The objects are sorted in descending order by creation date, with the most recently created object appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetRadarValueListItemsSearchParams).def_body(Schemas.parseGetRadarValueListItemsBody).def_response(async ({ json }) => Schemas.parseGetRadarValueListItemsResponse(await json())),
+/**
+ * Create a value list item
+ *
+ * Creates a new `ValueListItem` object, which is added to the specified parent value list.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostRadarValueListItemsBody).def_response(async ({ json }) => Schemas.parseRadarValueListItem(await json())),
+'$item': {
+/**
+ * Delete a value list item
+ *
+ * Deletes a `ValueListItem` object, removing it from its parent value list.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteRadarValueListItemsItemBody).def_response(async ({ json }) => Schemas.parseDeletedRadarValueListItem(await json())),
+/**
+ * Retrieve a value list item
+ *
+ * Retrieves a `ValueListItem` object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetRadarValueListItemsItemSearchParams).def_body(Schemas.parseGetRadarValueListItemsItemBody).def_response(async ({ json }) => Schemas.parseRadarValueListItem(await json()))
+}
+},
+'value_lists': {
+/**
+ * List all value lists
+ *
+ * Returns a list of `ValueList` objects. The objects are sorted in descending order by creation date, with the most recently created object appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetRadarValueListsSearchParams).def_body(Schemas.parseGetRadarValueListsBody).def_response(async ({ json }) => Schemas.parseGetRadarValueListsResponse(await json())),
+/**
+ * Create a value list
+ *
+ * Creates a new `ValueList` object, which can then be referenced in rules.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostRadarValueListsBody).def_response(async ({ json }) => Schemas.parseRadarValueList(await json())),
+'$value_list': {
+/**
+ * Delete a value list
+ *
+ * Deletes a `ValueList` object, also deleting any items contained within the value list. To be deleted, a value list must not be referenced in any rules.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteRadarValueListsValueListBody).def_response(async ({ json }) => Schemas.parseDeletedRadarValueList(await json())),
+/**
+ * Retrieve a value list
+ *
+ * Retrieves a `ValueList` object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetRadarValueListsValueListSearchParams).def_body(Schemas.parseGetRadarValueListsValueListBody).def_response(async ({ json }) => Schemas.parseRadarValueList(await json())),
+/**
+ * Update a value list
+ *
+ * Updates a `ValueList` object by setting the values of the parameters passed. Any parameters not provided will be left unchanged. Note that `item_type` is immutable.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostRadarValueListsValueListBody).def_response(async ({ json }) => Schemas.parseRadarValueList(await json()))
+}
+}
+},
+'refunds': {
+/**
+ * List all refunds
+ *
+ * Returns a list of all refunds you created. We return the refunds in sorted order, with the most recent refunds appearing first. The 10 most recent refunds are always available by default on the Charge object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetRefundsSearchParams).def_body(Schemas.parseGetRefundsBody).def_response(async ({ json }) => Schemas.parseGetRefundsResponse(await json())),
+/**
+ * Create customer balance refund
+ *
+ * When you create a new refund, you must specify a Charge or a PaymentIntent object on which to create it.
+ * 
+ * Creating a new refund will refund a charge that has previously been created but not yet refunded.
+ * Funds will be refunded to the credit or debit card that was originally charged.
+ * 
+ * You can optionally refund only part of a charge.
+ * You can do so multiple times, until the entire charge has been refunded.
+ * 
+ * Once entirely refunded, a charge can’t be refunded again.
+ * This method will raise an error when called on an already-refunded charge,
+ * or when trying to refund more money than is left on a charge.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostRefundsBody).def_response(async ({ json }) => Schemas.parseRefund(await json())),
+'$refund': {
+/**
+ * Retrieve a refund
+ *
+ * Retrieves the details of an existing refund.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetRefundsRefundSearchParams).def_body(Schemas.parseGetRefundsRefundBody).def_response(async ({ json }) => Schemas.parseRefund(await json())),
+/**
+ * Update a refund
+ *
+ * Updates the refund that you specify by setting the values of the passed parameters. Any parameters that you don’t provide remain unchanged.
+ * 
+ * This request only accepts `metadata` as an argument.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostRefundsRefundBody).def_response(async ({ json }) => Schemas.parseRefund(await json())),
+'cancel': {
+/**
+ * Cancel a refund
+ *
+ * Cancels a refund with a status of `requires_action`.
+ * 
+ * You can’t cancel refunds in other states. Only refunds for payment methods that require customer action can enter the `requires_action` state.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostRefundsRefundCancelBody).def_response(async ({ json }) => Schemas.parseRefund(await json()))
+}
+}
+},
+'reporting': {
+'report_runs': {
+/**
+ * List all Report Runs
+ *
+ * Returns a list of Report Runs, with the most recent appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetReportingReportRunsSearchParams).def_body(Schemas.parseGetReportingReportRunsBody).def_response(async ({ json }) => Schemas.parseGetReportingReportRunsResponse(await json())),
+/**
+ * Create a Report Run
+ *
+ * Creates a new object and begin running the report. (Certain report types require a [live-mode API key](https://stripe.com/docs/keys#test-live-modes).)
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostReportingReportRunsBody).def_response(async ({ json }) => Schemas.parseReportingReportRun(await json())),
+'$report_run': {
+/**
+ * Retrieve a Report Run
+ *
+ * Retrieves the details of an existing Report Run.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetReportingReportRunsReportRunSearchParams).def_body(Schemas.parseGetReportingReportRunsReportRunBody).def_response(async ({ json }) => Schemas.parseReportingReportRun(await json()))
+}
+},
+'report_types': {
+/**
+ * List all Report Types
+ *
+ * Returns a full list of Report Types.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetReportingReportTypesSearchParams).def_body(Schemas.parseGetReportingReportTypesBody).def_response(async ({ json }) => Schemas.parseGetReportingReportTypesResponse(await json())),
+'$report_type': {
+/**
+ * Retrieve a Report Type
+ *
+ * Retrieves the details of a Report Type. (Certain report types require a [live-mode API key](https://stripe.com/docs/keys#test-live-modes).)
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetReportingReportTypesReportTypeSearchParams).def_body(Schemas.parseGetReportingReportTypesReportTypeBody).def_response(async ({ json }) => Schemas.parseReportingReportType(await json()))
+}
+}
+},
+'reviews': {
+/**
+ * List all open reviews
+ *
+ * Returns a list of `Review` objects that have `open` set to `true`. The objects are sorted in descending order by creation date, with the most recently created object appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetReviewsSearchParams).def_body(Schemas.parseGetReviewsBody).def_response(async ({ json }) => Schemas.parseGetReviewsResponse(await json())),
+'$review': {
+/**
+ * Retrieve a review
+ *
+ * Retrieves a `Review` object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetReviewsReviewSearchParams).def_body(Schemas.parseGetReviewsReviewBody).def_response(async ({ json }) => Schemas.parseReview(await json())),
+'approve': {
+/**
+ * Approve a review
+ *
+ * Approves a `Review` object, closing it and removing it from the list of reviews.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostReviewsReviewApproveBody).def_response(async ({ json }) => Schemas.parseReview(await json()))
+}
+}
+},
+'setup_attempts': {
+/**
+ * List all SetupAttempts
+ *
+ * Returns a list of SetupAttempts that associate with a provided SetupIntent.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetSetupAttemptsSearchParams).def_body(Schemas.parseGetSetupAttemptsBody).def_response(async ({ json }) => Schemas.parseGetSetupAttemptsResponse(await json()))
+},
+'setup_intents': {
+/**
+ * List all SetupIntents
+ *
+ * Returns a list of SetupIntents.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetSetupIntentsSearchParams).def_body(Schemas.parseGetSetupIntentsBody).def_response(async ({ json }) => Schemas.parseGetSetupIntentsResponse(await json())),
+/**
+ * Create a SetupIntent
+ *
+ * Creates a SetupIntent object.
+ * 
+ * After you create the SetupIntent, attach a payment method and [confirm](/docs/api/setup_intents/confirm)
+ * it to collect any required permissions to charge the payment method later.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostSetupIntentsBody).def_response(async ({ json }) => Schemas.parseSetupIntent(await json())),
+'$intent': {
+/**
+ * Retrieve a SetupIntent
+ *
+ * Retrieves the details of a SetupIntent that has previously been created. 
+ * 
+ * Client-side retrieval using a publishable key is allowed when the `client_secret` is provided in the query string. 
+ * 
+ * When retrieved with a publishable key, only a subset of properties will be returned. Please refer to the [SetupIntent](#setup_intent_object) object reference for more details.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetSetupIntentsIntentSearchParams).def_body(Schemas.parseGetSetupIntentsIntentBody).def_response(async ({ json }) => Schemas.parseSetupIntent(await json())),
+/**
+ * Update a SetupIntent
+ *
+ * Updates a SetupIntent object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostSetupIntentsIntentBody).def_response(async ({ json }) => Schemas.parseSetupIntent(await json())),
+'cancel': {
+/**
+ * Cancel a SetupIntent
+ *
+ * You can cancel a SetupIntent object when it’s in one of these statuses: `requires_payment_method`, `requires_confirmation`, or `requires_action`. 
+ * 
+ * After you cancel it, setup is abandoned and any operations on the SetupIntent fail with an error. You can’t cancel the SetupIntent for a Checkout Session. [Expire the Checkout Session](/docs/api/checkout/sessions/expire) instead.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostSetupIntentsIntentCancelBody).def_response(async ({ json }) => Schemas.parseSetupIntent(await json()))
+},
+'confirm': {
+/**
+ * Confirm a SetupIntent
+ *
+ * Confirm that your customer intends to set up the current or
+ * provided payment method. For example, you would confirm a SetupIntent
+ * when a customer hits the “Save” button on a payment method management
+ * page on your website.
+ * 
+ * If the selected payment method does not require any additional
+ * steps from the customer, the SetupIntent will transition to the
+ * `succeeded` status.
+ * 
+ * Otherwise, it will transition to the `requires_action` status and
+ * suggest additional actions via `next_action`. If setup fails,
+ * the SetupIntent will transition to the
+ * `requires_payment_method` status or the `canceled` status if the
+ * confirmation limit is reached.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostSetupIntentsIntentConfirmBody).def_response(async ({ json }) => Schemas.parseSetupIntent(await json()))
+},
+'verify_microdeposits': {
+/**
+ * Verify microdeposits on a SetupIntent
+ *
+ * Verifies microdeposits on a SetupIntent object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostSetupIntentsIntentVerifyMicrodepositsBody).def_response(async ({ json }) => Schemas.parseSetupIntent(await json()))
+}
+}
+},
+'shipping_rates': {
+/**
+ * List all shipping rates
+ *
+ * Returns a list of your shipping rates.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetShippingRatesSearchParams).def_body(Schemas.parseGetShippingRatesBody).def_response(async ({ json }) => Schemas.parseGetShippingRatesResponse(await json())),
+/**
+ * Create a shipping rate
+ *
+ * Creates a new shipping rate object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostShippingRatesBody).def_response(async ({ json }) => Schemas.parseShippingRate(await json())),
+'$shipping_rate_token': {
+/**
+ * Retrieve a shipping rate
+ *
+ * Returns the shipping rate object with the given ID.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetShippingRatesShippingRateTokenSearchParams).def_body(Schemas.parseGetShippingRatesShippingRateTokenBody).def_response(async ({ json }) => Schemas.parseShippingRate(await json())),
+/**
+ * Update a shipping rate
+ *
+ * Updates an existing shipping rate object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostShippingRatesShippingRateTokenBody).def_response(async ({ json }) => Schemas.parseShippingRate(await json()))
+}
+},
+'sigma': {
+'scheduled_query_runs': {
+/**
+ * List all scheduled query runs
+ *
+ * Returns a list of scheduled query runs.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetSigmaScheduledQueryRunsSearchParams).def_body(Schemas.parseGetSigmaScheduledQueryRunsBody).def_response(async ({ json }) => Schemas.parseGetSigmaScheduledQueryRunsResponse(await json())),
+'$scheduled_query_run': {
+/**
+ * Retrieve a scheduled query run
+ *
+ * Retrieves the details of an scheduled query run.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetSigmaScheduledQueryRunsScheduledQueryRunSearchParams).def_body(Schemas.parseGetSigmaScheduledQueryRunsScheduledQueryRunBody).def_response(async ({ json }) => Schemas.parseScheduledQueryRun(await json()))
+}
+}
+},
+'sources': {
+/**
+ * Shares a source
+ *
+ * Creates a new source object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostSourcesBody).def_response(async ({ json }) => Schemas.parseSource(await json())),
+'$source': {
+/**
+ * Retrieve a source
+ *
+ * Retrieves an existing source object. Supply the unique source ID from a source creation request and Stripe will return the corresponding up-to-date source object information.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetSourcesSourceSearchParams).def_body(Schemas.parseGetSourcesSourceBody).def_response(async ({ json }) => Schemas.parseSource(await json())),
+/**
+ * Update a source
+ *
+ * Updates the specified source by setting the values of the parameters passed. Any parameters not provided will be left unchanged.
+ * 
+ * This request accepts the `metadata` and `owner` as arguments. It is also possible to update type specific information for selected payment methods. Please refer to our [payment method guides](/docs/sources) for more detail.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostSourcesSourceBody).def_response(async ({ json }) => Schemas.parseSource(await json())),
+'source_transactions': {
+/**
+ * List source transactions for a given source.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetSourcesSourceSourceTransactionsSearchParams).def_body(Schemas.parseGetSourcesSourceSourceTransactionsBody).def_response(async ({ json }) => Schemas.parseGetSourcesSourceSourceTransactionsResponse(await json()))
+},
+'verify': {
+/**
+ * Verify a given source.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostSourcesSourceVerifyBody).def_response(async ({ json }) => Schemas.parseSource(await json()))
+}
+}
+},
+'subscription_items': {
+/**
+ * List all subscription items
+ *
+ * Returns a list of your subscription items for a given subscription.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetSubscriptionItemsSearchParams).def_body(Schemas.parseGetSubscriptionItemsBody).def_response(async ({ json }) => Schemas.parseGetSubscriptionItemsResponse(await json())),
+/**
+ * Create a subscription item
+ *
+ * Adds a new item to an existing subscription. No existing items will be changed or replaced.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostSubscriptionItemsBody).def_response(async ({ json }) => Schemas.parseSubscriptionItem(await json())),
+'$item': {
+/**
+ * Delete a subscription item
+ *
+ * Deletes an item from the subscription. Removing a subscription item from a subscription will not cancel the subscription.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteSubscriptionItemsItemBody).def_response(async ({ json }) => Schemas.parseDeletedSubscriptionItem(await json())),
+/**
+ * Retrieve a subscription item
+ *
+ * Retrieves the subscription item with the given ID.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetSubscriptionItemsItemSearchParams).def_body(Schemas.parseGetSubscriptionItemsItemBody).def_response(async ({ json }) => Schemas.parseSubscriptionItem(await json())),
+/**
+ * Update a subscription item
+ *
+ * Updates the plan or quantity of an item on a current subscription.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostSubscriptionItemsItemBody).def_response(async ({ json }) => Schemas.parseSubscriptionItem(await json()))
+}
+},
+'subscription_schedules': {
+/**
+ * List all schedules
+ *
+ * Retrieves the list of your subscription schedules.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetSubscriptionSchedulesSearchParams).def_body(Schemas.parseGetSubscriptionSchedulesBody).def_response(async ({ json }) => Schemas.parseGetSubscriptionSchedulesResponse(await json())),
+/**
+ * Create a schedule
+ *
+ * Creates a new subscription schedule object. Each customer can have up to 500 active or scheduled subscriptions.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostSubscriptionSchedulesBody).def_response(async ({ json }) => Schemas.parseSubscriptionSchedule(await json())),
+'$schedule': {
+/**
+ * Retrieve a schedule
+ *
+ * Retrieves the details of an existing subscription schedule. You only need to supply the unique subscription schedule identifier that was returned upon subscription schedule creation.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetSubscriptionSchedulesScheduleSearchParams).def_body(Schemas.parseGetSubscriptionSchedulesScheduleBody).def_response(async ({ json }) => Schemas.parseSubscriptionSchedule(await json())),
+/**
+ * Update a schedule
+ *
+ * Updates an existing subscription schedule.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostSubscriptionSchedulesScheduleBody).def_response(async ({ json }) => Schemas.parseSubscriptionSchedule(await json())),
+'amend': {
+/**
+ * Amend a schedule
+ *
+ * Amends an existing subscription schedule.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostSubscriptionSchedulesScheduleAmendBody).def_response(async ({ json }) => Schemas.parseSubscriptionSchedule(await json()))
+},
+'cancel': {
+/**
+ * Cancel a schedule
+ *
+ * Cancels a subscription schedule and its associated subscription immediately (if the subscription schedule has an active subscription). A subscription schedule can only be canceled if its status is `not_started` or `active`.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostSubscriptionSchedulesScheduleCancelBody).def_response(async ({ json }) => Schemas.parseSubscriptionSchedule(await json()))
+},
+'release': {
+/**
+ * Release a schedule
+ *
+ * Releases the subscription schedule immediately, which will stop scheduling of its phases, but leave any existing subscription in place. A schedule can only be released if its status is `not_started` or `active`. If the subscription schedule is currently associated with a subscription, releasing it will remove its `subscription` property and set the subscription’s ID to the `released_subscription` property.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostSubscriptionSchedulesScheduleReleaseBody).def_response(async ({ json }) => Schemas.parseSubscriptionSchedule(await json()))
+}
+}
+},
+'subscriptions': {
+/**
+ * List subscriptions
+ *
+ * By default, returns a list of subscriptions that have not been canceled. In order to list canceled subscriptions, specify `status=canceled`.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetSubscriptionsSearchParams).def_body(Schemas.parseGetSubscriptionsBody).def_response(async ({ json }) => Schemas.parseGetSubscriptionsResponse(await json())),
+/**
+ * Create a subscription
+ *
+ * Creates a new subscription on an existing customer. Each customer can have up to 500 active or scheduled subscriptions.
+ * 
+ * When you create a subscription with `collection_method=charge_automatically`, the first invoice is finalized as part of the request.
+ * The `payment_behavior` parameter determines the exact behavior of the initial payment.
+ * 
+ * To start subscriptions where the first invoice always begins in a `draft` status, use [subscription schedules](/docs/billing/subscriptions/subscription-schedules#managing) instead.
+ * Schedules provide the flexibility to model more complex billing configurations that change over time.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostSubscriptionsBody).def_response(async ({ json }) => Schemas.parseSubscription(await json())),
+'search': {
+/**
+ * Search subscriptions
+ *
+ * Search for subscriptions you’ve previously created using Stripe’s [Search Query Language](/docs/search#search-query-language).
+ * Don’t use search in read-after-write flows where strict consistency is necessary. Under normal operating
+ * conditions, data is searchable in less than a minute. Occasionally, propagation of new or updated data can be up
+ * to an hour behind during outages. Search functionality is not available to merchants in India.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetSubscriptionsSearchSearchParams).def_body(Schemas.parseGetSubscriptionsSearchBody).def_response(async ({ json }) => Schemas.parseGetSubscriptionsSearchResponse(await json()))
+},
+'$subscription_exposed_id': {
+/**
+ * Cancel a subscription
+ *
+ * Cancels a customer’s subscription immediately. The customer won’t be charged again for the subscription. After it’s canceled, you can no longer update the subscription or its [metadata](/metadata).
+ * 
+ * Any pending invoice items that you’ve created are still charged at the end of the period, unless manually [deleted](#delete_invoiceitem). If you’ve set the subscription to cancel at the end of the period, any pending prorations are also left in place and collected at the end of the period. But if the subscription is set to cancel immediately, pending prorations are removed if `invoice_now` and `prorate` are both set to true.
+ * 
+ * By default, upon subscription cancellation, Stripe stops automatic collection of all finalized invoices for the customer. This is intended to prevent unexpected payment attempts after the customer has canceled a subscription. However, you can resume automatic collection of the invoices manually after subscription cancellation to have us proceed. Or, you could check for unpaid invoices before allowing the customer to cancel the subscription at all.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteSubscriptionsSubscriptionExposedIdBody).def_response(async ({ json }) => Schemas.parseSubscription(await json())),
+/**
+ * Retrieve a subscription
+ *
+ * Retrieves the subscription with the given ID.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetSubscriptionsSubscriptionExposedIdSearchParams).def_body(Schemas.parseGetSubscriptionsSubscriptionExposedIdBody).def_response(async ({ json }) => Schemas.parseSubscription(await json())),
+/**
+ * Update a subscription
+ *
+ * Updates an existing subscription to match the specified parameters.
+ * When changing prices or quantities, we optionally prorate the price we charge next month to make up for any price changes.
+ * To preview how the proration is calculated, use the [create preview](/docs/api/invoices/create_preview) endpoint.
+ * 
+ * By default, we prorate subscription changes. For example, if a customer signs up on May 1 for a 100 price, they’ll be billed 100 immediately. If on May 15 they switch to a 200 price, then on June 1 they’ll be billed 250 (200 for a renewal of her subscription, plus a 50 prorating adjustment for half of the previous month’s 100 difference). Similarly, a downgrade generates a credit that is applied to the next invoice. We also prorate when you make quantity changes.
+ * 
+ * Switching prices does not normally change the billing date or generate an immediate charge unless:
+ * 
+ * - The billing interval is changed (for example, from monthly to yearly).
+ * 
+ * - The subscription moves from free to paid.
+ * 
+ * - A trial starts or ends.
+ * 
+ * In these cases, we apply a credit for the unused time on the previous price, immediately charge the customer using the new price, and reset the billing date. Learn about how [Stripe immediately attempts payment for subscription changes](/docs/billing/subscriptions/upgrade-downgrade#immediate-payment).
+ * 
+ * If you want to charge for an upgrade immediately, pass `proration_behavior` as `always_invoice` to create prorations, automatically invoice the customer for those proration adjustments, and attempt to collect payment. If you pass `create_prorations`, the prorations are created but not automatically invoiced. If you want to bill the customer for the prorations before the subscription’s renewal date, you need to manually [invoice the customer](/docs/api/invoices/create).
+ * 
+ * If you don’t want to prorate, set the `proration_behavior` option to `none`. With this option, the customer is billed 100 on May 1 and 200 on June 1. Similarly, if you set `proration_behavior` to `none` when switching between different billing intervals (for example, from monthly to yearly), we don’t generate any credits for the old subscription’s unused time. We still reset the billing date and bill immediately for the new subscription.
+ * 
+ * Updating the quantity on a subscription many times in an hour may result in [rate limiting](/docs/rate-limits). If you need to bill for a frequently changing quantity, consider integrating [usage-based billing](/docs/billing/subscriptions/usage-based) instead.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostSubscriptionsSubscriptionExposedIdBody).def_response(async ({ json }) => Schemas.parseSubscription(await json())),
+'discount': {
+/**
+ * Delete a subscription discount
+ *
+ * Removes the currently applied discount on a subscription.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteSubscriptionsSubscriptionExposedIdDiscountBody).def_response(async ({ json }) => Schemas.parseDeletedDiscount(await json()))
+}
+},
+'$subscription': {
+'attach_cadence': {
+/**
+ * Attach a Billing Cadence
+ *
+ * Attach a Billing Cadence to an existing subscription. When attached, the subscription is billed by the Billing Cadence, potentially sharing invoices with the other subscriptions linked to the Billing Cadence.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostSubscriptionsSubscriptionAttachCadenceBody).def_response(async ({ json }) => Schemas.parseSubscription(await json()))
+},
+'migrate': {
+/**
+ * Migrate a subscription
+ *
+ * Upgrade the billing_mode of an existing subscription.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostSubscriptionsSubscriptionMigrateBody).def_response(async ({ json }) => Schemas.parseSubscription(await json()))
+},
+'resume': {
+/**
+ * Resume a subscription
+ *
+ * Initiates resumption of a paused subscription, optionally resetting the billing cycle anchor and creating prorations. If a resumption invoice is generated, it must be paid or marked uncollectible before the subscription will be unpaused. If payment succeeds the subscription will become `active`, and if payment fails the subscription will be `past_due`. The resumption invoice will void automatically if not paid by the expiration date.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostSubscriptionsSubscriptionResumeBody).def_response(async ({ json }) => Schemas.parseSubscription(await json()))
+}
+}
+},
+'tax': {
+'associations': {
+'find': {
+/**
+ * Find a Tax Association
+ *
+ * Finds a tax association object by PaymentIntent id.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTaxAssociationsFindSearchParams).def_body(Schemas.parseGetTaxAssociationsFindBody).def_response(async ({ json }) => Schemas.parseTaxAssociation(await json()))
+}
+},
+'calculations': {
+/**
+ * Create a Tax Calculation
+ *
+ * Calculates tax based on the input and returns a Tax `Calculation` object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTaxCalculationsBody).def_response(async ({ json }) => Schemas.parseTaxCalculation(await json())),
+'$calculation': {
+/**
+ * Retrieve a Tax Calculation
+ *
+ * Retrieves a Tax `Calculation` object, if the calculation hasn’t expired.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTaxCalculationsCalculationSearchParams).def_body(Schemas.parseGetTaxCalculationsCalculationBody).def_response(async ({ json }) => Schemas.parseTaxCalculation(await json())),
+'line_items': {
+/**
+ * Retrieve a calculation's line items
+ *
+ * Retrieves the line items of a tax calculation as a collection, if the calculation hasn’t expired.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTaxCalculationsCalculationLineItemsSearchParams).def_body(Schemas.parseGetTaxCalculationsCalculationLineItemsBody).def_response(async ({ json }) => Schemas.parseGetTaxCalculationsCalculationLineItemsResponse(await json()))
+}
+}
+},
+'forms': {
+/**
+ * List all tax forms
+ *
+ * Returns a list of tax forms which were previously created. The tax forms are returned in sorted order, with the oldest tax forms appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTaxFormsSearchParams).def_body(Schemas.parseGetTaxFormsBody).def_response(async ({ json }) => Schemas.parseGetTaxFormsResponse(await json())),
+'$id': {
+/**
+ * Retrieve a tax form
+ *
+ * Retrieves the details of a tax form that has previously been created. Supply the unique tax form ID that was returned from your previous request, and Stripe will return the corresponding tax form information.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTaxFormsIdSearchParams).def_body(Schemas.parseGetTaxFormsIdBody).def_response(async ({ json }) => Schemas.parseTaxForm(await json())),
+'pdf': {
+/**
+ * Download tax form PDF
+ *
+ * Download the PDF for a tax form.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTaxFormsIdPdfSearchParams).def_body(Schemas.parseGetTaxFormsIdPdfBody)
+}
+}
+},
+'registrations': {
+/**
+ * List registrations
+ *
+ * Returns a list of Tax `Registration` objects.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTaxRegistrationsSearchParams).def_body(Schemas.parseGetTaxRegistrationsBody).def_response(async ({ json }) => Schemas.parseGetTaxRegistrationsResponse(await json())),
+/**
+ * Create a registration
+ *
+ * Creates a new Tax `Registration` object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTaxRegistrationsBody).def_response(async ({ json }) => Schemas.parseTaxRegistration(await json())),
+'$id': {
+/**
+ * Retrieve a registration
+ *
+ * Returns a Tax `Registration` object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTaxRegistrationsIdSearchParams).def_body(Schemas.parseGetTaxRegistrationsIdBody).def_response(async ({ json }) => Schemas.parseTaxRegistration(await json())),
+/**
+ * Update a registration
+ *
+ * Updates an existing Tax `Registration` object.
+ * 
+ * A registration cannot be deleted after it has been created. If you wish to end a registration you may do so by setting `expires_at`.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTaxRegistrationsIdBody).def_response(async ({ json }) => Schemas.parseTaxRegistration(await json()))
+}
+},
+'settings': {
+/**
+ * Retrieve settings
+ *
+ * Retrieves Tax `Settings` for a merchant.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTaxSettingsSearchParams).def_body(Schemas.parseGetTaxSettingsBody).def_response(async ({ json }) => Schemas.parseTaxSettings(await json())),
+/**
+ * Update settings
+ *
+ * Updates Tax `Settings` parameters used in tax calculations. All parameters are editable but none can be removed once set.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTaxSettingsBody).def_response(async ({ json }) => Schemas.parseTaxSettings(await json()))
+},
+'transactions': {
+'create_from_calculation': {
+/**
+ * Create a transaction from a calculation
+ *
+ * Creates a Tax Transaction from a calculation, if that calculation hasn’t expired. Calculations expire after 90 days.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTaxTransactionsCreateFromCalculationBody).def_response(async ({ json }) => Schemas.parseTaxTransaction(await json()))
+},
+'create_reversal': {
+/**
+ * Create a reversal transaction
+ *
+ * Partially or fully reverses a previously created `Transaction`.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTaxTransactionsCreateReversalBody).def_response(async ({ json }) => Schemas.parseTaxTransaction(await json()))
+},
+'$transaction': {
+/**
+ * Retrieve a transaction
+ *
+ * Retrieves a Tax `Transaction` object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTaxTransactionsTransactionSearchParams).def_body(Schemas.parseGetTaxTransactionsTransactionBody).def_response(async ({ json }) => Schemas.parseTaxTransaction(await json())),
+'line_items': {
+/**
+ * Retrieve a transaction's line items
+ *
+ * Retrieves the line items of a committed standalone transaction as a collection.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTaxTransactionsTransactionLineItemsSearchParams).def_body(Schemas.parseGetTaxTransactionsTransactionLineItemsBody).def_response(async ({ json }) => Schemas.parseGetTaxTransactionsTransactionLineItemsResponse(await json()))
+}
+}
+}
+},
+'tax_codes': {
+/**
+ * List all tax codes
+ *
+ * A list of [all tax codes available](https://stripe.com/docs/tax/tax-categories) to add to Products in order to allow specific tax calculations.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTaxCodesSearchParams).def_body(Schemas.parseGetTaxCodesBody).def_response(async ({ json }) => Schemas.parseGetTaxCodesResponse(await json())),
+'$id': {
+/**
+ * Retrieve a tax code
+ *
+ * Retrieves the details of an existing tax code. Supply the unique tax code ID and Stripe will return the corresponding tax code information.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTaxCodesIdSearchParams).def_body(Schemas.parseGetTaxCodesIdBody).def_response(async ({ json }) => Schemas.parseTaxCode(await json()))
+}
+},
+'tax_ids': {
+/**
+ * List all tax IDs
+ *
+ * Returns a list of tax IDs.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTaxIdsSearchParams).def_body(Schemas.parseGetTaxIdsBody).def_response(async ({ json }) => Schemas.parseGetTaxIdsResponse(await json())),
+/**
+ * Create a tax ID
+ *
+ * Creates a new account or customer `tax_id` object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTaxIdsBody).def_response(async ({ json }) => Schemas.parseTaxId(await json())),
+'$id': {
+/**
+ * Delete a tax ID
+ *
+ * Deletes an existing account or customer `tax_id` object.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteTaxIdsIdBody).def_response(async ({ json }) => Schemas.parseDeletedTaxId(await json())),
+/**
+ * Retrieve a tax ID
+ *
+ * Retrieves an account or customer `tax_id` object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTaxIdsIdSearchParams).def_body(Schemas.parseGetTaxIdsIdBody).def_response(async ({ json }) => Schemas.parseTaxId(await json()))
+}
+},
+'tax_rates': {
+/**
+ * List all tax rates
+ *
+ * Returns a list of your tax rates. Tax rates are returned sorted by creation date, with the most recently created tax rates appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTaxRatesSearchParams).def_body(Schemas.parseGetTaxRatesBody).def_response(async ({ json }) => Schemas.parseGetTaxRatesResponse(await json())),
+/**
+ * Create a tax rate
+ *
+ * Creates a new tax rate.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTaxRatesBody).def_response(async ({ json }) => Schemas.parseTaxRate(await json())),
+'$tax_rate': {
+/**
+ * Retrieve a tax rate
+ *
+ * Retrieves a tax rate with the given ID
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTaxRatesTaxRateSearchParams).def_body(Schemas.parseGetTaxRatesTaxRateBody).def_response(async ({ json }) => Schemas.parseTaxRate(await json())),
+/**
+ * Update a tax rate
+ *
+ * Updates an existing tax rate.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTaxRatesTaxRateBody).def_response(async ({ json }) => Schemas.parseTaxRate(await json()))
+}
+},
+'terminal': {
+'configurations': {
+/**
+ * List all Configurations
+ *
+ * Returns a list of `Configuration` objects.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTerminalConfigurationsSearchParams).def_body(Schemas.parseGetTerminalConfigurationsBody).def_response(async ({ json }) => Schemas.parseGetTerminalConfigurationsResponse(await json())),
+/**
+ * Create a Configuration
+ *
+ * Creates a new `Configuration` object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTerminalConfigurationsBody).def_response(async ({ json }) => Schemas.parseTerminalConfiguration(await json())),
+'$configuration': {
+/**
+ * Delete a Configuration
+ *
+ * Deletes a `Configuration` object.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteTerminalConfigurationsConfigurationBody).def_response(async ({ json }) => Schemas.parseDeletedTerminalConfiguration(await json())),
+/**
+ * Retrieve a Configuration
+ *
+ * Retrieves a `Configuration` object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTerminalConfigurationsConfigurationSearchParams).def_body(Schemas.parseGetTerminalConfigurationsConfigurationBody).def_response(async ({ json }) => Schemas.parseGetTerminalConfigurationsConfigurationResponse(await json())),
+/**
+ * Update a Configuration
+ *
+ * Updates a new `Configuration` object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTerminalConfigurationsConfigurationBody).def_response(async ({ json }) => Schemas.parsePostTerminalConfigurationsConfigurationResponse(await json()))
+}
+},
+'connection_tokens': {
+/**
+ * Create a Connection Token
+ *
+ * To connect to a reader the Stripe Terminal SDK needs to retrieve a short-lived connection token from Stripe, proxied through your server. On your backend, add an endpoint that creates and returns a connection token.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTerminalConnectionTokensBody).def_response(async ({ json }) => Schemas.parseTerminalConnectionToken(await json()))
+},
+'locations': {
+/**
+ * List all Locations
+ *
+ * Returns a list of `Location` objects.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTerminalLocationsSearchParams).def_body(Schemas.parseGetTerminalLocationsBody).def_response(async ({ json }) => Schemas.parseGetTerminalLocationsResponse(await json())),
+/**
+ * Create a Location
+ *
+ * Creates a new `Location` object.
+ * For further details, including which address fields are required in each country, see the [Manage locations](/docs/terminal/fleet/locations) guide.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTerminalLocationsBody).def_response(async ({ json }) => Schemas.parseTerminalLocation(await json())),
+'$location': {
+/**
+ * Delete a Location
+ *
+ * Deletes a `Location` object.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteTerminalLocationsLocationBody).def_response(async ({ json }) => Schemas.parseDeletedTerminalLocation(await json())),
+/**
+ * Retrieve a Location
+ *
+ * Retrieves a `Location` object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTerminalLocationsLocationSearchParams).def_body(Schemas.parseGetTerminalLocationsLocationBody).def_response(async ({ json }) => Schemas.parseGetTerminalLocationsLocationResponse(await json())),
+/**
+ * Update a Location
+ *
+ * Updates a `Location` object by setting the values of the parameters passed. Any parameters not provided will be left unchanged.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTerminalLocationsLocationBody).def_response(async ({ json }) => Schemas.parsePostTerminalLocationsLocationResponse(await json()))
+}
+},
+'onboarding_links': {
+/**
+ * Create an Onboarding Link
+ *
+ * Creates a new `OnboardingLink` object that contains a redirect_url used for onboarding onto Tap to Pay on iPhone.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTerminalOnboardingLinksBody).def_response(async ({ json }) => Schemas.parseTerminalOnboardingLink(await json()))
+},
+'reader_collected_data': {
+'$reader_collected_data': {
+/**
+ * Retrieve ReaderCollectedData
+ *
+ * Retrieve data collected using Reader hardware.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTerminalReaderCollectedDataReaderCollectedDataSearchParams).def_body(Schemas.parseGetTerminalReaderCollectedDataReaderCollectedDataBody).def_response(async ({ json }) => Schemas.parseTerminalReaderCollectedData(await json()))
+}
+},
+'readers': {
+/**
+ * List all Readers
+ *
+ * Returns a list of `Reader` objects.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTerminalReadersSearchParams).def_body(Schemas.parseGetTerminalReadersBody).def_response(async ({ json }) => Schemas.parseGetTerminalReadersResponse(await json())),
+/**
+ * Create a Reader
+ *
+ * Creates a new `Reader` object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTerminalReadersBody).def_response(async ({ json }) => Schemas.parseTerminalReader(await json())),
+'$reader': {
+/**
+ * Delete a Reader
+ *
+ * Deletes a `Reader` object.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteTerminalReadersReaderBody).def_response(async ({ json }) => Schemas.parseDeletedTerminalReader(await json())),
+/**
+ * Retrieve a Reader
+ *
+ * Retrieves a `Reader` object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTerminalReadersReaderSearchParams).def_body(Schemas.parseGetTerminalReadersReaderBody).def_response(async ({ json }) => Schemas.parseGetTerminalReadersReaderResponse(await json())),
+/**
+ * Update a Reader
+ *
+ * Updates a `Reader` object by setting the values of the parameters passed. Any parameters not provided will be left unchanged.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTerminalReadersReaderBody).def_response(async ({ json }) => Schemas.parsePostTerminalReadersReaderResponse(await json())),
+'cancel_action': {
+/**
+ * Cancel the current reader action
+ *
+ * Cancels the current reader action. See [Programmatic Cancellation](/docs/terminal/payments/collect-card-payment?terminal-sdk-platform=server-driven#programmatic-cancellation) for more details.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTerminalReadersReaderCancelActionBody).def_response(async ({ json }) => Schemas.parseTerminalReader(await json()))
+},
+'collect_inputs': {
+/**
+ * Collect inputs using a Reader
+ *
+ * Initiates an [input collection flow](/docs/terminal/features/collect-inputs) on a Reader to display input forms and collect information from your customers.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTerminalReadersReaderCollectInputsBody).def_response(async ({ json }) => Schemas.parseTerminalReader(await json()))
+},
+'collect_payment_method': {
+/**
+ * Hand off a PaymentIntent to a Reader and collect card details
+ *
+ * Initiates a payment flow on a Reader and updates the PaymentIntent with card details before manual confirmation. See [Collecting a Payment method](/docs/terminal/payments/collect-card-payment?terminal-sdk-platform=server-driven&process=inspect#collect-a-paymentmethod) for more details.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTerminalReadersReaderCollectPaymentMethodBody).def_response(async ({ json }) => Schemas.parseTerminalReader(await json()))
+},
+'confirm_payment_intent': {
+/**
+ * Confirm a PaymentIntent on the Reader
+ *
+ * Finalizes a payment on a Reader. See [Confirming a Payment](/docs/terminal/payments/collect-card-payment?terminal-sdk-platform=server-driven&process=inspect#confirm-the-paymentintent) for more details.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTerminalReadersReaderConfirmPaymentIntentBody).def_response(async ({ json }) => Schemas.parseTerminalReader(await json()))
+},
+'process_payment_intent': {
+/**
+ * Hand-off a PaymentIntent to a Reader
+ *
+ * Initiates a payment flow on a Reader. See [process the payment](/docs/terminal/payments/collect-card-payment?terminal-sdk-platform=server-driven&process=immediately#process-payment) for more details.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTerminalReadersReaderProcessPaymentIntentBody).def_response(async ({ json }) => Schemas.parseTerminalReader(await json()))
+},
+'process_setup_intent': {
+/**
+ * Hand-off a SetupIntent to a Reader
+ *
+ * Initiates a SetupIntent flow on a Reader. See [Save directly without charging](/docs/terminal/features/saving-payment-details/save-directly) for more details.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTerminalReadersReaderProcessSetupIntentBody).def_response(async ({ json }) => Schemas.parseTerminalReader(await json()))
+},
+'refund_payment': {
+/**
+ * Refund a Charge or a PaymentIntent in-person
+ *
+ * Initiates an in-person refund on a Reader. See [Refund an Interac Payment](/docs/terminal/payments/regional?integration-country=CA#refund-an-interac-payment) for more details.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTerminalReadersReaderRefundPaymentBody).def_response(async ({ json }) => Schemas.parseTerminalReader(await json()))
+},
+'set_reader_display': {
+/**
+ * Set reader display
+ *
+ * Sets the reader display to show [cart details](/docs/terminal/features/display).
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTerminalReadersReaderSetReaderDisplayBody).def_response(async ({ json }) => Schemas.parseTerminalReader(await json()))
+}
+}
+}
+},
+'test': {
+'payment_intents': {
+'$intent': {
+'trigger_action': {
+/**
+ * Trigger an external action on a PaymentIntent.
+ *
+ * Trigger an external action on a PaymentIntent.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestPaymentIntentsIntentTriggerActionBody).def_response(async ({ json }) => Schemas.parsePaymentIntent(await json()))
+}
+}
+}
+},
+'test_helpers': {
+'confirmation_tokens': {
+/**
+ * Create a test Confirmation Token
+ *
+ * Creates a test mode Confirmation Token server side for your integration tests.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersConfirmationTokensBody).def_response(async ({ json }) => Schemas.parseConfirmationToken(await json()))
+},
+'customers': {
+'$customer': {
+'fund_cash_balance': {
+/**
+ * Fund a test mode cash balance
+ *
+ * Create an incoming testmode bank transfer
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersCustomersCustomerFundCashBalanceBody).def_response(async ({ json }) => Schemas.parseCustomerCashBalanceTransaction(await json()))
+}
+}
+},
+'issuing': {
+'authorizations': {
+/**
+ * Create a test-mode authorization
+ *
+ * Create a test-mode authorization.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersIssuingAuthorizationsBody).def_response(async ({ json }) => Schemas.parseIssuingAuthorization(await json())),
+'$authorization': {
+'capture': {
+/**
+ * Capture a test-mode authorization
+ *
+ * Capture a test-mode authorization.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersIssuingAuthorizationsAuthorizationCaptureBody).def_response(async ({ json }) => Schemas.parseIssuingAuthorization(await json()))
+},
+'expire': {
+/**
+ * Expire a test-mode authorization
+ *
+ * Expire a test-mode Authorization.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersIssuingAuthorizationsAuthorizationExpireBody).def_response(async ({ json }) => Schemas.parseIssuingAuthorization(await json()))
+},
+'finalize_amount': {
+/**
+ * Finalize a test-mode authorization's amount
+ *
+ * Finalize the amount on an Authorization prior to capture, when the initial authorization was for an estimated amount.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersIssuingAuthorizationsAuthorizationFinalizeAmountBody).def_response(async ({ json }) => Schemas.parseIssuingAuthorization(await json()))
+},
+'fraud_challenges': {
+'respond': {
+/**
+ * Respond to fraud challenge
+ *
+ * Respond to a fraud challenge on a testmode Issuing authorization, simulating either a confirmation of fraud or a correction of legitimacy.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersIssuingAuthorizationsAuthorizationFraudChallengesRespondBody).def_response(async ({ json }) => Schemas.parseIssuingAuthorization(await json()))
+}
+},
+'increment': {
+/**
+ * Increment a test-mode authorization
+ *
+ * Increment a test-mode Authorization.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersIssuingAuthorizationsAuthorizationIncrementBody).def_response(async ({ json }) => Schemas.parseIssuingAuthorization(await json()))
+},
+'reverse': {
+/**
+ * Reverse a test-mode authorization
+ *
+ * Reverse a test-mode Authorization.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersIssuingAuthorizationsAuthorizationReverseBody).def_response(async ({ json }) => Schemas.parseIssuingAuthorization(await json()))
+}
+}
+},
+'cards': {
+'$card': {
+'shipping': {
+'deliver': {
+/**
+ * Deliver a testmode card
+ *
+ * Updates the shipping status of the specified Issuing `Card` object to `delivered`.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersIssuingCardsCardShippingDeliverBody).def_response(async ({ json }) => Schemas.parseIssuingCard(await json()))
+},
+'fail': {
+/**
+ * Fail a testmode card
+ *
+ * Updates the shipping status of the specified Issuing `Card` object to `failure`.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersIssuingCardsCardShippingFailBody).def_response(async ({ json }) => Schemas.parseIssuingCard(await json()))
+},
+'return': {
+/**
+ * Return a testmode card
+ *
+ * Updates the shipping status of the specified Issuing `Card` object to `returned`.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersIssuingCardsCardShippingReturnBody).def_response(async ({ json }) => Schemas.parseIssuingCard(await json()))
+},
+'ship': {
+/**
+ * Ship a testmode card
+ *
+ * Updates the shipping status of the specified Issuing `Card` object to `shipped`.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersIssuingCardsCardShippingShipBody).def_response(async ({ json }) => Schemas.parseIssuingCard(await json()))
+},
+'submit': {
+/**
+ * Submit a testmode card
+ *
+ * Updates the shipping status of the specified Issuing `Card` object to `submitted`. This method requires Stripe Version ‘2024-09-30.acacia’ or later.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersIssuingCardsCardShippingSubmitBody).def_response(async ({ json }) => Schemas.parseIssuingCard(await json()))
+}
+}
+}
+},
+'personalization_designs': {
+'$personalization_design': {
+'activate': {
+/**
+ * Activate a testmode personalization design
+ *
+ * Updates the `status` of the specified testmode personalization design object to `active`.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersIssuingPersonalizationDesignsPersonalizationDesignActivateBody).def_response(async ({ json }) => Schemas.parseIssuingPersonalizationDesign(await json()))
+},
+'deactivate': {
+/**
+ * Deactivate a testmode personalization design
+ *
+ * Updates the `status` of the specified testmode personalization design object to `inactive`.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersIssuingPersonalizationDesignsPersonalizationDesignDeactivateBody).def_response(async ({ json }) => Schemas.parseIssuingPersonalizationDesign(await json()))
+},
+'reject': {
+/**
+ * Reject a testmode personalization design
+ *
+ * Updates the `status` of the specified testmode personalization design object to `rejected`.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersIssuingPersonalizationDesignsPersonalizationDesignRejectBody).def_response(async ({ json }) => Schemas.parseIssuingPersonalizationDesign(await json()))
+}
+}
+},
+'transactions': {
+'create_force_capture': {
+/**
+ * Create a test-mode force capture
+ *
+ * Allows the user to capture an arbitrary amount, also known as a forced capture.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersIssuingTransactionsCreateForceCaptureBody).def_response(async ({ json }) => Schemas.parseIssuingTransaction(await json()))
+},
+'create_unlinked_refund': {
+/**
+ * Create a test-mode unlinked refund
+ *
+ * Allows the user to refund an arbitrary amount, also known as a unlinked refund.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersIssuingTransactionsCreateUnlinkedRefundBody).def_response(async ({ json }) => Schemas.parseIssuingTransaction(await json()))
+},
+'$transaction': {
+'refund': {
+/**
+ * Refund a test-mode transaction
+ *
+ * Refund a test-mode Transaction.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersIssuingTransactionsTransactionRefundBody).def_response(async ({ json }) => Schemas.parseIssuingTransaction(await json()))
+}
+}
+}
+},
+'refunds': {
+'$refund': {
+'expire': {
+/**
+ * Expire a pending refund.
+ *
+ * Expire a refund with a status of `requires_action`.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersRefundsRefundExpireBody).def_response(async ({ json }) => Schemas.parseRefund(await json()))
+}
+}
+},
+'terminal': {
+'readers': {
+'$reader': {
+'present_payment_method': {
+/**
+ * Simulate presenting a payment method
+ *
+ * Presents a payment method on a simulated reader. Can be used to simulate accepting a payment, saving a card or refunding a transaction.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersTerminalReadersReaderPresentPaymentMethodBody).def_response(async ({ json }) => Schemas.parseTerminalReader(await json()))
+},
+'succeed_input_collection': {
+/**
+ * Simulate a successful input collection
+ *
+ * Use this endpoint to trigger a successful input collection on a simulated reader.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersTerminalReadersReaderSucceedInputCollectionBody).def_response(async ({ json }) => Schemas.parseTerminalReader(await json()))
+},
+'timeout_input_collection': {
+/**
+ * Simulate an input collection timeout
+ *
+ * Use this endpoint to complete an input collection with a timeout error on a simulated reader.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersTerminalReadersReaderTimeoutInputCollectionBody).def_response(async ({ json }) => Schemas.parseTerminalReader(await json()))
+}
+}
+}
+},
+'test_clocks': {
+/**
+ * List all test clocks
+ *
+ * Returns a list of your test clocks.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTestHelpersTestClocksSearchParams).def_body(Schemas.parseGetTestHelpersTestClocksBody).def_response(async ({ json }) => Schemas.parseGetTestHelpersTestClocksResponse(await json())),
+/**
+ * Create a test clock
+ *
+ * Creates a new test clock that can be attached to new customers and quotes.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersTestClocksBody).def_response(async ({ json }) => Schemas.parseTestHelpersTestClock(await json())),
+'$test_clock': {
+/**
+ * Delete a test clock
+ *
+ * Deletes a test clock.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteTestHelpersTestClocksTestClockBody).def_response(async ({ json }) => Schemas.parseDeletedTestHelpersTestClock(await json())),
+/**
+ * Retrieve a test clock
+ *
+ * Retrieves a test clock.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTestHelpersTestClocksTestClockSearchParams).def_body(Schemas.parseGetTestHelpersTestClocksTestClockBody).def_response(async ({ json }) => Schemas.parseTestHelpersTestClock(await json())),
+'advance': {
+/**
+ * Advance a test clock
+ *
+ * Starts advancing a test clock to a specified time in the future. Advancement is done when status changes to `Ready`.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersTestClocksTestClockAdvanceBody).def_response(async ({ json }) => Schemas.parseTestHelpersTestClock(await json()))
+}
+}
+},
+'treasury': {
+'inbound_transfers': {
+'$id': {
+'fail': {
+/**
+ * Test mode: Fail an InboundTransfer
+ *
+ * Transitions a test mode created InboundTransfer to the `failed` status. The InboundTransfer must already be in the `processing` state.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersTreasuryInboundTransfersIdFailBody).def_response(async ({ json }) => Schemas.parseTreasuryInboundTransfer(await json()))
+},
+'return': {
+/**
+ * Test mode: Return an InboundTransfer
+ *
+ * Marks the test mode InboundTransfer object as returned and links the InboundTransfer to a ReceivedDebit. The InboundTransfer must already be in the `succeeded` state.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersTreasuryInboundTransfersIdReturnBody).def_response(async ({ json }) => Schemas.parseTreasuryInboundTransfer(await json()))
+},
+'succeed': {
+/**
+ * Test mode: Succeed an InboundTransfer
+ *
+ * Transitions a test mode created InboundTransfer to the `succeeded` status. The InboundTransfer must already be in the `processing` state.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersTreasuryInboundTransfersIdSucceedBody).def_response(async ({ json }) => Schemas.parseTreasuryInboundTransfer(await json()))
+}
+}
+},
+'outbound_payments': {
+'$id': {
+/**
+ * Test mode: Update an OutboundPayment
+ *
+ * Updates a test mode created OutboundPayment with tracking details. The OutboundPayment must not be cancelable, and cannot be in the `canceled` or `failed` states.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersTreasuryOutboundPaymentsIdBody).def_response(async ({ json }) => Schemas.parseTreasuryOutboundPayment(await json())),
+'fail': {
+/**
+ * Test mode: Fail an OutboundPayment
+ *
+ * Transitions a test mode created OutboundPayment to the `failed` status. The OutboundPayment must already be in the `processing` state.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersTreasuryOutboundPaymentsIdFailBody).def_response(async ({ json }) => Schemas.parseTreasuryOutboundPayment(await json()))
+},
+'return': {
+/**
+ * Test mode: Return an OutboundPayment
+ *
+ * Transitions a test mode created OutboundPayment to the `returned` status. The OutboundPayment must already be in the `processing` state.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersTreasuryOutboundPaymentsIdReturnBody).def_response(async ({ json }) => Schemas.parseTreasuryOutboundPayment(await json()))
+}
+}
+},
+'outbound_transfers': {
+'$outbound_transfer': {
+/**
+ * Test mode: Update an OutboundTransfer
+ *
+ * Updates a test mode created OutboundTransfer with tracking details. The OutboundTransfer must not be cancelable, and cannot be in the `canceled` or `failed` states.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersTreasuryOutboundTransfersOutboundTransferBody).def_response(async ({ json }) => Schemas.parseTreasuryOutboundTransfer(await json())),
+'fail': {
+/**
+ * Test mode: Fail an OutboundTransfer
+ *
+ * Transitions a test mode created OutboundTransfer to the `failed` status. The OutboundTransfer must already be in the `processing` state.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersTreasuryOutboundTransfersOutboundTransferFailBody).def_response(async ({ json }) => Schemas.parseTreasuryOutboundTransfer(await json()))
+},
+'return': {
+/**
+ * Test mode: Return an OutboundTransfer
+ *
+ * Transitions a test mode created OutboundTransfer to the `returned` status. The OutboundTransfer must already be in the `processing` state.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersTreasuryOutboundTransfersOutboundTransferReturnBody).def_response(async ({ json }) => Schemas.parseTreasuryOutboundTransfer(await json()))
+}
+}
+},
+'received_credits': {
+/**
+ * Test mode: Create a ReceivedCredit
+ *
+ * Use this endpoint to simulate a test mode ReceivedCredit initiated by a third party. In live mode, you can’t directly create ReceivedCredits initiated by third parties.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersTreasuryReceivedCreditsBody).def_response(async ({ json }) => Schemas.parseTreasuryReceivedCredit(await json()))
+},
+'received_debits': {
+/**
+ * Test mode: Create a ReceivedDebit
+ *
+ * Use this endpoint to simulate a test mode ReceivedDebit initiated by a third party. In live mode, you can’t directly create ReceivedDebits initiated by third parties.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTestHelpersTreasuryReceivedDebitsBody).def_response(async ({ json }) => Schemas.parseTreasuryReceivedDebit(await json()))
+}
+}
+},
+'tokens': {
+/**
+ * Create a CVC update token
+ *
+ * Creates a single-use token that represents a bank account’s details.
+ * You can use this token with any v1 API method in place of a bank account dictionary. You can only use this token once. To do so, attach it to a [connected account](#accounts) where [controller.requirement_collection](/api/accounts/object#account_object-controller-requirement_collection) is `application`, which includes Custom accounts.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTokensBody).def_response(async ({ json }) => Schemas.parseToken(await json())),
+'$token': {
+/**
+ * Retrieve a token
+ *
+ * Retrieves the token with the given ID.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTokensTokenSearchParams).def_body(Schemas.parseGetTokensTokenBody).def_response(async ({ json }) => Schemas.parseToken(await json()))
+}
+},
+'topups': {
+/**
+ * List all top-ups
+ *
+ * Returns a list of top-ups.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTopupsSearchParams).def_body(Schemas.parseGetTopupsBody).def_response(async ({ json }) => Schemas.parseGetTopupsResponse(await json())),
+/**
+ * Create a top-up
+ *
+ * Top up the balance of an account
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTopupsBody).def_response(async ({ json }) => Schemas.parseTopup(await json())),
+'$topup': {
+/**
+ * Retrieve a top-up
+ *
+ * Retrieves the details of a top-up that has previously been created. Supply the unique top-up ID that was returned from your previous request, and Stripe will return the corresponding top-up information.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTopupsTopupSearchParams).def_body(Schemas.parseGetTopupsTopupBody).def_response(async ({ json }) => Schemas.parseTopup(await json())),
+/**
+ * Update a top-up
+ *
+ * Updates the metadata of a top-up. Other top-up details are not editable by design.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTopupsTopupBody).def_response(async ({ json }) => Schemas.parseTopup(await json())),
+'cancel': {
+/**
+ * Cancel a top-up
+ *
+ * Cancels a top-up. Only pending top-ups can be canceled.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTopupsTopupCancelBody).def_response(async ({ json }) => Schemas.parseTopup(await json()))
+}
+}
+},
+'transfers': {
+/**
+ * List all transfers
+ *
+ * Returns a list of existing transfers sent to connected accounts. The transfers are returned in sorted order, with the most recently created transfers appearing first.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTransfersSearchParams).def_body(Schemas.parseGetTransfersBody).def_response(async ({ json }) => Schemas.parseGetTransfersResponse(await json())),
+/**
+ * Create a transfer
+ *
+ * To send funds from your Stripe account to a connected account, you create a new transfer object. Your [Stripe balance](#balance) must be able to cover the transfer amount, or you’ll receive an “Insufficient Funds” error.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTransfersBody).def_response(async ({ json }) => Schemas.parseTransfer(await json())),
+'$id': {
+'reversals': {
+/**
+ * List all reversals
+ *
+ * You can see a list of the reversals belonging to a specific transfer. Note that the 10 most recent reversals are always available by default on the transfer object. If you need more than those 10, you can use this API method and the `limit` and `starting_after` parameters to page through additional reversals.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTransfersIdReversalsSearchParams).def_body(Schemas.parseGetTransfersIdReversalsBody).def_response(async ({ json }) => Schemas.parseGetTransfersIdReversalsResponse(await json())),
+/**
+ * Create a transfer reversal
+ *
+ * When you create a new reversal, you must specify a transfer to create it on.
+ * 
+ * When reversing transfers, you can optionally reverse part of the transfer. You can do so as many times as you wish until the entire transfer has been reversed.
+ * 
+ * Once entirely reversed, a transfer can’t be reversed again. This method will return an error when called on an already-reversed transfer, or when trying to reverse more money than is left on a transfer.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTransfersIdReversalsBody).def_response(async ({ json }) => Schemas.parseTransferReversal(await json()))
+}
+},
+'$transfer': {
+/**
+ * Retrieve a transfer
+ *
+ * Retrieves the details of an existing transfer. Supply the unique transfer ID from either a transfer creation request or the transfer list, and Stripe will return the corresponding transfer information.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTransfersTransferSearchParams).def_body(Schemas.parseGetTransfersTransferBody).def_response(async ({ json }) => Schemas.parseTransfer(await json())),
+/**
+ * Update a transfer
+ *
+ * Updates the specified transfer by setting the values of the parameters passed. Any parameters not provided will be left unchanged.
+ * 
+ * This request accepts only metadata as an argument.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTransfersTransferBody).def_response(async ({ json }) => Schemas.parseTransfer(await json())),
+'reversals': {
+'$id': {
+/**
+ * Retrieve a reversal
+ *
+ * By default, you can see the 10 most recent reversals stored directly on the transfer object, but you can also retrieve details about a specific reversal stored on the transfer.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTransfersTransferReversalsIdSearchParams).def_body(Schemas.parseGetTransfersTransferReversalsIdBody).def_response(async ({ json }) => Schemas.parseTransferReversal(await json())),
+/**
+ * Update a reversal
+ *
+ * Updates the specified reversal by setting the values of the parameters passed. Any parameters not provided will be left unchanged.
+ * 
+ * This request only accepts metadata and description as arguments.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTransfersTransferReversalsIdBody).def_response(async ({ json }) => Schemas.parseTransferReversal(await json()))
+}
+}
+}
+},
+'treasury': {
+'credit_reversals': {
+/**
+ * List all CreditReversals
+ *
+ * Returns a list of CreditReversals.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTreasuryCreditReversalsSearchParams).def_body(Schemas.parseGetTreasuryCreditReversalsBody).def_response(async ({ json }) => Schemas.parseGetTreasuryCreditReversalsResponse(await json())),
+/**
+ * Create a CreditReversal
+ *
+ * Reverses a ReceivedCredit and creates a CreditReversal object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTreasuryCreditReversalsBody).def_response(async ({ json }) => Schemas.parseTreasuryCreditReversal(await json())),
+'$credit_reversal': {
+/**
+ * Retrieve a CreditReversal
+ *
+ * Retrieves the details of an existing CreditReversal by passing the unique CreditReversal ID from either the CreditReversal creation request or CreditReversal list
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTreasuryCreditReversalsCreditReversalSearchParams).def_body(Schemas.parseGetTreasuryCreditReversalsCreditReversalBody).def_response(async ({ json }) => Schemas.parseTreasuryCreditReversal(await json()))
+}
+},
+'debit_reversals': {
+/**
+ * List all DebitReversals
+ *
+ * Returns a list of DebitReversals.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTreasuryDebitReversalsSearchParams).def_body(Schemas.parseGetTreasuryDebitReversalsBody).def_response(async ({ json }) => Schemas.parseGetTreasuryDebitReversalsResponse(await json())),
+/**
+ * Create a DebitReversal
+ *
+ * Reverses a ReceivedDebit and creates a DebitReversal object.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTreasuryDebitReversalsBody).def_response(async ({ json }) => Schemas.parseTreasuryDebitReversal(await json())),
+'$debit_reversal': {
+/**
+ * Retrieve a DebitReversal
+ *
+ * Retrieves a DebitReversal object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTreasuryDebitReversalsDebitReversalSearchParams).def_body(Schemas.parseGetTreasuryDebitReversalsDebitReversalBody).def_response(async ({ json }) => Schemas.parseTreasuryDebitReversal(await json()))
+}
+},
+'financial_accounts': {
+/**
+ * List all FinancialAccounts
+ *
+ * Returns a list of FinancialAccounts.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTreasuryFinancialAccountsSearchParams).def_body(Schemas.parseGetTreasuryFinancialAccountsBody).def_response(async ({ json }) => Schemas.parseGetTreasuryFinancialAccountsResponse(await json())),
+/**
+ * Create a FinancialAccount
+ *
+ * Creates a new FinancialAccount. Each connected account can have up to three FinancialAccounts by default.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTreasuryFinancialAccountsBody).def_response(async ({ json }) => Schemas.parseTreasuryFinancialAccount(await json())),
+'$financial_account': {
+/**
+ * Retrieve a FinancialAccount
+ *
+ * Retrieves the details of a FinancialAccount.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTreasuryFinancialAccountsFinancialAccountSearchParams).def_body(Schemas.parseGetTreasuryFinancialAccountsFinancialAccountBody).def_response(async ({ json }) => Schemas.parseTreasuryFinancialAccount(await json())),
+/**
+ * Update a FinancialAccount
+ *
+ * Updates the details of a FinancialAccount.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTreasuryFinancialAccountsFinancialAccountBody).def_response(async ({ json }) => Schemas.parseTreasuryFinancialAccount(await json())),
+'close': {
+/**
+ * Close a FinancialAccount
+ *
+ * Closes a FinancialAccount. A FinancialAccount can only be closed if it has a zero balance, has no pending InboundTransfers, and has canceled all attached Issuing cards.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTreasuryFinancialAccountsFinancialAccountCloseBody).def_response(async ({ json }) => Schemas.parseTreasuryFinancialAccount(await json()))
+},
+'features': {
+/**
+ * Retrieve FinancialAccount Features
+ *
+ * Retrieves Features information associated with the FinancialAccount.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTreasuryFinancialAccountsFinancialAccountFeaturesSearchParams).def_body(Schemas.parseGetTreasuryFinancialAccountsFinancialAccountFeaturesBody).def_response(async ({ json }) => Schemas.parseTreasuryFinancialAccountFeatures(await json())),
+/**
+ * Update FinancialAccount Features
+ *
+ * Updates the Features associated with a FinancialAccount.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTreasuryFinancialAccountsFinancialAccountFeaturesBody).def_response(async ({ json }) => Schemas.parseTreasuryFinancialAccountFeatures(await json()))
+}
+}
+},
+'inbound_transfers': {
+/**
+ * List all InboundTransfers
+ *
+ * Returns a list of InboundTransfers sent from the specified FinancialAccount.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTreasuryInboundTransfersSearchParams).def_body(Schemas.parseGetTreasuryInboundTransfersBody).def_response(async ({ json }) => Schemas.parseGetTreasuryInboundTransfersResponse(await json())),
+/**
+ * Create an InboundTransfer
+ *
+ * Creates an InboundTransfer.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTreasuryInboundTransfersBody).def_response(async ({ json }) => Schemas.parseTreasuryInboundTransfer(await json())),
+'$id': {
+/**
+ * Retrieve an InboundTransfer
+ *
+ * Retrieves the details of an existing InboundTransfer.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTreasuryInboundTransfersIdSearchParams).def_body(Schemas.parseGetTreasuryInboundTransfersIdBody).def_response(async ({ json }) => Schemas.parseTreasuryInboundTransfer(await json()))
+},
+'$inbound_transfer': {
+'cancel': {
+/**
+ * Cancel an InboundTransfer
+ *
+ * Cancels an InboundTransfer.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTreasuryInboundTransfersInboundTransferCancelBody).def_response(async ({ json }) => Schemas.parseTreasuryInboundTransfer(await json()))
+}
+}
+},
+'outbound_payments': {
+/**
+ * List all OutboundPayments
+ *
+ * Returns a list of OutboundPayments sent from the specified FinancialAccount.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTreasuryOutboundPaymentsSearchParams).def_body(Schemas.parseGetTreasuryOutboundPaymentsBody).def_response(async ({ json }) => Schemas.parseGetTreasuryOutboundPaymentsResponse(await json())),
+/**
+ * Create an OutboundPayment
+ *
+ * Creates an OutboundPayment.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTreasuryOutboundPaymentsBody).def_response(async ({ json }) => Schemas.parseTreasuryOutboundPayment(await json())),
+'$id': {
+/**
+ * Retrieve an OutboundPayment
+ *
+ * Retrieves the details of an existing OutboundPayment by passing the unique OutboundPayment ID from either the OutboundPayment creation request or OutboundPayment list.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTreasuryOutboundPaymentsIdSearchParams).def_body(Schemas.parseGetTreasuryOutboundPaymentsIdBody).def_response(async ({ json }) => Schemas.parseTreasuryOutboundPayment(await json())),
+'cancel': {
+/**
+ * Cancel an OutboundPayment
+ *
+ * Cancel an OutboundPayment.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTreasuryOutboundPaymentsIdCancelBody).def_response(async ({ json }) => Schemas.parseTreasuryOutboundPayment(await json()))
+}
+}
+},
+'outbound_transfers': {
+/**
+ * List all OutboundTransfers
+ *
+ * Returns a list of OutboundTransfers sent from the specified FinancialAccount.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTreasuryOutboundTransfersSearchParams).def_body(Schemas.parseGetTreasuryOutboundTransfersBody).def_response(async ({ json }) => Schemas.parseGetTreasuryOutboundTransfersResponse(await json())),
+/**
+ * Create an OutboundTransfer
+ *
+ * Creates an OutboundTransfer.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTreasuryOutboundTransfersBody).def_response(async ({ json }) => Schemas.parseTreasuryOutboundTransfer(await json())),
+'$outbound_transfer': {
+/**
+ * Retrieve an OutboundTransfer
+ *
+ * Retrieves the details of an existing OutboundTransfer by passing the unique OutboundTransfer ID from either the OutboundTransfer creation request or OutboundTransfer list.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTreasuryOutboundTransfersOutboundTransferSearchParams).def_body(Schemas.parseGetTreasuryOutboundTransfersOutboundTransferBody).def_response(async ({ json }) => Schemas.parseTreasuryOutboundTransfer(await json())),
+'cancel': {
+/**
+ * Cancel an OutboundTransfer
+ *
+ * An OutboundTransfer can be canceled if the funds have not yet been paid out.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostTreasuryOutboundTransfersOutboundTransferCancelBody).def_response(async ({ json }) => Schemas.parseTreasuryOutboundTransfer(await json()))
+}
+}
+},
+'received_credits': {
+/**
+ * List all ReceivedCredits
+ *
+ * Returns a list of ReceivedCredits.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTreasuryReceivedCreditsSearchParams).def_body(Schemas.parseGetTreasuryReceivedCreditsBody).def_response(async ({ json }) => Schemas.parseGetTreasuryReceivedCreditsResponse(await json())),
+'$id': {
+/**
+ * Retrieve a ReceivedCredit
+ *
+ * Retrieves the details of an existing ReceivedCredit by passing the unique ReceivedCredit ID from the ReceivedCredit list.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTreasuryReceivedCreditsIdSearchParams).def_body(Schemas.parseGetTreasuryReceivedCreditsIdBody).def_response(async ({ json }) => Schemas.parseTreasuryReceivedCredit(await json()))
+}
+},
+'received_debits': {
+/**
+ * List all ReceivedDebits
+ *
+ * Returns a list of ReceivedDebits.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTreasuryReceivedDebitsSearchParams).def_body(Schemas.parseGetTreasuryReceivedDebitsBody).def_response(async ({ json }) => Schemas.parseGetTreasuryReceivedDebitsResponse(await json())),
+'$id': {
+/**
+ * Retrieve a ReceivedDebit
+ *
+ * Retrieves the details of an existing ReceivedDebit by passing the unique ReceivedDebit ID from the ReceivedDebit list
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTreasuryReceivedDebitsIdSearchParams).def_body(Schemas.parseGetTreasuryReceivedDebitsIdBody).def_response(async ({ json }) => Schemas.parseTreasuryReceivedDebit(await json()))
+}
+},
+'transaction_entries': {
+/**
+ * List all TransactionEntries
+ *
+ * Retrieves a list of TransactionEntry objects.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTreasuryTransactionEntriesSearchParams).def_body(Schemas.parseGetTreasuryTransactionEntriesBody).def_response(async ({ json }) => Schemas.parseGetTreasuryTransactionEntriesResponse(await json())),
+'$id': {
+/**
+ * Retrieve a TransactionEntry
+ *
+ * Retrieves a TransactionEntry object.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTreasuryTransactionEntriesIdSearchParams).def_body(Schemas.parseGetTreasuryTransactionEntriesIdBody).def_response(async ({ json }) => Schemas.parseTreasuryTransactionEntry(await json()))
+}
+},
+'transactions': {
+/**
+ * List all Transactions
+ *
+ * Retrieves a list of Transaction objects.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTreasuryTransactionsSearchParams).def_body(Schemas.parseGetTreasuryTransactionsBody).def_response(async ({ json }) => Schemas.parseGetTreasuryTransactionsResponse(await json())),
+'$id': {
+/**
+ * Retrieve a Transaction
+ *
+ * Retrieves the details of an existing Transaction.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetTreasuryTransactionsIdSearchParams).def_body(Schemas.parseGetTreasuryTransactionsIdBody).def_response(async ({ json }) => Schemas.parseTreasuryTransaction(await json()))
+}
+}
+},
+'webhook_endpoints': {
+/**
+ * List all webhook endpoints
+ *
+ * Returns a list of your webhook endpoints.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetWebhookEndpointsSearchParams).def_body(Schemas.parseGetWebhookEndpointsBody).def_response(async ({ json }) => Schemas.parseGetWebhookEndpointsResponse(await json())),
+/**
+ * Create a webhook endpoint
+ *
+ * A webhook endpoint must have a `url` and a list of `enabled_events`. You may optionally specify the Boolean `connect` parameter. If set to true, then a Connect webhook endpoint that notifies the specified `url` about events from all connected accounts is created; otherwise an account webhook endpoint that notifies the specified `url` only about events from your account is created. You can also create webhook endpoints in the [webhooks settings](https://dashboard.stripe.com/account/webhooks) section of the Dashboard.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostWebhookEndpointsBody).def_response(async ({ json }) => Schemas.parseWebhookEndpoint(await json())),
+'$webhook_endpoint': {
+/**
+ * Delete a webhook endpoint
+ *
+ * You can also delete webhook endpoints via the [webhook endpoint management](https://dashboard.stripe.com/account/webhooks) page of the Stripe dashboard.
+ */
+'DELETE': f.builder().def_json().def_body(Schemas.parseDeleteWebhookEndpointsWebhookEndpointBody).def_response(async ({ json }) => Schemas.parseDeletedWebhookEndpoint(await json())),
+/**
+ * Retrieve a webhook endpoint
+ *
+ * Retrieves the webhook endpoint with the given ID.
+ */
+'GET': f.builder().def_json().def_searchparams(Schemas.parseGetWebhookEndpointsWebhookEndpointSearchParams).def_body(Schemas.parseGetWebhookEndpointsWebhookEndpointBody).def_response(async ({ json }) => Schemas.parseWebhookEndpoint(await json())),
+/**
+ * Update a webhook endpoint
+ *
+ * Updates the webhook endpoint. You may edit the `url`, the list of `enabled_events`, and the status of your endpoint.
+ */
+'POST': f.builder().def_json().def_body(Schemas.parsePostWebhookEndpointsWebhookEndpointBody).def_response(async ({ json }) => Schemas.parseWebhookEndpoint(await json()))
+}
+}
+}
+};

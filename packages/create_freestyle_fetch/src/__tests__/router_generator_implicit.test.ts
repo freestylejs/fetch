@@ -1,7 +1,7 @@
 import type { OpenAPIV3_1 } from 'openapi-types'
 import { describe, expect, it } from 'vitest'
 import { parsePaths } from '../path_parser'
-import { generateRouter } from '../router_generator'
+import { generateRouterSurfaces } from '../router_generator'
 
 describe('HTTP Methods Generation (Implicit)', () => {
     it('should NOT generate .def_method() but rely on router structure', () => {
@@ -17,7 +17,11 @@ describe('HTTP Methods Generation (Implicit)', () => {
         }
 
         const parsedPaths = parsePaths(spec)
-        const code = generateRouter(parsedPaths, spec)
+        const surfaces = generateRouterSurfaces(parsedPaths, spec)
+        const code = [
+            surfaces.apiFileContent,
+            ...surfaces.domainFiles.map((domain) => domain.content),
+        ].join('\n')
 
         // We expect the generated code to NOT explicitly define methods
         // because the runtime router handles it based on the key (GET, POST, etc.)

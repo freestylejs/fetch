@@ -7,7 +7,7 @@ import { outputFileSync } from 'fs-extra'
 import { AuthGenerator } from './auth_generator'
 import { GeneratorError } from './errors'
 import { parseOpenApiSpec, parsePaths } from './path_parser'
-import { generateRouter } from './router_generator'
+import { generateRouterSurfaces } from './router_generator'
 import { SchemaGenerator } from './schema_generator'
 import { SpecValidator } from './validator'
 
@@ -39,15 +39,44 @@ program
                 console.log(warnings)
             }
 
-            console.log(chalk.blue('ℹ') + ' Generating models...')
             const schemaGenerator = new SchemaGenerator(spec)
 
-            // Generate and write models
-            const modelsFileContent = schemaGenerator.generateModels()
+            console.log(chalk.blue('ℹ') + ' Generating router...')
+            // Router generation first: it promotes inline validators into
+            // named parsers registered on the shared generator.
+            const parsedPaths = parsePaths(spec)
+            const { apiFileContent, domainFiles } = generateRouterSurfaces(
+                parsedPaths,
+                spec,
+                schemaGenerator
+            )
+
+            for (const domain of domainFiles) {
+                outputFileSync(
+                    resolve(absoluteOutputPath, domain.fileName),
+                    domain.content
+                )
+            }
 
             outputFileSync(
-                resolve(absoluteOutputPath, 'models.ts'),
-                modelsFileContent
+                resolve(absoluteOutputPath, 'api.ts'),
+                apiFileContent
+            )
+
+            console.log(chalk.blue('ℹ') + ' Generating types...')
+            outputFileSync(
+                resolve(absoluteOutputPath, 'types.ts'),
+                schemaGenerator.emitTypes()
+            )
+
+            console.log(chalk.blue('ℹ') + ' Generating schemas...')
+            outputFileSync(
+                resolve(absoluteOutputPath, 'schemas.js'),
+                schemaGenerator.emitSchemasJs()
+            )
+            outputFileSync(
+                resolve(absoluteOutputPath, 'schemas.d.ts'),
+                schemaGenerator.emitSchemasDecl()
             )
 
             console.log(chalk.blue('ℹ') + ' Generating auth...')
@@ -59,20 +88,10 @@ program
                 authFileContent
             )
 
-            console.log(chalk.blue('ℹ') + ' Generating router...')
-            // Generate and write router
-            const parsedPaths = parsePaths(spec)
-            const routerFileContent = generateRouter(parsedPaths, spec)
-
-            outputFileSync(
-                resolve(absoluteOutputPath, 'api.ts'),
-                routerFileContent
-            )
-
             // Generate and write index
             outputFileSync(
                 resolve(absoluteOutputPath, 'index.ts'),
-                "export * from './api';\nexport * from './models';\nexport * from './auth';"
+                "export * from './api';\nexport * from './types';\nexport * from './schemas';\nexport * from './auth';"
             )
 
             console.log(
