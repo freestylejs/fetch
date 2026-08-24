@@ -26,6 +26,8 @@ ts-perf
 tsconfig.tsbuildinfo
 __snapshots__
 large.*
+.trace/
+bench/type-perf/corpus/
 
 # Logs
 npm-debug.log*
