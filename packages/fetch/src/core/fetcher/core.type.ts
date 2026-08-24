@@ -1,8 +1,4 @@
-import type {
-    ConcreteBoolean,
-    IncludeString,
-    OmitNever,
-} from '../../utils/types'
+import type { ConcreteBoolean, IncludeString } from '../../utils/types'
 
 type BaseFetchOption = Required<RequestInit>
 
@@ -173,8 +169,15 @@ type FetchUnitOption = Omit<
     FetchOption,
     'body' | 'method' | 'headers' | 'signal'
 >
+type FilterUnknownFields<RecordT> = {
+    [Key in keyof RecordT as [unknown] extends [RecordT[Key]]
+        ? 0 extends 1 & RecordT[Key]
+            ? Key
+            : never
+        : Key]: RecordT[Key]
+}
 type FetchQueryOptions<FetchPathParams, FetchSearchParams, FetchBody> =
-    OmitNever<{
+    FilterUnknownFields<{
         /**
          * @description Path params
          */

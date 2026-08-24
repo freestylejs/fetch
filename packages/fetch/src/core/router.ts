@@ -219,11 +219,12 @@ type StripTrailingSlash<S extends string> = S extends `${infer Head}/`
     ? StripTrailingSlash<Head>
     : S
 
-type JoinRouterUrl<BaseUrl extends string, Suffix extends string> = [
-    StripTrailingSlash<BaseUrl>,
-] extends ['']
-    ? Suffix
-    : `${StripTrailingSlash<BaseUrl>}/${Suffix}`
+type JoinRouterUrl<BaseUrl extends string, Suffix extends string> =
+    StripTrailingSlash<BaseUrl> extends infer B extends string
+        ? [B] extends ['']
+            ? Suffix
+            : `${B}/${Suffix}`
+        : never
 
 type NoAny<T> = 0 extends 1 & T ? unknown : T
 
@@ -231,6 +232,9 @@ type BuildRouterUrlFromStructure<
     RouterBuilderStructure,
     BaseUrl extends string = '',
     PathParamsList extends ReadonlyArray<string> = [],
+    EmptyPathParams extends boolean = PathParamsList[number] extends []
+        ? true
+        : false,
 > = {
     [Key in keyof RouterBuilderStructure]: Key extends FetchMethod
         ? RouterBuilderStructure[Key] extends FetchBuilder<
@@ -244,7 +248,7 @@ type BuildRouterUrlFromStructure<
           >
             ? FetchUnit<
                   Key,
-                  PathParamsList[number] extends []
+                  EmptyPathParams extends true
                       ? unknown
                       : {
                             [CollectedPathParamsList in PathParamsList[number]]: Param
@@ -261,12 +265,14 @@ type BuildRouterUrlFromStructure<
               ? BuildRouterUrlFromStructure<
                     RouterBuilderStructure[Key],
                     JoinRouterUrl<BaseUrl, string>,
-                    readonly [...PathParamsList, GetDynamicPath<Key>]
+                    readonly [...PathParamsList, GetDynamicPath<Key>],
+                    false
                 >
               : BuildRouterUrlFromStructure<
                     RouterBuilderStructure[Key],
                     JoinRouterUrl<BaseUrl, Key>,
-                    PathParamsList
+                    PathParamsList,
+                    EmptyPathParams
                 >
           : never
 }
@@ -274,12 +280,15 @@ type BuildRouterUrlFromStructure<
 /**
  * Extract router config
  */
-export type GetRouterConfig<RouterStructure extends UnitStructure> = {
+export type GetRouterConfig<RouterStructure extends UnitStructure> =
+    _GetRouterConfigUnchecked<RouterStructure>
+
+type _GetRouterConfigUnchecked<RouterStructure> = {
     [Key in keyof RouterStructure]: Key extends FetchMethod
         ? RouterStructure[Key] extends FetchUnitShape
             ? InferFetchUnit<RouterStructure[Key]>
             : never
         : RouterStructure[Key] extends UnitStructure
-          ? GetRouterConfig<RouterStructure[Key]>
+          ? _GetRouterConfigUnchecked<RouterStructure[Key]>
           : never
 }

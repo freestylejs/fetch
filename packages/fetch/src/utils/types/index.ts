@@ -16,11 +16,7 @@ export type Prettify<T> = {
 } & {}
 
 export type OmitUnknown<T> = Prettify<{
-    [K in keyof T as T[K] extends infer U
-        ? unknown extends U
-            ? never
-            : K
-        : never]: T[K]
+    [K in keyof T as unknown extends T[K] ? never : K]: T[K]
 }>
 
 export type ToRequiredField<
