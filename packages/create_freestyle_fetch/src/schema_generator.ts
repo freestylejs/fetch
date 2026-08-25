@@ -3,6 +3,7 @@ import { SchemaValidationError } from './errors' // Assumed existing
 import {
     createJSDocComment,
     formatZodLiteral,
+    GENERATED_FILE_HEADER,
     quoteString,
     toPascalCase,
     toSafeIdentifier,
@@ -221,7 +222,10 @@ export class SchemaGenerator {
 
     public emitTypes(): string {
         this.ensureSchemaNames()
-        const parts: string[] = ['// Helper types for schemas']
+        const parts: string[] = [
+            GENERATED_FILE_HEADER,
+            '// Helper types for schemas',
+        ]
         const schemas = this.spec.components?.schemas ?? {}
         for (const name of Object.keys(schemas)) {
             const pascalName = this.getSchemaName(name)
@@ -246,7 +250,10 @@ export class SchemaGenerator {
     }
 
     public emitSchemasJs(): string {
-        const parts: string[] = [`import { z } from 'zod';`]
+        const parts: string[] = [
+            GENERATED_FILE_HEADER,
+            `import { z } from 'zod';`,
+        ]
         if (
             this.inlineRegistrations.some(
                 (r) => r.wrapper === 'urlSearchParams'
@@ -328,7 +335,11 @@ export class SchemaGenerator {
         const header = imports.length
             ? `import type { ${imports.join(', ')} } from './types';`
             : undefined
-        return [...(header ? [header] : []), ...lines].join('\n\n')
+        return [
+            GENERATED_FILE_HEADER,
+            ...(header ? ['', header] : []),
+            ...lines,
+        ].join('\n\n')
     }
 
     /**

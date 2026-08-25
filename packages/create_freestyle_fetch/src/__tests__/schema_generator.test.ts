@@ -1,6 +1,7 @@
 import type { OpenAPIV3_1 } from 'openapi-types'
 import { describe, expect, it } from 'vitest'
 import { SchemaGenerator } from '../schema_generator'
+import { GENERATED_FILE_HEADER } from '../utils'
 
 describe('SchemaGenerator', () => {
     const createSpec = (
@@ -670,9 +671,13 @@ describe('SchemaGenerator', () => {
                 paths: {},
             }
             const generator = new SchemaGenerator(spec)
-            expect(generator.emitTypes()).toBe('// Helper types for schemas')
-            expect(generator.emitSchemasJs()).toBe("import { z } from 'zod';")
-            expect(generator.emitSchemasDecl()).toBe('')
+            expect(generator.emitTypes()).toBe(
+                `${GENERATED_FILE_HEADER}\n\n// Helper types for schemas`
+            )
+            expect(generator.emitSchemasJs()).toBe(
+                `${GENERATED_FILE_HEADER}\n\nimport { z } from 'zod';`
+            )
+            expect(generator.emitSchemasDecl()).toBe(GENERATED_FILE_HEADER)
         })
 
         it('should keep the zod import inside schemas.js only', () => {

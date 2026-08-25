@@ -1,6 +1,6 @@
 import type { OpenAPIV3_1 } from 'openapi-types'
 import { AuthSchemeError } from './errors'
-import { quoteString } from './utils'
+import { GENERATED_FILE_HEADER, quoteString } from './utils'
 
 export interface SecurityScheme {
     type: 'apiKey' | 'http' | 'oauth2' | 'openIdConnect'
@@ -268,6 +268,8 @@ export class AuthGenerator {
 
     public generateFileContent(): string {
         return [
+            GENERATED_FILE_HEADER,
+            '',
             `import { f, type Middleware } from '@freestylejs/fetch'`,
             '',
             this.generateAuthConfig(),

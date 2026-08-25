@@ -4,6 +4,7 @@ import type { InlineParserKind, InlineParserWrapper } from './schema_generator'
 import { SchemaGenerator } from './schema_generator'
 import {
     createJSDocComment,
+    GENERATED_FILE_HEADER,
     quoteString,
     toPascalCase,
     toSafeIdentifier,
@@ -496,7 +497,9 @@ export function generateRouterSurfaces(
         domainFiles.push({
             fileName,
             exportName,
-            content: `import { f } from '@freestylejs/fetch';
+            content: `${GENERATED_FILE_HEADER}
+
+import { f } from '@freestylejs/fetch';
 import * as Schemas from '../schemas';
 
 /**
@@ -531,7 +534,9 @@ ${structureBody}
         `import { createAuthMiddleware, AuthConfig } from './auth';`
     )
 
-    const apiFileContent = `${apiImports.join('\n')}
+    const apiFileContent = `${GENERATED_FILE_HEADER}
+
+${apiImports.join('\n')}
 
 export const createClient = (config: { baseUrl?: string, auth?: AuthConfig } = {}) => {
     const authMw = config.auth ? createAuthMiddleware(config.auth) : undefined

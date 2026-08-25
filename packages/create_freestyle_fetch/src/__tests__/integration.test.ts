@@ -3,6 +3,7 @@ import { join, resolve } from 'path'
 import { describe, expect, it } from 'vitest'
 import { AuthGenerator } from '../auth_generator'
 import { parseOpenApiSpec, parsePaths } from '../path_parser'
+import { GENERATED_FILE_HEADER } from '../utils'
 import { generateRouterSurfaces } from '../router_generator'
 import { SchemaGenerator } from '../schema_generator'
 
@@ -46,8 +47,7 @@ describe('Generator', () => {
                     'schemas.js': schemaGenerator.emitSchemasJs(),
                     'schemas.d.ts': schemaGenerator.emitSchemasDecl(),
                     'auth.ts': new AuthGenerator(spec).generateFileContent(),
-                    'index.ts':
-                        "export * from './api';\nexport * from './types';\nexport * from './schemas';\nexport * from './auth';",
+                    'index.ts': `${GENERATED_FILE_HEADER}\n\nexport * from './api';\nexport * from './types';\nexport * from './schemas';\nexport * from './auth';`,
                 }
                 for (const domain of domainFiles) {
                     generated[domain.fileName] = domain.content
